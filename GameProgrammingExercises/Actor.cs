@@ -1,3 +1,4 @@
+using System.Numerics;
 using Silk.NET.Maths;
 
 namespace GameProgrammingExercises;
@@ -7,10 +8,10 @@ public class Actor : IDisposable
     private readonly List<Component> _components = new();
 
     // transformation
-    private Vector2D<float> _position;
-    private float _scale;
-    private float _rotation;
     private bool _recomputeWorldTransform = true;
+    private Vector2D<float> _position = Vector2D<float>.Zero;
+    private float _scale = 1.0f;
+    private float _rotation = 0.0f;
 
     /// <summary>
     /// Constructor. Creates an instance of the Actor.
@@ -35,7 +36,7 @@ public class Actor : IDisposable
     /// <summary>
     /// Actor's state.
     /// </summary>
-    public ActorState State { get; }
+    public ActorState State { get; set; } = ActorState.Active;
 
     public Vector2D<float> Position
     {
@@ -67,32 +68,9 @@ public class Actor : IDisposable
         }
     }
 
-    public Vector2D<float> Forward => new((float)Math.Cos(_rotation), (float)Math.Sin(_rotation));
+    public Vector2D<float> Forward => new(Scalar.Cos(_rotation), Scalar.Sin(_rotation));
 
     public Matrix4X4<float> WorldTransform { get; private set; }
-
-    public void AddComponent(Component component)
-    {
-        // Find the insertion point in the sorted vector
-        // (The first element with a order higher than me)
-        int myOrder = component.UpdateOrder;
-        int index = 0;
-        for (; index < _components.Count; index++)
-        {
-            if (myOrder < _components[index].UpdateOrder)
-            {
-                break;
-            }
-        }
-
-        // Inserts element before position of iterator
-        _components.Insert(index, component);
-    }
-    
-    public void RemoveComponent(Component component)
-    {
-        _components.Remove(component);
-    }
 
     /// <summary>
     /// Update function called from Game (not overridable).
@@ -176,6 +154,28 @@ public class Actor : IDisposable
             }
         }
     }
+    
+    public void AddComponent(Component component)
+    {
+        // Find the insertion point in the sorted vector
+        // (The first element with a order higher than me)
+        int index = 0;
+        for (; index < _components.Count; index++)
+        {
+            if (component.UpdateOrder < _components[index].UpdateOrder)
+            {
+                break;
+            }
+        }
+
+        // Inserts element before position of iterator
+        _components.Insert(index, component);
+    }
+    
+    public void RemoveComponent(Component component)
+    {
+        _components.Remove(component);
+    }
 
     /// <summary>
     /// Disposes the actor which will remove itself from the game and clean up all containing components.
@@ -194,9 +194,9 @@ public class Actor : IDisposable
 
             // Need to delete components
             // Because ~Component calls RemoveComponent, need a different style loop
-            foreach (var component in _components)
+            while (_components.Any())
             {
-                component.Dispose();
+                _components.Last().Dispose();
             }
         }
     }

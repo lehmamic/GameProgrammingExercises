@@ -39,13 +39,13 @@ public sealed class Shader : IDisposable
         _gl.DeleteShader(vertex);
         _gl.DeleteShader(fragment);
     }
-    
+
     public void SetActive()
     {
         // Set this program as the active one
         _gl.UseProgram(_handle);
     }
-    
+
     public void SetUniform(string name, int value)
     {
         int location = _gl.GetUniformLocation(_handle, name);
@@ -86,7 +86,7 @@ public sealed class Shader : IDisposable
         }
 
         // Send the matrix data to the uniform
-        _gl.UniformMatrix4(location, 1, false, (float*) &value);
+        _gl.UniformMatrix4(location, 1, true, (float*) &value);
     }
 
     private uint CompileShader(ShaderType type, string path)
@@ -109,7 +109,6 @@ public sealed class Shader : IDisposable
 
         return handle;
     }
-
 
     public void Dispose()
     {

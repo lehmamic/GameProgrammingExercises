@@ -4,8 +4,8 @@ namespace GameProgrammingExercises;
 
 public class CircleComponent : Component
 {
-    public CircleComponent(Actor owner, int updateOrder = 100)
-        : base(owner, updateOrder)
+    public CircleComponent(Actor owner)
+        : base(owner)
     {
     }
     

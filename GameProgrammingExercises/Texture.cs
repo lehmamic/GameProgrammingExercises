@@ -1,14 +1,13 @@
 using Silk.NET.OpenGL;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Advanced;
 
 namespace GameProgrammingExercises;
 
 public class Texture : IDisposable
 {
-    private uint _handle;
-    private GL _gl;
+    private readonly GL _gl;
+    private readonly uint _handle;
 
     public unsafe Texture(GL gl, string path)
     {
@@ -21,7 +20,7 @@ public class Texture : IDisposable
 
         _handle = _gl.GenTexture();
         _gl.BindTexture(TextureTarget.Texture2D, _handle);
-        
+
         _gl.TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgba8, (uint)image.Width, (uint)image.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, null);
         image.ProcessPixelRows(accessor =>
         {

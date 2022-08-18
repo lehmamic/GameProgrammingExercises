@@ -5,8 +5,8 @@ namespace GameProgrammingExercises;
 public sealed class BufferObject<TDataType> : IDisposable
     where TDataType : unmanaged
 {
-    private readonly uint _handle;
     private readonly GL _gl;
+    private readonly uint _handle;
 
     public unsafe BufferObject(GL gl, Span<TDataType> data, BufferTargetARB bufferType)
     {

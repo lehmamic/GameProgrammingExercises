@@ -5,7 +5,7 @@ using Silk.NET.Windowing;
 
 namespace GameProgrammingExercises;
 
-public class Game : IDisposable
+public class Game
 {
     // All the actors in the game
     private readonly List<Actor> _actors = new();
@@ -62,10 +62,12 @@ public class Game : IDisposable
             // Make sure we can load and compile shaders
             LoadShaders();
 
-            // Create quad for drawing sprites
             CreateSpriteVertices();
 
             LoadData();
+
+            _spriteShader.SetActive();
+            _spriteShader.SetUniform("uWorldTransform", Matrix4X4<float>.Identity);
         };
 
         _window.Update += deltaTime =>
@@ -77,6 +79,18 @@ public class Game : IDisposable
         _window.Render +=deltaTime =>
         {
             GenerateOutput((float)deltaTime);
+        };
+
+        _window.Closing += () =>
+        {
+            UnloadData();
+
+            _spriteShader.Dispose();
+            _spriteVertices.Dispose();
+            _window.Dispose();
+            _input.Dispose();
+
+            _gl.Dispose();
         };
 
         return _window;
@@ -108,11 +122,10 @@ public class Game : IDisposable
     {
         // Find the insertion point in the sorted vector
         // (The first element with a order higher than me)
-        int myOrder = sprite.DrawOrder;
         int index = 0;
         for (; index < _sprites.Count; index++)
         {
-            if (myOrder < _sprites[index].DrawOrder)
+            if (sprite.DrawOrder < _sprites[index].DrawOrder)
             {
                 break;
             }
@@ -143,7 +156,6 @@ public class Game : IDisposable
         {
             var texture = new Texture(_gl, fileName);
             _textures.Add(fileName, texture);
-            
         }
 
         return _textures[fileName];
@@ -162,7 +174,6 @@ public class Game : IDisposable
         {
             actor.Update(deltaTime);
         }
-
         _updatingActors = false;
 
         // Move any pending actors to _actors
@@ -191,7 +202,7 @@ public class Game : IDisposable
         _gl.Clear((uint) ClearBufferMask.ColorBufferBit);
 
         // Draw all sprite components
-
+        
         // Enable alpha blending on the color buffer
         _gl.Enable(GLEnum.Blend);
         _gl.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
@@ -227,8 +238,8 @@ public class Game : IDisposable
     private void CreateSpriteVertices()
     {
         var vertices = new[] {
-            -0.5f,  0.5f, 0.0f, 0.0f, 0.0f, // top left
-            0.5f,  0.5f, 0.0f, 1.0f, 0.0f, // top right
+            -0.5f, 0.5f, 0.0f, 0.0f, 0.0f, // top left
+            0.5f, 0.5f, 0.0f, 1.0f, 0.0f, // top right
             0.5f, -0.5f, 0.0f, 1.0f, 1.0f, // bottom right
             -0.5f, -0.5f, 0.0f, 0.0f, 1.0f  // bottom left
         };
@@ -272,17 +283,5 @@ public class Game : IDisposable
             _textures.Remove(texture.Key);
             texture.Value.Dispose();
         }
-    }
-
-    public void Dispose()
-    {
-        UnloadData();
-
-        _spriteShader.Dispose();
-        _spriteVertices.Dispose();
-        _window.Dispose();
-        _input.Dispose();
-
-        _gl.Dispose();
     }
 }

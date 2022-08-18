@@ -16,23 +16,36 @@ public class MoveComponent : Component
 
     public override void Update(float deltaTime)
     {
-        if (deltaTime.NearZero())
+        if (!AngularSpeed.NearZero())
         {
             Owner.Rotation += AngularSpeed * deltaTime;
         }
 
-        if (deltaTime.NearZero())
+        if (!ForwardSpeed.NearZero())
         {
-            Vector2D<float> pos = Owner.Position;
-            pos += Owner.Forward * ForwardSpeed * deltaTime;
-            
+            Vector2D<float> position = Owner.Position;
+            position += Owner.Forward * ForwardSpeed * deltaTime;
+
             // Screen wrapping (for asteroids)
-            if (pos.X < -512.0f) {pos.X = 510.0f; }
-            else if (pos.X > 512.0f) { pos.X = -510.0f; }
-            if (pos.Y < -384.0f) { pos.Y = 382.0f; }
-            else if (pos.Y > 384.0f) { pos.Y = -382.0f; }
+            if (position.X < -512.0f)
+            {
+                position.X = 510.0f;
+            }
+            else if (position.X > 512.0f)
+            {
+                position.X = -510.0f;
+            }
+
+            if (position.Y < -384.0f)
+            {
+                position.Y = 382.0f;
+            }
+            else if (position.Y > 384.0f)
+            {
+                position.Y = -382.0f;
+            }
             
-            Owner.Position = pos;
+            Owner.Position = position;
         }
     }
 }

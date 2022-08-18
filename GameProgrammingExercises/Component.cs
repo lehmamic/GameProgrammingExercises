@@ -11,6 +11,8 @@ public class Component : IDisposable
     {
         Owner = owner;
         UpdateOrder = updateOrder;
+
+        Owner.AddComponent(this);
     }
 
     /// <summary>
