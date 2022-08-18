@@ -1,3 +1,4 @@
+using GameProgrammingExercises.Maths;
 using Silk.NET.Input;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
@@ -34,6 +35,9 @@ public class Game
 
     // Game specific
     private List<Asteroid> _asteroids = new();
+    private Ship _ship;
+
+    public IReadOnlyList<Asteroid> Asteroids => _asteroids;
 
     public IWindow Initialize()
     {
@@ -163,7 +167,13 @@ public class Game
 
     private void ProcessInput()
     {
-        
+        // Process input for all actors
+        _updatingActors = true;
+        foreach (var actor in _actors)
+        {
+            actor.ProcessInput(_primaryKeyboard);
+        }
+        _updatingActors = false;
     }
 
     private void UpdateGame(float deltaTime)
@@ -186,7 +196,7 @@ public class Game
         _pendingActors.Clear();
 
         // Delete dead actors (which removes them from _actors)
-        var deadActors = _actors.Where(a => a.State == ActorState.Dead);
+        var deadActors = _actors.Where(a => a.State == ActorState.Dead).ToArray();
         foreach (var actor in deadActors)
         {
             actor.Dispose();
@@ -257,8 +267,8 @@ public class Game
     private void LoadData()
     {
         // Create player's ship
-        // mShip = new Ship(this);
-        // mShip->SetRotation(Math::PiOver2);
+        _ship = new Ship(_gl, this);
+        _ship.Rotation = GameMath.PiOver2;
 
         // Create asteroids
         const int numAsteroids = 20;

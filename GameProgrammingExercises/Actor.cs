@@ -1,4 +1,5 @@
 using System.Numerics;
+using Silk.NET.Input;
 using Silk.NET.Maths;
 
 namespace GameProgrammingExercises;
@@ -90,10 +91,28 @@ public class Actor : IDisposable
     }
 
     /// <summary>
+    /// ProcessInput function called from Game (not overridable).
+    /// </summary>
+    /// <param name="keyboard"></param>
+    public void ProcessInput(IKeyboard keyboard)
+    {
+        if (State == ActorState.Active)
+        {
+            // First process input for components
+            foreach (var component in _components)
+            {
+                component.ProcessInput(keyboard);
+            }
+
+            ActorInput(keyboard);
+        }
+    }
+
+    /// <summary>
     /// Updates all the components attached.
     /// </summary>
     /// <param name="deltaTime">The delta time between two frames.</param>
-    public void UpdateComponents(float deltaTime)
+    protected void UpdateComponents(float deltaTime)
     {
         foreach (var component in _components)
         {
@@ -106,33 +125,15 @@ public class Actor : IDisposable
     /// Any actor-specific update code (overridable).
     /// </summary>
     /// <param name="deltaTime">The delta time between two frames.</param>
-    public virtual void UpdateActor(float deltaTime)
+    protected virtual void UpdateActor(float deltaTime)
     {
-    }
-
-    /// <summary>
-    /// ProcessInput function called from Game (not overridable).
-    /// </summary>
-    /// <param name="keyState"></param>
-    public void ProcessInput(int keyState)
-    {
-        if (State == ActorState.Active)
-        {
-            // First process input for components
-            foreach (var component in _components)
-            {
-                component.ProcessInput(keyState);
-            }
-
-            ActorInput(keyState);
-        }
     }
 
     /// <summary>
     /// Any actor-specific input code (overridable).
     /// </summary>
-    /// <param name="keyState"></param>
-    public virtual void ActorInput(int keyState)
+    /// <param name="keyboard"></param>
+    protected virtual void ActorInput(IKeyboard keyboard)
     {
     }
     

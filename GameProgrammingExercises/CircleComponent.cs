@@ -13,7 +13,7 @@ public class CircleComponent : Component
 
     public Vector2D<float> Center => Owner.Position;
 
-    public bool Intersect(CircleComponent a, CircleComponent b)
+    public static bool Intersect(CircleComponent a, CircleComponent b)
     {
         // Calculate distance squared
         Vector2D<float> diff = a.Center - b.Center;

@@ -1,3 +1,5 @@
+using Silk.NET.Input;
+
 namespace GameProgrammingExercises;
 
 public class Component : IDisposable
@@ -32,12 +34,12 @@ public class Component : IDisposable
     public virtual void Update(float deltaTime)
     {
     }
-    
+
     /// <summary>
     /// Process input for this component.
     /// </summary>
-    /// <param name="keyState"></param>
-    public virtual void ProcessInput(int keyState)
+    /// <param name="keyboard"></param>
+    public virtual void ProcessInput(IKeyboard keyboard)
     {
     }
 
