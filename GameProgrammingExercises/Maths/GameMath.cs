@@ -30,7 +30,18 @@ public static class GameMath
             xaxis.Z, yaxis.Z, zaxis.Z, 0.0f,
             trans.X, trans.Y, trans.Z, 1.0f);
     }
-    
+
+    public static Quaternion<float> CreateQuaternion(Vector3D<float> axis, float angle)
+    {
+        float scalar = Scalar.Sin(angle / 2.0f);
+        var x = axis.X * scalar;
+        var y = axis.Y * scalar;
+        var z = axis.Z * scalar;
+        var w = Scalar.Cos(angle / 2.0f);
+
+        return new Quaternion<float>(x, y, z, w);
+    }
+
     public static Matrix4X4<float> CreateSimpleViewProj(float width, float height)
     {
         return Matrix4X4<float>.Identity with { M11 = 2.0f/width, M22 = 2.0f/height, M33 = 1.0f, M43 = 1.0f, M44 = 1.0f };

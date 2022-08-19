@@ -71,22 +71,53 @@ public class Mesh : IDisposable
         }
 
         float radius = 0.0f;
-        var vertices = new List<float>();
-        foreach (var vertex in raw.Vertices)
+        // var vertices = new List<float>();
+        // foreach (var vertex in raw.Vertices)
+        // {
+        //     if (vertex is null || vertex.Length != vertSize)
+        //     {
+        //         throw new MeshException($"Unexpected vertex format for {fileName}.");
+        //     }
+        //
+        //     var position = new Vector3D<float>(vertex[0], vertex[1], vertex[2]);
+        //     radius = Scalar.Max(radius, position.LengthSquared);
+        //
+        //     foreach (var value in vertex)
+        //     {
+        //         vertices.Add(value);
+        //     }
+        // }
+        var vertices = new float[]
         {
-            if (vertex is null || vertex.Length != vertSize)
-            {
-                throw new MeshException($"Unexpected vertex format for {fileName}.");
-            }
-
-            var position = new Vector3D<float>(vertex[0], vertex[1], vertex[2]);
-            radius = Scalar.Max(radius, position.LengthSquared);
-
-            foreach (var value in vertex)
-            {
-                vertices.Add(value);
-            }
-        }
+            -0.5f, -0.5f, -0.5f, 0, 0, -1, 0, 0,
+            0.5f, -0.5f, -0.5f, 0, 0, -1, 1, 0,
+            -0.5f, 0.5f, -0.5f, 0, 0, -1, 0, -1,
+            0.5f, 0.5f, -0.5f, 0, 0, -1, 1, -1,
+            -0.5f, 0.5f, 0.5f, 0, 1, 0, 0, -1,
+            0.5f, 0.5f, 0.5f, 0, 1, 0, 1, -1,
+            -0.5f, -0.5f, 0.5f, 0, 0, 1, 0, 0,
+            0.5f, -0.5f, 0.5f, 0, 0, 1, 1, 0,
+            -0.5f, 0.5f, -0.5f, 0, 0, -1, 0, -1,
+            0.5f, -0.5f, -0.5f, 0, 0, -1, 1, 0,
+            -0.5f, 0.5f, -0.5f, 0, 1, 0, 0, -1,
+            0.5f, 0.5f, -0.5f, 0, 1, 0, 1, -1,
+            -0.5f, 0.5f, 0.5f, 0, 1, 0, 0, -1,
+            -0.5f, 0.5f, 0.5f, 0, 0, 1, 0, -1,
+            0.5f, 0.5f, 0.5f, 0, 0, 1, 1, -1,
+            -0.5f, -0.5f, 0.5f, 0, 0, 1, 0, 0,
+            -0.5f, -0.5f, 0.5f, 0, -1, 0, 0, 0,
+            0.5f, -0.5f, 0.5f, 0, -1, 0, 1, 0,
+            -0.5f, -0.5f, -0.5f, 0, -1, 0, 0, 0,
+            0.5f, -0.5f, -0.5f, 0, -1, 0, 1, 0,
+            0.5f, -0.5f, -0.5f, 1, 0, 0, 1, 0,
+            0.5f, -0.5f, 0.5f, 1, 0, 0, 1, 0,
+            0.5f, 0.5f, -0.5f, 1, 0, 0, 1, -1,
+            0.5f, 0.5f, 0.5f, 1, 0, 0, 1, -1,
+            -0.5f, -0.5f, 0.5f, -1, 0, 0, 0, 0,
+            -0.5f, -0.5f, -0.5f, -1, 0, 0, 0, 0,
+            -0.5f, 0.5f, 0.5f, -1, 0, 0, 0, -1,
+            -0.5f, 0.5f, -0.5f, -1, 0, 0, 0, -1,
+        };
 
         // Load in the indices
         if (raw.Indices is null || !raw.Indices.Any())
@@ -94,22 +125,37 @@ public class Mesh : IDisposable
             throw new MeshException($"Mesh {fileName} has no indices.");
         }
 
-        var indices = new List<uint>();
-        foreach (var index in raw.Indices)
+        // var indices = new List<uint>();
+        // foreach (var index in raw.Indices)
+        // {
+        //     if (index is null || index.Length != 3)
+        //     {
+        //         throw new MeshException($"Invalid indices for {fileName}.");
+        //     }
+        //
+        //     foreach (var value in index)
+        //     {
+        //         indices.Add(value);
+        //     }
+        // }
+        var indices = new uint[]
         {
-            if (index is null || index.Length != 3)
-            {
-                throw new MeshException($"Invalid indices for {fileName}.");
-            }
+            2, 1, 0,
+            3, 9, 8,
+            4, 11, 10,
+            5, 11, 12,
+            6, 14, 13,
+            7, 14, 15,
+            18, 17, 16,
+            19, 17, 18,
+            22, 21, 20,
+            23, 21, 22,
+            26, 25, 24,
+            27, 25, 26,
+        };
 
-            foreach (var value in index)
-            {
-                indices.Add(value);
-            }
-        }
-
-        var vbo = new BufferObject<float>(game.Renderer.GL, vertices.ToArray(), BufferTargetARB.ArrayBuffer);
-        var ebo = new BufferObject<uint>(game.Renderer.GL, indices.ToArray(), BufferTargetARB.ElementArrayBuffer);
+        var vbo = new BufferObject<float>(game.Renderer.GL, vertices, BufferTargetARB.ArrayBuffer);
+        var ebo = new BufferObject<uint>(game.Renderer.GL, indices, BufferTargetARB.ElementArrayBuffer);
         var vao = new VertexArrayObject(game.Renderer.GL, vbo, ebo);
 
         return new Mesh(radius, raw.SpecularPower, raw.Shader, textures, vao);

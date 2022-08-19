@@ -19,9 +19,9 @@ public class MoveComponent : Component
         if (!AngularSpeed.NearZero())
         {
             float angle = AngularSpeed * deltaTime;
-            
+
             // Create quaternion for incremental (Rotate about up axis)
-            var increment = new Quaternion<float>(Vector3D<float>.UnitZ, angle);
+            var increment = GameMath.CreateQuaternion(Vector3D<float>.UnitZ, angle);
             Owner.Rotation = Quaternion<float>.Concatenate(Owner.Rotation, increment);
         }
 
