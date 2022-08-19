@@ -18,12 +18,16 @@ public class MoveComponent : Component
     {
         if (!AngularSpeed.NearZero())
         {
-            Owner.Rotation += AngularSpeed * deltaTime;
+            float angle = AngularSpeed * deltaTime;
+            
+            // Create quaternion for incremental (Rotate about up axis)
+            var increment = new Quaternion<float>(Vector3D<float>.UnitZ, angle);
+            Owner.Rotation = Quaternion<float>.Concatenate(Owner.Rotation, increment);
         }
 
         if (!ForwardSpeed.NearZero())
         {
-            Vector2D<float> position = Owner.Position;
+            Vector3D<float> position = Owner.Position;
             position += Owner.Forward * ForwardSpeed * deltaTime;
 
             // Screen wrapping (for asteroids)

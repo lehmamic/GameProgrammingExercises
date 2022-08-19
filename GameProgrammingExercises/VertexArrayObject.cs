@@ -6,15 +6,13 @@ namespace GameProgrammingExercises
     {
         private readonly uint _handle;
         private readonly GL _gl;
-        private readonly BufferObject<float> _vbo;
-        private readonly BufferObject<uint> _ebo;
         private readonly bool _leaveOpen;
 
         public VertexArrayObject(GL gl, BufferObject<float> vbo, BufferObject<uint> ebo, bool leaveOpen = false)
         {
             _gl = gl;
-            _vbo = vbo;
-            _ebo = ebo;
+            Vbo = vbo;
+            Ebo = ebo;
             _leaveOpen = leaveOpen;
 
             _handle = _gl.GenVertexArray();
@@ -23,15 +21,19 @@ namespace GameProgrammingExercises
             vbo.Bind();
             ebo.Bind();
 
-            VertexAttributePointer(0, 3, VertexAttribPointerType.Float, 5, 0);
-            VertexAttributePointer(1, 2, VertexAttribPointerType.Float, 5, 3);
-        }
+            // Position is 3 floats with offset 0
+            VertexAttributePointer(0, 3, VertexAttribPointerType.Float, 8, 0);
 
-        private unsafe void VertexAttributePointer(uint index, int count, VertexAttribPointerType type, uint vertexSize, int offSet)
-        {
-            _gl.VertexAttribPointer(index, count, type, false, vertexSize * (uint) sizeof(float), (void*) (offSet * sizeof(float)));
-            _gl.EnableVertexAttribArray(index);
+            // Normal is 3 floats with offset 3
+            VertexAttributePointer(1, 3, VertexAttribPointerType.Float, 8, 3);
+
+            // Texture coordinates is 2 floats with offset 6
+            VertexAttributePointer(2, 2, VertexAttribPointerType.Float, 8, 6);
         }
+        
+        public BufferObject<float> Vbo { get; }
+
+        public BufferObject<uint> Ebo { get; }
 
         public void SetActive()
         {
@@ -42,10 +44,16 @@ namespace GameProgrammingExercises
         {
             if (!_leaveOpen)
             {
-                _vbo.Dispose();
-                _ebo.Dispose();
+                Vbo.Dispose();
+                Ebo.Dispose();
             }
             _gl.DeleteVertexArray(_handle);
+        }
+
+        private unsafe void VertexAttributePointer(uint index, int count, VertexAttribPointerType type, uint vertexSize, int offSet)
+        {
+            _gl.VertexAttribPointer(index, count, type, false, vertexSize * (uint) sizeof(float), (void*) (offSet * sizeof(float)));
+            _gl.EnableVertexAttribArray(index);
         }
     }
 }

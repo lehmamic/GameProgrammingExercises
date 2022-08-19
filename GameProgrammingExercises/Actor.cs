@@ -1,4 +1,3 @@
-using System.Numerics;
 using Silk.NET.Input;
 using Silk.NET.Maths;
 
@@ -10,9 +9,9 @@ public class Actor : IDisposable
 
     // transformation
     private bool _recomputeWorldTransform = true;
-    private Vector2D<float> _position = Vector2D<float>.Zero;
+    private Vector3D<float> _position = Vector3D<float>.Zero;
     private float _scale = 1.0f;
-    private float _rotation = 0.0f;
+    private Quaternion<float> _rotation;
 
     /// <summary>
     /// Constructor. Creates an instance of the Actor.
@@ -39,7 +38,7 @@ public class Actor : IDisposable
     /// </summary>
     public ActorState State { get; set; } = ActorState.Active;
 
-    public Vector2D<float> Position
+    public Vector3D<float> Position
     {
         get => _position;
         set
@@ -59,7 +58,7 @@ public class Actor : IDisposable
         }
     }
 
-    public float Rotation
+    public Quaternion<float> Rotation
     {
         get => _rotation;
         set
@@ -69,7 +68,7 @@ public class Actor : IDisposable
         }
     }
 
-    public Vector2D<float> Forward => new(Scalar.Cos(_rotation), Scalar.Sin(_rotation));
+    public Vector3D<float> Forward => Vector3D.Transform(Vector3D<float>.UnitX, _rotation);
 
     public Matrix4X4<float> WorldTransform { get; private set; }
 
@@ -145,8 +144,8 @@ public class Actor : IDisposable
 
             // Scale, then rotate, then translate
             WorldTransform = Matrix4X4.CreateScale(_scale);
-            WorldTransform *= Matrix4X4.CreateRotationZ(_rotation);
-            WorldTransform *= Matrix4X4.CreateTranslation(new Vector3D<float>(_position.X, _position.Y, 0.0f));
+            WorldTransform *= Matrix4X4.CreateFromQuaternion(_rotation);
+            WorldTransform *= Matrix4X4.CreateTranslation(_position);
 
             // Inform components world transform updated
             foreach (var component in _components)

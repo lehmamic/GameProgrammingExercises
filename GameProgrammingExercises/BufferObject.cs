@@ -12,6 +12,7 @@ public sealed class BufferObject<TDataType> : IDisposable
     {
         _gl = gl;
         BufferType = bufferType;
+        Length = data.Length;
 
         _handle = _gl.GenBuffer();
         _gl.BindBuffer(BufferType, _handle);
@@ -23,6 +24,8 @@ public sealed class BufferObject<TDataType> : IDisposable
     }
 
     public BufferTargetARB BufferType { get; }
+    
+    public int Length { get; }
 
     public void Bind()
     {

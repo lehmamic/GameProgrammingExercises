@@ -11,12 +11,12 @@ public class CircleComponent : Component
     
     public float Radius { get; set; }
 
-    public Vector2D<float> Center => Owner.Position;
+    public Vector3D<float> Center => Owner.Position;
 
     public static bool Intersect(CircleComponent a, CircleComponent b)
     {
         // Calculate distance squared
-        Vector2D<float> diff = a.Center - b.Center;
+        Vector3D<float> diff = a.Center - b.Center;
         float distSq = diff.LengthSquared;
 
         // Calculate sum of radii squared

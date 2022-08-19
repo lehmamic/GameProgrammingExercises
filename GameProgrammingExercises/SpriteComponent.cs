@@ -5,22 +5,19 @@ namespace GameProgrammingExercises;
 
 public class SpriteComponent : Component
 {
-    private readonly GL _gl;
-
-    public SpriteComponent(GL gl, Actor owner, int drawOrder = 100)
+    public SpriteComponent(Actor owner, int drawOrder = 100)
         : base(owner)
     {
-        _gl = gl;
         DrawOrder = drawOrder;
 
-        Owner.Game.AddSprite(this);
+        Owner.Game.Renderer.AddSprite(this);
     }
     
     public int DrawOrder { get; }
 
     public Texture Texture { get; set; }
 
-    public unsafe void Draw(Shader shader)
+    public virtual unsafe void Draw(Shader shader)
     {
         // Scale the quad by the width/height of texture
         Matrix4X4<float> scaleMat = Matrix4X4.CreateScale(Texture.Width, Texture.Height, 1.0f);
@@ -37,14 +34,14 @@ public class SpriteComponent : Component
         Texture.SetActive();
 
         // Draw quad
-        _gl.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, null);
+        Owner.Game.Renderer.GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, null);
     }
 
     protected override void Dispose(bool disposing)
     {
         if (disposing)
         {
-            Owner.Game.RemoveSprite(this);
+            Owner.Game.Renderer.RemoveSprite(this);
         }
 
         base.Dispose(disposing);
