@@ -221,14 +221,15 @@ public class Renderer : IDisposable
         _meshShader.SetActive();
 
         // Set the view-projection matrix
-        ViewMatrix = Matrix4X4.CreateLookAt(
+        ViewMatrix = GameMath.CreateLookAt(
             Vector3D<float>.Zero,      // Camera position
             Vector3D<float>.UnitX,     // target position
             Vector3D<float>.UnitZ);    // Up
 
-        ProjectionMatrix = Matrix4X4.CreatePerspectiveFieldOfView(
+        ProjectionMatrix = GameMath.CreatePerspectiveFieldOfView(
             Scalar.DegreesToRadians(70.0f), // Horizontal FOV
-            ScreenWidth/ScreenHeight,    // Aspect Ratio
+            ScreenWidth,
+            ScreenHeight,
             25.0f,                  // Near plane
             10000.0f);              // Far plane
 

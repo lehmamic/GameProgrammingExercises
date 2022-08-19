@@ -23,7 +23,7 @@ public class Camera : Actor
         Vector3D<float> target = Position + Forward * 100.0f;
         Vector3D<float> up = Vector3D<float>.UnitZ;
 
-        Matrix4X4<float> view = Matrix4X4.CreateLookAt(cameraPosition, target, up);
+        Matrix4X4<float> view = GameMath.CreateLookAt(cameraPosition, target, up);
         Game.Renderer.ViewMatrix = view;
     }
 
