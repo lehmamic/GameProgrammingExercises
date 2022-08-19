@@ -141,46 +141,45 @@ public class Game
             Scale = 100.0f
         };
         var q = GameMath.CreateQuaternion(Vector3D<float>.UnitY, -1 * GameMath.PiOver2);
-        var x = GameMath.CreateQuaternion(Vector3D<float>.UnitZ, (float)(Math.PI + Math.PI / 4.0f));
-        q = Quaternion<float>.Concatenate(q, x);
+        q = Quaternion<float>.Concatenate(q, GameMath.CreateQuaternion(Vector3D<float>.UnitZ, (float)(Math.PI + Math.PI / 4.0f)));
         a.Rotation = q;
         _ = new MeshComponent(a)
         {
             Mesh = _renderer.GetMesh("Assets/Cube.gpmesh")
         };
-        //
-        // a = new Actor(this)
-        // {
-        //     Position = new Vector3D<float>(200.0f, -75.0f, 0.0f),
-        //     Scale = 3.0f
-        // };
-        // _ = new MeshComponent(a)
-        // {
-        //     Mesh = _renderer.GetMesh("Assets/Sphere.gpmesh")
-        // };
+        
+        a = new Actor(this)
+        {
+            Position = new Vector3D<float>(200.0f, -75.0f, 0.0f),
+            Scale = 3.0f
+        };
+        _ = new MeshComponent(a)
+        {
+            Mesh = _renderer.GetMesh("Assets/Sphere.gpmesh")
+        };
 
         // Camera actor
-        // _camera = new Camera(this);
+        _camera = new Camera(this);
 
         // UI elements
-        // a = new Actor(this)
-        // {
-        //     Position = new Vector3D<float>(-350.0f, -350.0f, 0.0f)
-        // };
-        // _ = new SpriteComponent(a)
-        // {
-        //     Texture = _renderer.GetTexture("Assets/HealthBar.png")
-        // };
-        //
-        // a = new Actor(this)
-        // {
-        //     Position = new Vector3D<float>(375.0f, -275.0f, 0.0f),
-        //     Scale = 0.75f
-        // };
-        // _ = new SpriteComponent(a)
-        // {
-        //     Texture = _renderer.GetTexture("Assets/Radar.png")
-        // };
+        a = new Actor(this)
+        {
+            Position = new Vector3D<float>(-350.0f, -350.0f, 0.0f)
+        };
+        _ = new SpriteComponent(a)
+        {
+            Texture = _renderer.GetTexture("Assets/HealthBar.png")
+        };
+        
+        a = new Actor(this)
+        {
+            Position = new Vector3D<float>(375.0f, -275.0f, 0.0f),
+            Scale = 0.75f
+        };
+        _ = new SpriteComponent(a)
+        {
+            Texture = _renderer.GetTexture("Assets/Radar.png")
+        };
     }
 
     private void UnloadData()
