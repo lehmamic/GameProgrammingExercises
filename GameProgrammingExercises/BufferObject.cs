@@ -24,7 +24,7 @@ public sealed class BufferObject<TDataType> : IDisposable
     }
 
     public BufferTargetARB BufferType { get; }
-    
+
     public int Length { get; }
 
     public void Bind()
