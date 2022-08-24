@@ -4,22 +4,39 @@ namespace GameProgrammingExercises
 {
     public class VertexArrayObject : IDisposable
     {
-        private readonly uint _handle;
         private readonly GL _gl;
-        private readonly bool _leaveOpen;
+        private readonly uint _vertexArray;
+        private readonly uint _vertexBuffer;
+        private readonly uint _indexBuffer;
 
-        public VertexArrayObject(GL gl, BufferObject<float> vbo, BufferObject<uint> ebo, bool leaveOpen = false)
+        public unsafe VertexArrayObject(GL gl, float[] vertices, uint[] indices)
         {
             _gl = gl;
-            Vbo = vbo;
-            Ebo = ebo;
-            _leaveOpen = leaveOpen;
 
-            _handle = _gl.GenVertexArray();
-            _gl.BindVertexArray(_handle);
+            NumberOfVertices = vertices.Length;
+            NumberOfIndices = indices.Length;
 
-            vbo.Bind();
-            ebo.Bind();
+            // Create vertex array
+            _vertexArray = _gl.GenVertexArray();
+            _gl.BindVertexArray(_vertexArray);
+
+            // Create vertex buffer
+            _vertexBuffer = _gl.GenBuffer();
+            _gl.BindBuffer(BufferTargetARB.ArrayBuffer, _vertexBuffer);
+
+            fixed (void* d = vertices)
+            {
+                _gl.BufferData(BufferTargetARB.ArrayBuffer, (nuint) (vertices.Length * sizeof(float)), d, BufferUsageARB.StaticDraw);
+            }
+
+            // Create index buffer
+            _indexBuffer = _gl.GenBuffer();
+            _gl.BindBuffer(BufferTargetARB.ElementArrayBuffer, _indexBuffer);
+
+            fixed (void* d = indices)
+            {
+                _gl.BufferData(BufferTargetARB.ElementArrayBuffer, (nuint) (indices.Length * sizeof(uint)), d, BufferUsageARB.StaticDraw);
+            }
 
             // Position is 3 floats with offset 0
             VertexAttributePointer(0, 3, VertexAttribPointerType.Float, 8, 0);
@@ -31,29 +48,26 @@ namespace GameProgrammingExercises
             VertexAttributePointer(2, 2, VertexAttribPointerType.Float, 8, 6);
         }
         
-        public BufferObject<float> Vbo { get; }
+        public int NumberOfVertices { get; }
 
-        public BufferObject<uint> Ebo { get; }
+        public int NumberOfIndices { get; }
 
         public void SetActive()
         {
-            _gl.BindVertexArray(_handle);
+            _gl.BindVertexArray(_vertexArray);
         }
 
         public void Dispose()
         {
-            if (!_leaveOpen)
-            {
-                Vbo.Dispose();
-                Ebo.Dispose();
-            }
-            _gl.DeleteVertexArray(_handle);
+            _gl.DeleteBuffer(_vertexBuffer);
+            _gl.DeleteBuffer(_indexBuffer);
+            _gl.DeleteVertexArray(_vertexArray);
         }
 
         private unsafe void VertexAttributePointer(uint index, int count, VertexAttribPointerType type, uint vertexSize, int offSet)
         {
-            _gl.VertexAttribPointer(index, count, type, false, vertexSize * (uint) sizeof(float), (void*) (offSet * sizeof(float)));
             _gl.EnableVertexAttribArray(index);
+            _gl.VertexAttribPointer(index, count, type, false, vertexSize * (uint) sizeof(float), (void*) (offSet * sizeof(float)));
         }
     }
 }

@@ -251,8 +251,6 @@ public class Renderer : IDisposable
             2, 3, 0
         };
 
-        var vbo = new BufferObject<float>(GL, vertices, BufferTargetARB.ArrayBuffer);
-        var ebo = new BufferObject<uint>(GL, indices, BufferTargetARB.ElementArrayBuffer);
-        _spriteVertices = new VertexArrayObject(GL, vbo, ebo);
+        _spriteVertices = new VertexArrayObject(GL, vertices, indices);
     }
 }

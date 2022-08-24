@@ -1,6 +1,5 @@
 using System.Text.Json;
 using Silk.NET.Maths;
-using Silk.NET.OpenGL;
 
 namespace GameProgrammingExercises;
 
@@ -94,22 +93,6 @@ public class Mesh : IDisposable
         // We where computing length squared earlier
         radius = Scalar.Sqrt(radius);
 
-        var rawIndices = new uint[][]
-        {
-            new uint[] { 2,1,0 },
-            new uint[] { 3,9,8 },
-            new uint[] { 4,11,10 },
-            new uint[] { 5,11,12 },
-            new uint[] { 6,14,13 },
-            new uint[] { 7,14,15 },
-            new uint[] { 18,17,16 },
-            new uint[] { 19,17,18 },
-            new uint[] { 22,21,20 },
-            new uint[] { 23,21,22 },
-            new uint[] { 26,25,24 },
-            new uint[] { 27,25,26 }
-        };
-
         // Load in the indices
         if (raw.Indices is null || !raw.Indices.Any())
         {
@@ -132,96 +115,7 @@ public class Mesh : IDisposable
             }
         }
 
-        var vertices2 = new float[]
-        {
-            -0.5f, -0.5f, -0.5f, 0, 0, -1, 0, 0,
-            0.5f, -0.5f, -0.5f, 0, 0, -1, 1, 0,
-            -0.5f, 0.5f, -0.5f, 0, 0, -1, 0, -1,
-            0.5f, 0.5f, -0.5f, 0, 0, -1, 1, -1,
-            -0.5f, 0.5f, 0.5f, 0, 1, 0, 0, -1,
-            0.5f, 0.5f, 0.5f, 0, 1, 0, 1, -1,
-            -0.5f, -0.5f, 0.5f, 0, 0, 1, 0, 0,
-            0.5f, -0.5f, 0.5f, 0, 0, 1, 1, 0,
-            -0.5f, 0.5f, -0.5f, 0, 0, -1, 0, -1,
-            0.5f, -0.5f, -0.5f, 0, 0, -1, 1, 0,
-            -0.5f, 0.5f, -0.5f, 0, 1, 0, 0, -1,
-            0.5f, 0.5f, -0.5f, 0, 1, 0, 1, -1,
-            -0.5f, 0.5f, 0.5f, 0, 1, 0, 0, -1,
-            -0.5f, 0.5f, 0.5f, 0, 0, 1, 0, -1,
-            0.5f, 0.5f, 0.5f, 0, 0, 1, 1, -1,
-            -0.5f, -0.5f, 0.5f, 0, 0, 1, 0, 0,
-            -0.5f, -0.5f, 0.5f, 0, -1, 0, 0, 0,
-            0.5f, -0.5f, 0.5f, 0, -1, 0, 1, 0,
-            -0.5f, -0.5f, -0.5f, 0, -1, 0, 0, 0,
-            0.5f, -0.5f, -0.5f, 0, -1, 0, 1, 0,
-            0.5f, -0.5f, -0.5f, 1, 0, 0, 1, 0,
-            0.5f, -0.5f, 0.5f, 1, 0, 0, 1, 0,
-            0.5f, 0.5f, -0.5f, 1, 0, 0, 1, -1,
-            0.5f, 0.5f, 0.5f, 1, 0, 0, 1, -1,
-            -0.5f, -0.5f, 0.5f, -1, 0, 0, 0, 0,
-            -0.5f, -0.5f, -0.5f, -1, 0, 0, 0, 0,
-            -0.5f, 0.5f, 0.5f, -1, 0, 0, 0, -1,
-            -0.5f, 0.5f, -0.5f, -1, 0, 0, 0, -1,
-        };
-
-        var indices2 = new uint[]
-        {
-            2, 1, 0,
-            3, 9, 8,
-            4, 11, 10,
-            5, 11, 12,
-            6, 14, 13,
-            7, 14, 15,
-            18, 17, 16,
-            19, 17, 18,
-            22, 21, 20,
-            23, 21, 22,
-            26, 25, 24,
-            27, 25, 26,
-        };
-
-        var indices3 = new uint[raw.Indices.Length * 3];
-        indices3[0] = (uint)(int)2;
-        indices3[1] = (uint)(int)1;
-        indices3[2] = (uint)(int)0;
-        indices3[3] = (uint)(int)3;
-        indices3[4] = (uint)(int)9;
-        indices3[5] = (uint)(int)8;
-        indices3[6] =  (uint)(int)4;
-        indices3[7] = (uint)(int)11;
-        indices3[8] = (uint)(int)10;
-        indices3[9] = (uint)(int)5;
-        indices3[10] = (uint)(int)11;
-        indices3[11] = (uint)(int)12;
-        indices3[12] = (uint)(int)6;
-        indices3[13] = (uint)(int)14;
-        indices3[14] = (uint)(int)13;
-        indices3[15] = (uint)(int)7;
-        indices3[16] = (uint)(int)14;
-        indices3[17] = (uint)(int)15;
-        indices3[18] = (uint)(int)18;
-        indices3[19] = (uint)(int)17;
-        indices3[20] = (uint)(int)16;
-        indices3[21] = (uint)(int)19;
-        indices3[22] = (uint)(int)17;
-        indices3[23] = (uint)(int)18;
-        indices3[24] = (uint)(int)22;
-        indices3[25] = (uint)(int)21;
-        indices3[26] = (uint)(int)20;
-        indices3[27] = (uint)(int)23;
-        indices3[28] = (uint)(int)21;
-        indices3[29] = (uint)(int)22;
-        indices3[30] = (uint)(int)26;
-        indices3[31] = (uint)(int)25;
-        indices3[32] = (uint)(int)24;
-        indices3[33] = (uint)(int)27;
-        indices3[34] = (uint)(int)25;
-        indices3[35] = (uint)(int)26;
-
-        var vbo = new BufferObject<float>(game.Renderer.GL, vertices, BufferTargetARB.ArrayBuffer);
-        var ebo = new BufferObject<uint>(game.Renderer.GL, indices, BufferTargetARB.ElementArrayBuffer);
-        var vao = new VertexArrayObject(game.Renderer.GL, vbo, ebo);
-
+        var vao = new VertexArrayObject(game.Renderer.GL, vertices, indices);
         return new Mesh(radius, raw.SpecularPower, raw.Shader, textures, vao);
     }
 

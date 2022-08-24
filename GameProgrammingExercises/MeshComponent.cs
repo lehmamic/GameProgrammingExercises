@@ -38,7 +38,7 @@ public class MeshComponent : Component
         vao.SetActive();
 
         // Draw
-        Owner.Game.Renderer.GL.DrawElements(PrimitiveType.Triangles, (uint)vao.Ebo.Length, DrawElementsType.UnsignedInt, null);
+        Owner.Game.Renderer.GL.DrawElements(PrimitiveType.Triangles, (uint)vao.NumberOfIndices, DrawElementsType.UnsignedInt, null);
     }
 
     protected override void Dispose(bool disposing)
