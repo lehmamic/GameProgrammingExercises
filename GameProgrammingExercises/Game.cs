@@ -18,7 +18,7 @@ public class Game
 
     private bool _updatingActors;
     private IKeyboard _primaryKeyboard;
-    private Camera _camera;
+    private CameraActor _cameraActor;
 
     // Game specific
 
@@ -140,14 +140,14 @@ public class Game
             Position = new Vector3D<float>(200.0f, 75.0f, 0.0f),
             Scale = 100.0f
         };
-        var q = GameMath.CreateQuaternion(Vector3D<float>.UnitY, -1 * GameMath.PiOver2);
+        var q = GameMath.CreateQuaternion(Vector3D<float>.UnitY, -1 * Scalar<float>.PiOver2);
         q = Quaternion<float>.Concatenate(q, GameMath.CreateQuaternion(Vector3D<float>.UnitZ, (float)(Math.PI + Math.PI / 4.0f)));
         a.Rotation = q;
         _ = new MeshComponent(a)
         {
             Mesh = _renderer.GetMesh("Assets/Cube.gpmesh")
         };
-        
+
         a = new Actor(this)
         {
             Position = new Vector3D<float>(200.0f, -75.0f, 0.0f),
@@ -157,9 +157,52 @@ public class Game
         {
             Mesh = _renderer.GetMesh("Assets/Sphere.gpmesh")
         };
+        
+        // Setup floor
+        var start = -1250.0f;
+        var size = 250.0f;
+        for (int i = 0; i < 10; i++)
+        {
+            for (int j = 0; j < 10; j++)
+            {
+                a = new PlaneActor(this)
+                {
+                    Position = new Vector3D<float>(start + i * size, start + j * size, -100.0f),
+                };
+            }
+        }
+
+        // // Left/right walls
+        // q = GameMath.CreateQuaternion(Vector3D<float>.UnitX, Scalar<float>.PiOver2);
+        // for (int i = 0; i < 10; i++)
+        // {
+        //     a = new PlaneActor(this);
+        //     a.Position = new Vector3D<float>(start + i * size, start - size, 0.0f);
+        //     a.Rotation = q;
+        //
+        //     a = new PlaneActor(this);
+        //     a.Position = new Vector3D<float>(start + i * size, -start + size, 0.0f);
+        //     a.Rotation = q;
+        // }
+        //
+        // q = Quaternion<float>.Concatenate(q, GameMath.CreateQuaternion(Vector3D<float>.UnitZ, Scalar<float>.PiOver2));
+        // // Forward/back walls
+        // for (int i = 0; i < 10; i++)
+        // {
+        //     a = new PlaneActor(this);
+        //     a.Position = new Vector3D<float>(start - size, start + i * size, 0.0f);
+        //     a.Rotation = q;
+        //
+        //     a = new PlaneActor(this);
+        //     a.Position = new Vector3D<float>(-start + size, start + i * size, 0.0f);
+        //     a.Rotation = q;
+        // }
+
+        // Setup lights
+        // TODO
 
         // Camera actor
-        _camera = new Camera(this);
+        _cameraActor = new CameraActor(this);
 
         // UI elements
         a = new Actor(this)

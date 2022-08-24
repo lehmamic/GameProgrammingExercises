@@ -4,11 +4,11 @@ using Silk.NET.Maths;
 
 namespace GameProgrammingExercises;
 
-public class Camera : Actor
+public class CameraActor : Actor
 {
     private readonly MoveComponent _move;
 
-    public Camera(Game game)
+    public CameraActor(Game game)
         : base(game)
     {
         _move = new MoveComponent(this);
