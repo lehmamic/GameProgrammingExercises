@@ -147,7 +147,7 @@ public class Game
         {
             Mesh = _renderer.GetMesh("Assets/Cube.gpmesh")
         };
-        
+
         a = new Actor(this)
         {
             Position = new Vector3D<float>(200.0f, -75.0f, 0.0f),
