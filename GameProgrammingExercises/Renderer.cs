@@ -58,6 +58,7 @@ public class Renderer : IDisposable
         var options = WindowOptions.Default;
         options.Size = new Vector2D<int>(1024, 768);
         options.Title = windowTitle;
+        options.PreferredDepthBufferBits = 32;
 
         Window = Silk.NET.Windowing.Window.Create(options);
 

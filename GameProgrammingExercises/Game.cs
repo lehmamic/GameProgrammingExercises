@@ -172,31 +172,31 @@ public class Game
             }
         }
 
-        // // Left/right walls
-        // q = GameMath.CreateQuaternion(Vector3D<float>.UnitX, Scalar<float>.PiOver2);
-        // for (int i = 0; i < 10; i++)
-        // {
-        //     a = new PlaneActor(this);
-        //     a.Position = new Vector3D<float>(start + i * size, start - size, 0.0f);
-        //     a.Rotation = q;
-        //
-        //     a = new PlaneActor(this);
-        //     a.Position = new Vector3D<float>(start + i * size, -start + size, 0.0f);
-        //     a.Rotation = q;
-        // }
-        //
-        // q = Quaternion<float>.Concatenate(q, GameMath.CreateQuaternion(Vector3D<float>.UnitZ, Scalar<float>.PiOver2));
-        // // Forward/back walls
-        // for (int i = 0; i < 10; i++)
-        // {
-        //     a = new PlaneActor(this);
-        //     a.Position = new Vector3D<float>(start - size, start + i * size, 0.0f);
-        //     a.Rotation = q;
-        //
-        //     a = new PlaneActor(this);
-        //     a.Position = new Vector3D<float>(-start + size, start + i * size, 0.0f);
-        //     a.Rotation = q;
-        // }
+        // Left/right walls
+        q = GameMath.CreateQuaternion(Vector3D<float>.UnitX, Scalar<float>.PiOver2);
+        for (int i = 0; i < 10; i++)
+        {
+            a = new PlaneActor(this);
+            a.Position = new Vector3D<float>(start + i * size, start - size, 0.0f);
+            a.Rotation = q;
+        
+            a = new PlaneActor(this);
+            a.Position = new Vector3D<float>(start + i * size, -start + size, 0.0f);
+            a.Rotation = q;
+        }
+        
+        q = Quaternion<float>.Concatenate(q, GameMath.CreateQuaternion(Vector3D<float>.UnitZ, Scalar<float>.PiOver2));
+        // Forward/back walls
+        for (int i = 0; i < 10; i++)
+        {
+            a = new PlaneActor(this);
+            a.Position = new Vector3D<float>(start - size, start + i * size, 0.0f);
+            a.Rotation = q;
+        
+            a = new PlaneActor(this);
+            a.Position = new Vector3D<float>(-start + size, start + i * size, 0.0f);
+            a.Rotation = q;
+        }
 
         // Setup lights
         // TODO

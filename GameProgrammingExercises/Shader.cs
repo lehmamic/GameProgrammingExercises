@@ -10,20 +10,22 @@ public sealed class Shader : IDisposable
     // Most of the time you would want to abstract items to make things like this invisible.
     private readonly uint _handle;
     private readonly GL _gl;
+    private uint _vertex;
+    private uint _fragment;
 
     public Shader(GL gl, string vertexShaderFilePath, string fragmentShaderFilePath)
     {
         _gl = gl;
 
         // Load and compile vertex and pixel shaders
-        uint vertex = CompileShader(ShaderType.VertexShader, vertexShaderFilePath);
-        uint fragment = CompileShader(ShaderType.FragmentShader, fragmentShaderFilePath);
+        _vertex = CompileShader(ShaderType.VertexShader, vertexShaderFilePath);
+        _fragment = CompileShader(ShaderType.FragmentShader, fragmentShaderFilePath);
         
         // Now create a shader program that links together the vertex/frag shaders
         _handle = _gl.CreateProgram();
 
-        _gl.AttachShader(_handle, vertex);
-        _gl.AttachShader(_handle, fragment);
+        _gl.AttachShader(_handle, _vertex);
+        _gl.AttachShader(_handle, _fragment);
         _gl.LinkProgram(_handle);
 
         // Verify that the program linked successfully
@@ -32,12 +34,6 @@ public sealed class Shader : IDisposable
         {
             throw new ShaderException($"Program failed to link with error: {_gl.GetProgramInfoLog(_handle)}");
         }
-
-        // Detach and delete the shaders
-        _gl.DetachShader(_handle, vertex);
-        _gl.DetachShader(_handle, fragment);
-        _gl.DeleteShader(vertex);
-        _gl.DeleteShader(fragment);
     }
 
     public void SetActive()
@@ -112,7 +108,13 @@ public sealed class Shader : IDisposable
 
     public void Dispose()
     {
-        //Remember to delete the program when we are done.
+        // Detach and delete the shaders
+        _gl.DetachShader(_handle, _vertex);
+        _gl.DetachShader(_handle, _fragment);
+        _gl.DeleteShader(_vertex);
+        _gl.DeleteShader(_fragment);
+
+        // Remember to delete the program when we are done.
         _gl.DeleteProgram(_handle);
     }
 }
