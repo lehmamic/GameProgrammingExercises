@@ -12,7 +12,7 @@ public class Actor : IDisposable
     private bool _recomputeWorldTransform = true;
     private Vector3D<float> _position = Vector3D<float>.Zero;
     private float _scale = 1.0f;
-    private Quaternion<float> _rotation;
+    private Quaternion<float> _rotation = Quaternion<float>.Identity;
 
     /// <summary>
     /// Constructor. Creates an instance of the Actor.

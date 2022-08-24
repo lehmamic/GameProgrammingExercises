@@ -1,3 +1,4 @@
+using System.Buffers;
 using Silk.NET.OpenGL;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
@@ -12,8 +13,12 @@ public class Texture : IDisposable
     public unsafe Texture(GL gl, string path)
     {
         _gl = gl;
+        _gl = gl;
 
-        using var image = Image.Load<Rgba32>(path);
+        var imageConfig = Configuration.Default.Clone();
+        imageConfig.PreferContiguousImageBuffers = true;
+
+        using var image = Image.Load<Rgba32>(imageConfig, path);
 
         Width = image.Width;
         Height = image.Height;
@@ -21,17 +26,23 @@ public class Texture : IDisposable
         _handle = _gl.GenTexture();
         _gl.BindTexture(TextureTarget.Texture2D, _handle);
 
-        _gl.TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgba8, (uint)image.Width, (uint)image.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, null);
-        image.ProcessPixelRows(accessor =>
+        if (!image.DangerousTryGetSinglePixelMemory(out Memory<Rgba32> memory))
         {
-            for (int y = 0; y < accessor.Height; y++)
-            {
-                fixed (void* data = accessor.GetRowSpan(y))
-                {
-                    gl.TexSubImage2D(TextureTarget.Texture2D, 0, 0, y, (uint) accessor.Width, 1, PixelFormat.Rgba, PixelType.UnsignedByte, data);
-                }
-            }
-        });
+            throw new Exception("This can only happen with multi-GB images or when PreferContiguousImageBuffers is not set to true.");
+        }
+
+        using MemoryHandle pinHandle = memory.Pin();
+        _gl.TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgba, (uint)image.Width, (uint)image.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, pinHandle.Pointer);
+        // image.ProcessPixelRows(accessor =>
+        // {
+        //     for (int y = 0; y < accessor.Height; y++)
+        //     {
+        //         fixed (void* data = accessor.GetRowSpan(y))
+        //         {
+        //             gl.TexSubImage2D(TextureTarget.Texture2D, 0, 0, y, (uint) accessor.Width, 1, PixelFormat.Rgba, PixelType.UnsignedByte, data);
+        //         }
+        //     }
+        // });
 
         // Enable bilinear filtering
         _gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int) GLEnum.Linear);
