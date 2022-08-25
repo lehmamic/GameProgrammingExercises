@@ -21,16 +21,16 @@ public class InputComponent : MoveComponent
 
     public float MaxAngularSpeed { get; set; }
 
-    public override void ProcessInput(IKeyboard keyboard)
+    public override void ProcessInput(InputState state)
     {
         // Calculate forward speed for MoveComponent
         float forwardSpeed = 0.0f;
     
-        if (keyboard.IsKeyPressed(ForwardKey)) {
+        if (state.Keyboard.GetKeyValue(ForwardKey)) {
             forwardSpeed += MaxForwardSpeed;
         }
     
-        if (keyboard.IsKeyPressed(BackKey)) {
+        if (state.Keyboard.GetKeyValue(BackKey)) {
             forwardSpeed -= MaxForwardSpeed;
         }
 
@@ -39,11 +39,11 @@ public class InputComponent : MoveComponent
         // Calculate angular speed for MoveComponent
         float angularSpeed = 0.0f;
     
-        if (keyboard.IsKeyPressed(ClockwiseKey)) {
+        if (state.Keyboard.GetKeyValue(ClockwiseKey)) {
             angularSpeed += MaxAngularSpeed;
         }
     
-        if (keyboard.IsKeyPressed(CounterClockwiseKey)) {
+        if (state.Keyboard.GetKeyValue(CounterClockwiseKey)) {
             angularSpeed -= MaxAngularSpeed;
         }
     

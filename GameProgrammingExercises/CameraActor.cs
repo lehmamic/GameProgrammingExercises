@@ -33,7 +33,7 @@ public class CameraActor : Actor
     protected override void UpdateActor(float deltaTime)
     {
         base.UpdateActor(deltaTime);
-        
+
         // Play the footstep if we're moving and haven't recently
         _lastFootstep -= deltaTime;
         if (!_move.ForwardSpeed.NearZero() && _lastFootstep <= 0.0f)
@@ -53,28 +53,28 @@ public class CameraActor : Actor
         Game.AudioSystem.SetListener(view);
     }
 
-    protected override void ActorInput(IKeyboard keyboard)
+    protected override void ActorInput(InputState state)
     {
         float forwardSpeed = 0.0f;
         float angularSpeed = 0.0f;
 
         // wasd movement
-        if (keyboard.IsKeyPressed(Key.W))
+        if (state.Keyboard.GetKeyValue(Key.W))
         {
             forwardSpeed += 300.0f;
         }
     
-        if (keyboard.IsKeyPressed(Key.S))
+        if (state.Keyboard.GetKeyValue(Key.S))
         {
             forwardSpeed -= 300.0f;
         }
     
-        if (keyboard.IsKeyPressed(Key.A))
+        if (state.Keyboard.GetKeyValue(Key.A))
         {
             angularSpeed -= GameMath.TwoPi;
         }
-    
-        if (keyboard.IsKeyPressed(Key.D))
+
+        if (state.Keyboard.GetKeyValue(Key.D))
         {
             angularSpeed += GameMath.TwoPi;
         }

@@ -16,19 +16,21 @@ public class Game
 
     private Renderer _renderer;
     private AudioSystem _audioSystem;
-    private IInputContext _input;
+    private InputSystem _inputSystem;
 
     private bool _updatingActors;
-    private IKeyboard _primaryKeyboard;
 
     // Game specific
     private CameraActor _cameraActor;
-    private SoundEvent _musicEvent;
-    private SoundEvent _reverbSnap;
+    private AudioActor _audioActor;
 
     public Renderer Renderer => _renderer;
 
     public AudioSystem AudioSystem => _audioSystem;
+
+    public IWindow Window => _renderer.Window;
+
+    public CameraActor Camera => _cameraActor;
 
     public IWindow Initialize()
     {
@@ -42,19 +44,9 @@ public class Game
 
         window.Load += () =>
         {
-            // Set-up input context.
-            _input = window.CreateInput();
-            _primaryKeyboard = _input.Keyboards.First();
-            _primaryKeyboard.KeyDown += (_, key, _) =>
-            {
-                if (key == Key.Escape)
-                {
-                    window.Close();
-                    return;
-                }
-
-                HandleKeyPress(key);
-            };
+            // Initialize input system
+            _inputSystem = new InputSystem(this);
+            _inputSystem.Initialize();
 
             LoadData();
         };
@@ -74,7 +66,7 @@ public class Game
         {
             UnloadData();
 
-            _input.Dispose();
+            _inputSystem.Dispose();
             _renderer.Dispose();
             _audioSystem.Dispose();
         };
@@ -106,80 +98,21 @@ public class Game
 
     private void ProcessInput()
     {
+        _inputSystem.Update();
+        var state = _inputSystem.State;
+    
+        if (state.Keyboard.GetKeyState(Key.Escape) == ButtonState.Released)
+        {
+            _renderer.Window.Close();
+        }
+    
         // Process input for all actors
         _updatingActors = true;
         foreach (var actor in _actors)
         {
-            actor.ProcessInput(_primaryKeyboard);
+            actor.ProcessInput(state);
         }
         _updatingActors = false;
-    }
-
-    private void HandleKeyPress(Key key)
-    {
-        switch (key)
-        {
-            case Key.Minus:
-            {
-                // Reduce master volume
-                float volume = _audioSystem.GetBusVolume("bus:/");
-                volume = Scalar.Max(0.0f, volume - 0.1f);
-                _audioSystem.SetBusVolume("bus:/", volume);
-                break;
-            }
-            case Key.Equal:
-            {
-                // Increase master volume
-                float volume = _audioSystem.GetBusVolume("bus:/");
-                volume = Scalar.Min(1.0f, volume + 0.1f);
-                _audioSystem.SetBusVolume("bus:/", volume);
-                break;
-            }
-            case Key.E:
-            {
-                // Play explosion
-                _audioSystem.PlayEvent("event:/Explosion2D");
-                break;
-            }
-
-            case Key.M:
-            {
-                // Toggle music pause state
-                _musicEvent.SetPaused(!_musicEvent.GetPaused());
-                break;
-            }
-
-            case Key.R:
-            {
-                // Stop or start reverb snapshot
-                if (_reverbSnap is null || !_reverbSnap.IsValid())
-                {
-                    _reverbSnap = _audioSystem.PlayEvent("snapshot:/WithReverb");
-                }
-                else
-                {
-                    _reverbSnap.Stop();
-                }
-                break;
-            }
-
-            case Key.Number1:
-            {
-                // Set default footstep surface
-                _cameraActor.SetFootstepSurface(0.0f);
-                break;
-            }
-
-            case Key.Number2:
-            {
-                // Set grass footstep surface
-                _cameraActor.SetFootstepSurface(0.5f);
-                break;
-            }
-
-            default:
-                break;
-        }
     }
 
     private void UpdateGame(float deltaTime)
@@ -325,8 +258,8 @@ public class Game
         var ac = new AudioComponent(a);
         ac.PlayEvent("event:/FireLoop");
 
-        // Start music
-        _musicEvent = _audioSystem.PlayEvent("event:/Music");
+        // Audio actor
+        _audioActor = new AudioActor(this);
     }
 
     private void UnloadData()
