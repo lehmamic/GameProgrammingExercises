@@ -22,34 +22,15 @@ public class MoveComponent : Component
 
             // Create quaternion for incremental (Rotate about up axis)
             var increment = GameMath.CreateQuaternion(Vector3D<float>.UnitZ, angle);
+            
+            // Concatenate old an new quaternion
             Owner.Rotation = Quaternion<float>.Concatenate(Owner.Rotation, increment);
         }
 
+        // Update position based on forward speed stays the same
         if (!ForwardSpeed.NearZero())
         {
-            Vector3D<float> position = Owner.Position;
-            position += Owner.Forward * ForwardSpeed * deltaTime;
-
-            // Screen wrapping (for asteroids)
-            if (position.X < -512.0f)
-            {
-                position.X = 510.0f;
-            }
-            else if (position.X > 512.0f)
-            {
-                position.X = -510.0f;
-            }
-
-            if (position.Y < -384.0f)
-            {
-                position.Y = 382.0f;
-            }
-            else if (position.Y > 384.0f)
-            {
-                position.Y = -382.0f;
-            }
-            
-            Owner.Position = position;
+            Owner.Position += Owner.Forward * ForwardSpeed * deltaTime;
         }
     }
 }
