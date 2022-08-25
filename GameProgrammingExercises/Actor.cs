@@ -1,5 +1,3 @@
-using System.Numerics;
-using Silk.NET.Input;
 using Silk.NET.Maths;
 
 namespace GameProgrammingExercises;
@@ -93,18 +91,18 @@ public class Actor : IDisposable
     /// <summary>
     /// ProcessInput function called from Game (not overridable).
     /// </summary>
-    /// <param name="keyboard"></param>
-    public void ProcessInput(IKeyboard keyboard)
+    /// <param name="state"></param>
+    public void ProcessInput(InputState state)
     {
         if (State == ActorState.Active)
         {
             // First process input for components
             foreach (var component in _components)
             {
-                component.ProcessInput(keyboard);
+                component.ProcessInput(state);
             }
 
-            ActorInput(keyboard);
+            ActorInput(state);
         }
     }
 
@@ -132,8 +130,8 @@ public class Actor : IDisposable
     /// <summary>
     /// Any actor-specific input code (overridable).
     /// </summary>
-    /// <param name="keyboard"></param>
-    protected virtual void ActorInput(IKeyboard keyboard)
+    /// <param name="state"></param>
+    protected virtual void ActorInput(InputState state)
     {
     }
     

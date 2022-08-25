@@ -1,5 +1,3 @@
-using Silk.NET.Input;
-
 namespace GameProgrammingExercises;
 
 public class Component : IDisposable
@@ -38,8 +36,8 @@ public class Component : IDisposable
     /// <summary>
     /// Process input for this component.
     /// </summary>
-    /// <param name="keyboard"></param>
-    public virtual void ProcessInput(IKeyboard keyboard)
+    /// <param name="state"></param>
+    public virtual void ProcessInput(InputState state)
     {
     }
 

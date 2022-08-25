@@ -21,11 +21,9 @@ public class Game
     private readonly Dictionary<string, Texture> _textures = new();
 
     private IWindow _window;
-    private IInputContext _input;
     private GL _gl;
 
     private bool _updatingActors;
-    private IKeyboard _primaryKeyboard;
 
     // Sprite Shader
     private Shader _spriteShader;
@@ -33,32 +31,29 @@ public class Game
     // Sprite vertex array
     private VertexArrayObject _spriteVertices;
 
+    private InputSystem _inputSystem;
+
     // Game specific
-    private List<Asteroid> _asteroids = new();
+    private readonly List<Asteroid> _asteroids = new();
     private Ship _ship;
 
     public IReadOnlyList<Asteroid> Asteroids => _asteroids;
+
+    public IWindow Window => _window;
 
     public IWindow Initialize()
     {
         var options = WindowOptions.Default;
         options.Size = new Vector2D<int>(1024, 768);
-        options.Title = "Game Programming in C++ (Chapter 5)";
+        options.Title = "Game Programming in C++ (Chapter 8)";
 
-        _window = Window.Create(options);
+        _window = Silk.NET.Windowing.Window.Create(options);
 
         _window.Load += () =>
         {
-            // Set-up input context.
-            _input = _window.CreateInput();
-            _primaryKeyboard = _input.Keyboards.First();
-            _primaryKeyboard.KeyDown += (_, key, _) =>
-            {
-                if (key == Key.Escape)
-                {
-                    _window.Close();
-                }
-            };
+            // Initialize input system
+            _inputSystem = new InputSystem(this);
+            _inputSystem.Initialize();
 
             // Getting the opengl api for drawing to the screen.
             _gl = GL.GetApi(_window);
@@ -92,7 +87,7 @@ public class Game
             _spriteShader.Dispose();
             _spriteVertices.Dispose();
             _window.Dispose();
-            _input.Dispose();
+            _inputSystem.Dispose();
 
             _gl.Dispose();
         };
@@ -167,11 +162,19 @@ public class Game
 
     private void ProcessInput()
     {
+        _inputSystem.Update();
+        var state = _inputSystem.State;
+    
+        if (state.Keyboard.GetKeyState(Key.Escape) == ButtonState.Released)
+        {
+            _window.Close();
+        }
+    
         // Process input for all actors
         _updatingActors = true;
         foreach (var actor in _actors)
         {
-            actor.ProcessInput(_primaryKeyboard);
+            actor.ProcessInput(state);
         }
         _updatingActors = false;
     }

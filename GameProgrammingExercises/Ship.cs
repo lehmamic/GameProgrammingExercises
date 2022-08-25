@@ -34,9 +34,9 @@ public class Ship : Actor
         _laserCooldown -= deltaTime;
     }
 
-    protected override void ActorInput(IKeyboard keyboard)
+    protected override void ActorInput(InputState state)
     {
-        if (keyboard.IsKeyPressed(Key.Space) && _laserCooldown <= 0.0f)
+        if (state.Keyboard.GetKeyValue(Key.Space) && _laserCooldown <= 0.0f)
         {
             // Create a laser and set its position/rotation to mine
             var laser = new Laser(_gl, Game)
