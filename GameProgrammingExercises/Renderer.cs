@@ -49,6 +49,11 @@ public class Renderer : IDisposable
     public Matrix4X4<float> ViewMatrix { get; set; }
 
     public Matrix4X4<float> ProjectionMatrix { get; set; }
+    
+    // Lighting data
+    public Vector3D<float> AmbientLight { get; set; }
+
+    public DirectionalLight DirectionalLight { get; set; }
 
     public IWindow Initialize(float screenWidth, float screenHeight, string windowTitle)
     {
@@ -100,9 +105,9 @@ public class Renderer : IDisposable
         _meshShader.SetUniform("uViewProj", ViewMatrix * ProjectionMatrix);
 
         // Update lighting uniforms
-        // SetLightUniforms(mMeshShader);
+        SetLightUniforms(_meshShader);
 
-        // Draw all meshs
+        // Draw all meshes
         foreach (var mesh in _meshComps)
         {
             mesh.Draw(_meshShader);
@@ -218,7 +223,7 @@ public class Renderer : IDisposable
         _spriteShader.SetUniform("uViewProj", viewProj);
 
         // Create basic mesh shader
-        _meshShader = new Shader(GL, "Shaders/BasicMesh.vert", "Shaders/BasicMesh.frag");
+        _meshShader = new Shader(GL, "Shaders/Pong.vert", "Shaders/Pong.frag");
         _meshShader.SetActive();
 
         // Set the view-projection matrix
@@ -253,5 +258,20 @@ public class Renderer : IDisposable
         };
 
         _spriteVertices = new VertexArrayObject(GL, vertices, indices);
+    }
+
+    private void SetLightUniforms(Shader shader)
+    {
+        // Camera position is from inverted view
+        Matrix4X4.Invert(ViewMatrix, out var invView);
+        shader.SetUniform("uCameraPos", invView.GetTranslation());
+
+        // Ambient light
+        shader.SetUniform("uAmbientLight", AmbientLight);
+    
+        // Directional light
+        shader.SetUniform("uDirLight.mDirection", DirectionalLight.Direction);
+        shader.SetUniform("uDirLight.mDiffuseColor", DirectionalLight.DiffuseColor);
+        shader.SetUniform("uDirLight.mSpecColor", DirectionalLight.SpecularColor);
     }
 }

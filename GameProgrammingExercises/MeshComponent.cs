@@ -24,7 +24,7 @@ public class MeshComponent : Component
         shader.SetUniform("uWorldTransform", Owner.WorldTransform);
 
         // Set specular power
-        //shader.SetUniform("uSpecPower", Mesh.SpecularPower);
+        shader.SetUniform("uSpecPower", Mesh.SpecularPower);
 
         // Set the active texture
         var texture = Mesh.Textures[TextureIndex];

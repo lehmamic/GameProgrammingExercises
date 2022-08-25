@@ -62,7 +62,7 @@ public sealed class Shader : IDisposable
         _gl.Uniform1(location, value);
     }
 
-    public void SetUniform(string name, Vector3 value)
+    public void SetUniform(string name, Vector3D<float> value)
     {
         int location = _gl.GetUniformLocation(_handle, name);
         if (location == -1)
