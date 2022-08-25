@@ -30,7 +30,7 @@ public class SoundEvent
         }
     }
 
-    public void Stop(bool allowFadeOut /* true */)
+    public void Stop(bool allowFadeOut = true)
     {
         var eventInstance = _system.GetEventInstance(_id);
         if (eventInstance is not null)

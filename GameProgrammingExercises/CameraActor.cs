@@ -7,16 +7,41 @@ namespace GameProgrammingExercises;
 public class CameraActor : Actor
 {
     private readonly MoveComponent _move;
+    private readonly AudioComponent _audio;
+    private readonly SoundEvent _footstep;
+
+    private float _lastFootstep;
 
     public CameraActor(Game game)
         : base(game)
     {
         _move = new MoveComponent(this);
+        _audio = new AudioComponent(this);
+        _lastFootstep = 0.0f;
+        _footstep = _audio.PlayEvent("event:/Footstep");
+        _footstep.SetPaused(true);
+    }
+    
+    public void SetFootstepSurface(float value)
+    {
+        // Pause here because the way I setup the parameter in FMOD
+        // changing it will play a footstep
+        _footstep.SetPaused(true);
+        _footstep.SetParameter("Surface", value);
     }
 
     protected override void UpdateActor(float deltaTime)
     {
         base.UpdateActor(deltaTime);
+        
+        // Play the footstep if we're moving and haven't recently
+        _lastFootstep -= deltaTime;
+        if (!_move.ForwardSpeed.NearZero() && _lastFootstep <= 0.0f)
+        {
+            _footstep.SetPaused(false);
+            _footstep.Restart();
+            _lastFootstep = 0.5f;
+        }
         
         // Compute new camera from this actor
         Vector3D<float> cameraPosition = Position;
@@ -25,6 +50,7 @@ public class CameraActor : Actor
 
         Matrix4X4<float> view = GameMath.CreateLookAt(cameraPosition, target, up);
         Game.Renderer.ViewMatrix = view;
+        Game.AudioSystem.SetListener(view);
     }
 
     protected override void ActorInput(IKeyboard keyboard)

@@ -194,14 +194,14 @@ public class Renderer : IDisposable
     public void Dispose()
     {
         // Destroy textures
-        foreach (var texture in _textures)
+        foreach (var texture in _textures.ToArray())
         {
             _textures.Remove(texture.Key);
             texture.Value.Dispose();
         }
 
         // Destroy meshes
-        foreach (var mesh in _meshes)
+        foreach (var mesh in _meshes.ToArray())
         {
             _meshes.Remove(mesh.Key);
             mesh.Value.Dispose();
