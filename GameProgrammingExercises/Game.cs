@@ -14,6 +14,7 @@ public class Game
     private readonly List<Actor> _pendingActors = new();
 
     private Renderer _renderer;
+    private AudioSystem _audioSystem;
     private IInputContext _input;
 
     private bool _updatingActors;
@@ -26,8 +27,13 @@ public class Game
 
     public IWindow Initialize()
     {
+        // Create the renderer
         _renderer = new Renderer(this);
-        var window = _renderer.Initialize(1024.0f, 768.0f, "Game Programming in C++ (Chapter 6)"); 
+        var window = _renderer.Initialize(1024.0f, 768.0f, "Game Programming in C++ (Chapter 7)"); 
+
+        // Create the audio system
+        _audioSystem = new AudioSystem(this);
+        _audioSystem.Initialize();
 
         window.Load += () =>
         {
@@ -62,6 +68,7 @@ public class Game
 
             _input.Dispose();
             _renderer.Dispose();
+            _audioSystem.Dispose();
         };
 
         return window;
@@ -125,6 +132,9 @@ public class Game
         {
             actor.Dispose();
         }
+
+        // Update audio system
+        _audioSystem.Update(deltaTime);
     }
 
     private void GenerateOutput()
