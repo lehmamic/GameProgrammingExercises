@@ -18,6 +18,7 @@ public sealed class InputSystem : IDisposable
         var keyboardState = new KeyboardState(new Dictionary<Key, bool>(),new Dictionary<Key, bool>());
         var mouseState = new MouseState(
             Vector2D<float>.Zero,
+            Vector2D<float>.Zero,
             false,
             Vector2D<float>.Zero,
             new Dictionary<MouseButton, bool>(),
@@ -42,6 +43,7 @@ public sealed class InputSystem : IDisposable
         _primaryMouse = _input.Mice.First();
         var mouseState = new MouseState(
             _primaryMouse.Position.ToGeneric(),
+            Vector2D<float>.Zero,
             false,
             _primaryMouse.ScrollWheels.First().ToVector2D(),
             _primaryMouse.SupportedButtons.ToDictionary(k => k, _ => false),
@@ -54,9 +56,15 @@ public sealed class InputSystem : IDisposable
     {
         _primaryMouse.Cursor.CursorMode = CursorMode.Disabled;
 
-        State = new InputState(
-            State.Keyboard,
-            new MouseState(State.Mouse.Position, value, State.Mouse.ScrollWheel, State.Mouse.PreviousButtonStates, State.Mouse.CurrentButtonStates));
+        var mouseState = new MouseState(
+            State.Mouse.Position,
+            Vector2D<float>.Zero,
+            value,
+            State.Mouse.ScrollWheel,
+            State.Mouse.PreviousButtonStates,
+            State.Mouse.CurrentButtonStates);
+
+        State = new InputState(State.Keyboard, mouseState);
     }
 
     // Called right after SDL_PollEvents loop
@@ -82,8 +90,12 @@ public sealed class InputSystem : IDisposable
             currentMouseButtonStates[button] = _primaryMouse.IsButtonPressed(button);
         }
 
+        var currentPosition = _primaryMouse.Position.ToGeneric();
+        var relativePosition = currentPosition - State.Mouse.Position;
+
         var currentMouseState = new MouseState(
-            _primaryMouse.Position.ToGeneric(),
+            currentPosition,
+            relativePosition,
             State.Mouse.IsRelative,
             _primaryMouse.ScrollWheels.First().ToVector2D(),
             previousMouseButtonStates,
