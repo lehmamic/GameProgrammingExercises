@@ -5,18 +5,23 @@ namespace GameProgrammingExercises;
 
 public class MouseState
 {
-    public MouseState(Vector2D<float> position,
+    public MouseState(
+        Vector2D<float> position,
+        bool isRelative,
         Vector2D<float> scrollWheel,
         IReadOnlyDictionary<MouseButton, bool> previousButtonStates,
         IReadOnlyDictionary<MouseButton, bool> currentButtonStates)
     {
         Position = position;
+        IsRelative = isRelative;
         ScrollWheel = scrollWheel;
         PreviousButtonStates = previousButtonStates;
         CurrentButtonStates = currentButtonStates;
     }
 
     public Vector2D<float> Position { get; }
+
+    public bool IsRelative { get; }
 
     public Vector2D<float> ScrollWheel { get; }
 

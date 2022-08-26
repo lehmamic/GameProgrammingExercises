@@ -18,12 +18,15 @@ public sealed class InputSystem : IDisposable
         var keyboardState = new KeyboardState(new Dictionary<Key, bool>(),new Dictionary<Key, bool>());
         var mouseState = new MouseState(
             Vector2D<float>.Zero,
+            false,
             Vector2D<float>.Zero,
             new Dictionary<MouseButton, bool>(),
             new Dictionary<MouseButton, bool>());
 
         State = new InputState(keyboardState, mouseState);
     }
+
+    public InputState State { get; private set; }
 
     public void Initialize()
     {
@@ -39,6 +42,7 @@ public sealed class InputSystem : IDisposable
         _primaryMouse = _input.Mice.First();
         var mouseState = new MouseState(
             _primaryMouse.Position.ToGeneric(),
+            false,
             _primaryMouse.ScrollWheels.First().ToVector2D(),
             _primaryMouse.SupportedButtons.ToDictionary(k => k, _ => false),
             _primaryMouse.SupportedButtons.ToDictionary(k => k, _ => false));
@@ -46,7 +50,14 @@ public sealed class InputSystem : IDisposable
         State = new InputState(keyboardState, mouseState);
     }
 
-    public InputState State { get; private set; }
+    public void SetRelativeMouseMode(bool value)
+    {
+        _primaryMouse.Cursor.CursorMode = CursorMode.Disabled;
+
+        State = new InputState(
+            State.Keyboard,
+            new MouseState(State.Mouse.Position, value, State.Mouse.ScrollWheel, State.Mouse.PreviousButtonStates, State.Mouse.CurrentButtonStates));
+    }
 
     // Called right after SDL_PollEvents loop
     public void Update()
