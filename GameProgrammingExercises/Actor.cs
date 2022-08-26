@@ -70,6 +70,8 @@ public class Actor : IDisposable
 
     public Vector3D<float> Forward => Vector3D.Transform(Vector3D<float>.UnitX, _rotation);
 
+    public Vector3D<float> Right => Vector3D.Transform(Vector3D<float>.UnitY, _rotation);
+
     public Matrix4X4<float> WorldTransform { get; private set; }
 
     /// <summary>

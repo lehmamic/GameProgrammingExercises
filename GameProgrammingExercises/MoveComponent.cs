@@ -9,10 +9,21 @@ public class MoveComponent : Component
         : base(owner, updateOrder)
     {
     }
-    
+
+    /// <summary>
+    /// Controls rotation (radians/second)
+    /// </summary>
     public float AngularSpeed { get; set; }
 
+    /// <summary>
+    /// Controls forward movement
+    /// </summary>
     public float ForwardSpeed { get; set; }
+    
+    /// <summary>
+    /// Controls strafe movement
+    /// </summary>
+    public float StrafeSpeed { get; set; }
 
     public override void Update(float deltaTime)
     {
@@ -28,9 +39,15 @@ public class MoveComponent : Component
         }
 
         // Update position based on forward speed stays the same
-        if (!ForwardSpeed.NearZero())
+        if (!ForwardSpeed.NearZero() || !StrafeSpeed.NearZero())
         {
-            Owner.Position += Owner.Forward * ForwardSpeed * deltaTime;
+            var pos = Owner.Position;
+            pos += Owner.Forward * ForwardSpeed * deltaTime;
+
+            // Update position based on strafe
+            pos += Owner.Right * StrafeSpeed * deltaTime;
+
+            Owner.Position = pos;
         }
     }
 }
