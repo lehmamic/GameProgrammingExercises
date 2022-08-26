@@ -7,12 +7,14 @@ public class MouseState
 {
     public MouseState(
         Vector2D<float> position,
+        Vector2D<float> relativePosition,
         bool isRelative,
         Vector2D<float> scrollWheel,
         IReadOnlyDictionary<MouseButton, bool> previousButtonStates,
         IReadOnlyDictionary<MouseButton, bool> currentButtonStates)
     {
         Position = position;
+        RelativePosition = relativePosition;
         IsRelative = isRelative;
         ScrollWheel = scrollWheel;
         PreviousButtonStates = previousButtonStates;
@@ -20,6 +22,8 @@ public class MouseState
     }
 
     public Vector2D<float> Position { get; }
+
+    public Vector2D<float> RelativePosition { get; }
 
     public bool IsRelative { get; }
 
