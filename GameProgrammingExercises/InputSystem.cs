@@ -84,6 +84,7 @@ public sealed class InputSystem : IDisposable
 
         var currentMouseState = new MouseState(
             _primaryMouse.Position.ToGeneric(),
+            State.Mouse.IsRelative,
             _primaryMouse.ScrollWheels.First().ToVector2D(),
             previousMouseButtonStates,
             currentMouseButtonStates);
