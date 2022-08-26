@@ -10,6 +10,8 @@ public class MeshComponent : Component
         Owner.Game.Renderer.AddMeshComp(this);
     }
 
+    public bool Visible { get; set; } = true;
+
     public Mesh Mesh { get; set; }
 
     public int TextureIndex { get; set; }
@@ -27,7 +29,7 @@ public class MeshComponent : Component
         shader.SetUniform("uSpecPower", Mesh.SpecularPower);
 
         // Set the active texture
-        var texture = Mesh.Textures[TextureIndex];
+        var texture = Mesh.GetTexture(TextureIndex);
         if (texture is not null)
         {
             texture.SetActive();

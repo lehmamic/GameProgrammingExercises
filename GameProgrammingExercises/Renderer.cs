@@ -110,7 +110,10 @@ public class Renderer : IDisposable
         // Draw all meshes
         foreach (var mesh in _meshComps)
         {
-            mesh.Draw(_meshShader);
+            if (mesh.Visible)
+            {
+                mesh.Draw(_meshShader);
+            }
         }
 
         /*
@@ -130,7 +133,10 @@ public class Renderer : IDisposable
         // Draw all sprites
         foreach (var sprite in _sprites)
         {
-            sprite.Draw(_spriteShader);
+            if (sprite.Visible)
+            {
+                sprite.Draw(_spriteShader);
+            }
         }
 
         // Swap the buffers (No need Silk.Net does it for us)

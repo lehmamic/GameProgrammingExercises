@@ -12,8 +12,10 @@ public class SpriteComponent : Component
 
         Owner.Game.Renderer.AddSprite(this);
     }
-    
+
     public int DrawOrder { get; }
+
+    public bool Visible { get; set; } = true;
 
     public Texture Texture { get; set; }
 

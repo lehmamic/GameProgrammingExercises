@@ -118,6 +118,16 @@ public class Mesh : IDisposable
         var vao = new VertexArrayObject(game.Renderer.GL, vertices, indices);
         return new Mesh(radius, raw.SpecularPower, raw.Shader, textures, vao);
     }
+    
+    public Texture? GetTexture(int index)
+    {
+        if (index < Textures.Count)
+        {
+            return Textures[index];
+        }
+
+        return null;
+    }
 
     public void Dispose()
     {

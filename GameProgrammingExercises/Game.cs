@@ -21,7 +21,11 @@ public class Game
 
     // Game specific
     private CameraActor _cameraActor;
+    private FpsActor _fpsActor;
     private AudioActor _audioActor;
+    private SpriteComponent _crosshair;
+    private Actor _startSphere;
+    private Actor _endSphere;
 
     public Renderer Renderer => _renderer;
 
@@ -223,9 +227,6 @@ public class Game
             specularColor: new Vector3D<float>(0.8f, 0.8f, 0.8f)
         );
 
-        // Camera actor
-        _cameraActor = new CameraActor(this);
-
         // UI elements
         a = new Actor(this)
         {
@@ -246,19 +247,51 @@ public class Game
             Texture = _renderer.GetTexture("Assets/Radar.png")
         };
 
-        // Create spheres with audio components playing different sounds
         a = new Actor(this)
         {
-            Position = new Vector3D<float>(500.0f, -75.0f, 0.0f),
-            Scale = 1.0f
+            Scale = 2.0f
         };
-        var mc = new MeshComponent(a);
-        mc.Mesh = _renderer.GetMesh("Assets/Sphere.gpmesh");
-        var ac = new AudioComponent(a);
-        ac.PlayEvent("event:/FireLoop");
+        _crosshair = new SpriteComponent(a);
+        _crosshair.Texture = _renderer.GetTexture("Assets/Crosshair.png");
 
         // Audio actor
         _audioActor = new AudioActor(this);
+
+        // Enable relative mouse mode for camera look
+        _inputSystem.SetRelativeMouseMode(true);
+
+        // Make an initial call to get relative to clear out
+        // SDL_GetRelativeMouseState(nullptr, nullptr);
+
+        // Different camera actors
+        _fpsActor = new FpsActor(this);
+        // mFollowActor = new FollowActor(this);
+        // mOrbitActor = new OrbitActor(this);
+        // mSplineActor = new SplineActor(this);
+        //
+        ChangeCamera('1');
+
+        // Spheres for demonstrating unprojection
+        _startSphere = new Actor(this)
+        {
+            Position = new Vector3D<float>(10000.0f, 0.0f, 0.0f),
+            Scale = 0.25f
+        };
+        _ = new MeshComponent(_startSphere)
+        {
+            Mesh = _renderer.GetMesh("Assets/Sphere.gpmesh")
+        };
+
+        _endSphere = new Actor(this)
+        {
+            Position = new Vector3D<float>(10000.0f, 0.0f, 0.0f),
+            Scale = 0.25f
+        };
+        var mc = new MeshComponent(_endSphere)
+        {
+            Mesh = _renderer.GetMesh("Assets/Sphere.gpmesh"),
+            TextureIndex = 1
+        };
     }
 
     private void UnloadData()
@@ -268,6 +301,42 @@ public class Game
         foreach (var actor in _actors.ToArray())
         {
             actor.Dispose();
+        }
+    }
+    
+    private void ChangeCamera(int mode)
+    {
+        // Disable everything
+        _fpsActor.State = ActorState.Paused;
+        _fpsActor.Visible = false;
+        _crosshair.Visible = false;
+        // mFollowActor->SetState(Actor::EPaused);
+        // mFollowActor->SetVisible(false);
+        // mOrbitActor->SetState(Actor::EPaused);
+        // mOrbitActor->SetVisible(false);
+        // mSplineActor->SetState(Actor::EPaused);
+
+        // Enable the camera specified by the mode
+        switch (mode)
+        {
+            case '1':
+            default:
+                _fpsActor.State = ActorState.Active;
+                _fpsActor.Visible = true;
+                _crosshair.Visible  = true;
+                break;
+            // case '2':
+            //     mFollowActor->SetState(Actor::EActive);
+            //     mFollowActor->SetVisible(true);
+            //     break;
+            // case '3':
+            //     mOrbitActor->SetState(Actor::EActive);
+            //     mOrbitActor->SetVisible(true);
+            //     break;
+            // case '4':
+            //     mSplineActor->SetState(Actor::EActive);
+            //     mSplineActor->RestartSpline();
+            //     break;
         }
     }
 }
