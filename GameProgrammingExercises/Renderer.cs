@@ -196,6 +196,34 @@ public class Renderer : IDisposable
 
         return _meshes[fileName];
     }
+    
+    public Vector3D<float> Unproject(Vector3D<float> screenPoint)
+    {
+        // Convert screenPoint to device coordinates (between -1 and +1)
+        Vector3D<float> deviceCoord = screenPoint;
+        deviceCoord.X /= (ScreenWidth) * 0.5f;
+        deviceCoord.Y /= (ScreenHeight) * 0.5f;
+
+        // Transform vector by unprojection matrix
+        Matrix4X4<float> unprojection = ViewMatrix * ProjectionMatrix;
+        Matrix4X4.Invert(unprojection, out unprojection);
+        return GameMath.TransformWithPerspDiv(deviceCoord, unprojection);
+    }
+
+    public void GetScreenDirection(out Vector3D<float> outStart, out Vector3D<float> outDir)
+    {
+        // Get start point (in center of screen on near plane)
+        Vector3D<float> screenPoint = new Vector3D<float>(0.0f, 0.0f, 0.0f);
+        outStart = Unproject(screenPoint);
+
+        // Get end point (in center of screen, between near and far)
+        screenPoint.Z = 0.9f;
+        Vector3D<float> end = Unproject(screenPoint);
+
+        // Get direction vector
+        outDir = end - outStart;
+        outDir = Vector3D.Normalize(outDir);
+    }
 
     public void Dispose()
     {

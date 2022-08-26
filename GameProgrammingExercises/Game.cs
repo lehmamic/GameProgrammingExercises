@@ -20,20 +20,18 @@ public class Game
     private bool _updatingActors;
 
     // Game specific
-    private CameraActor _cameraActor;
     private FpsActor _fpsActor;
-    private AudioActor _audioActor;
+    private FollowActor _followActor;
     private SpriteComponent _crosshair;
     private Actor _startSphere;
     private Actor _endSphere;
+    private SoundEvent _musicEvent;
 
     public Renderer Renderer => _renderer;
 
     public AudioSystem AudioSystem => _audioSystem;
 
     public IWindow Window => _renderer.Window;
-
-    public CameraActor Camera => _cameraActor;
 
     public IWindow Initialize()
     {
@@ -108,6 +106,8 @@ public class Game
         {
             _renderer.Window.Close();
         }
+
+        HandleKeyPress(state);
     
         // Process input for all actors
         _updatingActors = true;
@@ -116,6 +116,60 @@ public class Game
             actor.ProcessInput(state);
         }
         _updatingActors = false;
+    }
+    
+    private void HandleKeyPress(InputState state)
+    {
+        if (state.Keyboard.GetKeyState(Key.Minus) == ButtonState.Pressed)
+        {
+            // Reduce master volume
+            float volume = _audioSystem.GetBusVolume("bus:/");
+            volume = Scalar.Max(0.0f, volume - 0.1f);
+            _audioSystem.SetBusVolume("bus:/", volume);
+        }
+
+        if (state.Keyboard.GetKeyState(Key.Equal) == ButtonState.Pressed)
+        {
+            // Increase master volume
+            float volume = _audioSystem.GetBusVolume("bus:/");
+            volume = Scalar.Min(1.0f, volume + 0.1f);
+            _audioSystem.SetBusVolume("bus:/", volume);
+        }
+
+        if (state.Keyboard.GetKeyState(Key.Number1) == ButtonState.Pressed)
+        {
+            ChangeCamera(1);
+        }
+        
+        if (state.Keyboard.GetKeyState(Key.Number2) == ButtonState.Pressed)
+        {
+            ChangeCamera(2);
+        }
+        
+        if (state.Keyboard.GetKeyState(Key.Number3) == ButtonState.Pressed)
+        {
+            ChangeCamera(3);
+        }
+        
+        if (state.Keyboard.GetKeyState(Key.Number4) == ButtonState.Pressed)
+        {
+            ChangeCamera(4);
+        }
+
+        if (state.Mouse.GetButtonState(MouseButton.Left) == ButtonState.Pressed)
+        {
+            // Get start point (in center of screen on near plane)
+            Vector3D<float> screenPoint = new Vector3D<float>(0.0f, 0.0f, 0.0f);
+            Vector3D<float> start = _renderer.Unproject(screenPoint);
+
+            // Get end point (in center of screen, between near and far)
+            screenPoint.Z = 0.9f;
+            Vector3D<float> end = _renderer.Unproject(screenPoint);
+
+            // Set spheres to points
+            _startSphere.Position = start;
+            _endSphere.Position = end;
+        }
     }
 
     private void UpdateGame(float deltaTime)
@@ -254,8 +308,8 @@ public class Game
         _crosshair = new SpriteComponent(a);
         _crosshair.Texture = _renderer.GetTexture("Assets/Crosshair.png");
 
-        // Audio actor
-        _audioActor = new AudioActor(this);
+        // Start music
+        _musicEvent = _audioSystem.PlayEvent("event:/Music");
 
         // Enable relative mouse mode for camera look
         _inputSystem.SetRelativeMouseMode(true);
@@ -265,7 +319,7 @@ public class Game
 
         // Different camera actors
         _fpsActor = new FpsActor(this);
-        // mFollowActor = new FollowActor(this);
+        _followActor = new FollowActor(this);
         // mOrbitActor = new OrbitActor(this);
         // mSplineActor = new SplineActor(this);
         //
@@ -310,8 +364,8 @@ public class Game
         _fpsActor.State = ActorState.Paused;
         _fpsActor.Visible = false;
         _crosshair.Visible = false;
-        // mFollowActor->SetState(Actor::EPaused);
-        // mFollowActor->SetVisible(false);
+        _followActor.State = ActorState.Paused;
+        _followActor.Visible = false;
         // mOrbitActor->SetState(Actor::EPaused);
         // mOrbitActor->SetVisible(false);
         // mSplineActor->SetState(Actor::EPaused);
@@ -319,21 +373,21 @@ public class Game
         // Enable the camera specified by the mode
         switch (mode)
         {
-            case '1':
+            case 1:
             default:
                 _fpsActor.State = ActorState.Active;
                 _fpsActor.Visible = true;
                 _crosshair.Visible  = true;
                 break;
-            // case '2':
-            //     mFollowActor->SetState(Actor::EActive);
-            //     mFollowActor->SetVisible(true);
-            //     break;
-            // case '3':
+            case 2:
+                _followActor.State = ActorState.Active;
+                _followActor.Visible = true;
+                break;
+            // case 3:
             //     mOrbitActor->SetState(Actor::EActive);
             //     mOrbitActor->SetVisible(true);
             //     break;
-            // case '4':
+            // case 4:
             //     mSplineActor->SetState(Actor::EActive);
             //     mSplineActor->RestartSpline();
             //     break;

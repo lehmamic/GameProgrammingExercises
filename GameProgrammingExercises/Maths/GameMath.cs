@@ -87,4 +87,24 @@ public static class GameMath
             M43 = -nearPlaneDistance * farPlaneDistance / (farPlaneDistance - nearPlaneDistance),
         };
     }
+    
+    // This will transform the vector and renormalize the w component
+    public static Vector3D<float> TransformWithPerspDiv(Vector3D<float> vec, Matrix4X4<float> mat, float w = 1.0f)
+    {
+        Vector3D<float> retVal;
+        retVal.X = vec.X * mat[0][0] + vec.Y * mat[1][0] +
+                   vec.Z * mat[2][0] + w * mat[3][0];
+        retVal.Y = vec.X * mat[0][1] + vec.Y * mat[1][1] +
+                   vec.Z * mat[2][1] + w * mat[3][1];
+        retVal.Z = vec.X * mat[0][2] + vec.Y * mat[1][2] +
+                   vec.Z * mat[2][2] + w * mat[3][2];
+        float transformedW = vec.X * mat[0][3] + vec.Y * mat[1][3] +
+                             vec.Z * mat[2][3] + w * mat[3][3];
+        if (!Scalar.Abs(transformedW).NearZero())
+        {
+            transformedW = 1.0f / transformedW;
+            retVal *= transformedW;
+        }
+        return retVal;
+    }
 }
