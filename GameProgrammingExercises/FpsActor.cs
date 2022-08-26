@@ -112,8 +112,8 @@ public class FpsActor : Actor
         // Mouse movement
     
         // Get relative movement from SDL
-        var x = state.Mouse.Position.X;
-        var y = state.Mouse.Position.Y;
+        var x = state.Mouse.RelativePosition.X;
+        var y = state.Mouse.RelativePosition.Y;
 
         // Assume mouse movement is usually between -500 and +500
         int maxMouseSpeed = 500;

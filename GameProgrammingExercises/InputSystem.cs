@@ -54,7 +54,7 @@ public sealed class InputSystem : IDisposable
 
     public void SetRelativeMouseMode(bool value)
     {
-        _primaryMouse.Cursor.CursorMode = CursorMode.Disabled;
+        _primaryMouse.Cursor.CursorMode = CursorMode.Raw;
 
         var mouseState = new MouseState(
             State.Mouse.Position,
