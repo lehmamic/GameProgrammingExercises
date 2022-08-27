@@ -22,6 +22,7 @@ public class Game
     // Game specific
     private FpsActor _fpsActor;
     private FollowActor _followActor;
+    private OrbitActor _orbitActor;
     private SpriteComponent _crosshair;
     private Actor _startSphere;
     private Actor _endSphere;
@@ -320,7 +321,7 @@ public class Game
         // Different camera actors
         _fpsActor = new FpsActor(this);
         _followActor = new FollowActor(this);
-        // mOrbitActor = new OrbitActor(this);
+        _orbitActor = new OrbitActor(this);
         // mSplineActor = new SplineActor(this);
         //
         ChangeCamera('1');
@@ -366,8 +367,8 @@ public class Game
         _crosshair.Visible = false;
         _followActor.State = ActorState.Paused;
         _followActor.Visible = false;
-        // mOrbitActor->SetState(Actor::EPaused);
-        // mOrbitActor->SetVisible(false);
+        _orbitActor.State = ActorState.Paused;
+        _orbitActor.Visible = false;
         // mSplineActor->SetState(Actor::EPaused);
 
         // Enable the camera specified by the mode
@@ -383,10 +384,10 @@ public class Game
                 _followActor.State = ActorState.Active;
                 _followActor.Visible = true;
                 break;
-            // case 3:
-            //     mOrbitActor->SetState(Actor::EActive);
-            //     mOrbitActor->SetVisible(true);
-            //     break;
+            case 3:
+                _orbitActor.State = ActorState.Active;
+                _orbitActor.Visible = true;
+                break;
             // case 4:
             //     mSplineActor->SetState(Actor::EActive);
             //     mSplineActor->RestartSpline();
