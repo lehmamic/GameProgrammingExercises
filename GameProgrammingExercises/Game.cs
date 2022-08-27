@@ -23,6 +23,7 @@ public class Game
     private FpsActor _fpsActor;
     private FollowActor _followActor;
     private OrbitActor _orbitActor;
+    private SplineActor _splineActor;
     private SpriteComponent _crosshair;
     private Actor _startSphere;
     private Actor _endSphere;
@@ -260,7 +261,7 @@ public class Game
             a.Position = new Vector3D<float>(start + i * size, -start + size, 0.0f);
             a.Rotation = q;
         }
-        
+
         q = Quaternion<float>.Concatenate(q, GameMath.CreateQuaternion(Vector3D<float>.UnitZ, Scalar<float>.PiOver2));
         // Forward/back walls
         for (int i = 0; i < 10; i++)
@@ -322,8 +323,8 @@ public class Game
         _fpsActor = new FpsActor(this);
         _followActor = new FollowActor(this);
         _orbitActor = new OrbitActor(this);
-        // mSplineActor = new SplineActor(this);
-        //
+        _splineActor = new SplineActor(this);
+
         ChangeCamera('1');
 
         // Spheres for demonstrating unprojection
@@ -369,7 +370,7 @@ public class Game
         _followActor.Visible = false;
         _orbitActor.State = ActorState.Paused;
         _orbitActor.Visible = false;
-        // mSplineActor->SetState(Actor::EPaused);
+        _splineActor.State = ActorState.Paused;
 
         // Enable the camera specified by the mode
         switch (mode)
@@ -388,10 +389,10 @@ public class Game
                 _orbitActor.State = ActorState.Active;
                 _orbitActor.Visible = true;
                 break;
-            // case 4:
-            //     mSplineActor->SetState(Actor::EActive);
-            //     mSplineActor->RestartSpline();
-            //     break;
+            case 4:
+                _splineActor.State = ActorState.Active;
+                _splineActor.RestartSpline();
+                break;
         }
     }
 }
