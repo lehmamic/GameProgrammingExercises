@@ -39,7 +39,7 @@ public class Game
     {
         // Create the renderer
         _renderer = new Renderer(this);
-        var window = _renderer.Initialize(1024.0f, 768.0f, "Game Programming in C++ (Chapter 9)"); 
+        var window = _renderer.Initialize(1024.0f, 768.0f, "Game Programming in C++ (Chapter 10)"); 
 
         // Create the audio system
         _audioSystem = new AudioSystem(this);
