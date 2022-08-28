@@ -79,16 +79,18 @@ public class PhysWorld
     public void TestSweepAndPrune(Action<Actor, Actor> f)
     {
         // Sort by min.x
-        _boxes.Sort((a, b) => a.WorldBox.Min.X < b.WorldBox.Min.X ? -1 : 1);
+        var boxes = _boxes
+            .OrderBy(b => b.WorldBox.Min.X)
+            .ToList();
 
-        for (int i = 0; i < _boxes.Count; i++)
+        for (int i = 0; i < boxes.Count; i++)
         {
             // Get max.x for current box
-            BoxComponent a = _boxes[i];
+            BoxComponent a = boxes[i];
             float max = a.WorldBox.Max.X;
-            for (int j = i + 1; j < _boxes.Count; j++)
+            for (int j = i + 1; j < boxes.Count; j++)
             {
-                BoxComponent b = _boxes[j];
+                BoxComponent b = boxes[j];
                 // If AABB[j] min is past the max bounds of AABB[i],
                 // then there aren't any other possible intersections
                 // against AABB[i]

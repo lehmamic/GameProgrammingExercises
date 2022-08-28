@@ -1,5 +1,3 @@
-using FMOD.Studio;
-
 namespace GameProgrammingExercises;
 
 public class PlaneActor : Actor

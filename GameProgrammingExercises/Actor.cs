@@ -222,7 +222,9 @@ public class Actor : IDisposable
             // Because ~Component calls RemoveComponent, need a different style loop
             while (_components.Any())
             {
-                _components.Last().Dispose();
+                var component = _components.Last();
+                component.Dispose();
+                _components.Remove(component);
             }
         }
     }

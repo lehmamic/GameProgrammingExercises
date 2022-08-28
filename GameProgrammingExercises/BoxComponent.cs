@@ -21,7 +21,7 @@ public class BoxComponent : Component
 
     public AABB WorldBox => _worldBox;
 
-    public bool ShouldRotate { get; set; }
+    public bool ShouldRotate { get; set; } = true;
 
     public override void OnUpdateWorldTransform()
     {

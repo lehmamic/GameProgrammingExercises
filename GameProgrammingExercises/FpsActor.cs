@@ -1,4 +1,3 @@
-using System.Numerics;
 using GameProgrammingExercises.Maths;
 using GameProgrammingExercises.Maths.Geometry;
 using Silk.NET.Input;
@@ -37,7 +36,7 @@ public class FpsActor : Actor
         {
             Mesh = Game.Renderer.GetMesh("Assets/Rifle.gpmesh")
         };
-        
+
         // Add a box component
         AABB myBox = new (new Vector3D<float>(-25.0f, -25.0f, -87.5f), new Vector3D<float>(25.0f, 25.0f, 87.5f));
         _boxComp = new BoxComponent(this)

@@ -152,7 +152,7 @@ public static class Collision
         TestSidePlane(l.Start.Z, l.End.Z, b.Max.Z, Vector3D<float>.UnitZ, values);
         
         // Sort the t values in ascending order
-        values.Sort((a, b) => a.T < b.T ? -1 : 1);
+        values = values.OrderBy(v => v.T).ToList();
 
         // Test if the box contains any of these points of intersection
         Vector3D<float> point;
@@ -167,7 +167,7 @@ public static class Collision
             }
         }
 
-        //None of the intersections are within bounds of box
+        // None of the intersections are within bounds of box
         outT = 0.0f;
         outNorm = Vector3D<float>.Zero;
         return false;
