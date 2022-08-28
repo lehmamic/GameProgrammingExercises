@@ -16,24 +16,27 @@ public class Game
     private Renderer _renderer;
     private AudioSystem _audioSystem;
     private InputSystem _inputSystem;
+    private PhysWorld _physWorld;
 
     private bool _updatingActors;
 
     // Game specific
     private FpsActor _fpsActor;
-    private FollowActor _followActor;
-    private OrbitActor _orbitActor;
-    private SplineActor _splineActor;
     private SpriteComponent _crosshair;
     private Actor _startSphere;
     private Actor _endSphere;
     private SoundEvent _musicEvent;
+    private readonly List<PlaneActor> _planes = new();
+
+    public IWindow Window => _renderer.Window;
 
     public Renderer Renderer => _renderer;
 
     public AudioSystem AudioSystem => _audioSystem;
 
-    public IWindow Window => _renderer.Window;
+    public PhysWorld PhysWorld => _physWorld;
+
+    public IReadOnlyList<PlaneActor> Planes => _planes;
 
     public IWindow Initialize()
     {
@@ -44,6 +47,9 @@ public class Game
         // Create the audio system
         _audioSystem = new AudioSystem(this);
         _audioSystem.Initialize();
+        
+        // Create the physics world
+        _physWorld = new PhysWorld(this);
 
         window.Load += () =>
         {
@@ -99,6 +105,16 @@ public class Game
         _actors.Remove(actor);
     }
 
+    public void AddPlane(PlaneActor plane)
+    {
+        _planes.Add(plane);
+    }
+
+    public void RemovePlane(PlaneActor plane)
+    {
+        _planes.Remove(plane);
+    }
+
     private void ProcessInput()
     {
         _inputSystem.Update();
@@ -138,39 +154,9 @@ public class Game
             _audioSystem.SetBusVolume("bus:/", volume);
         }
 
-        if (state.Keyboard.GetKeyState(Key.Number1) == ButtonState.Pressed)
-        {
-            ChangeCamera(1);
-        }
-        
-        if (state.Keyboard.GetKeyState(Key.Number2) == ButtonState.Pressed)
-        {
-            ChangeCamera(2);
-        }
-        
-        if (state.Keyboard.GetKeyState(Key.Number3) == ButtonState.Pressed)
-        {
-            ChangeCamera(3);
-        }
-        
-        if (state.Keyboard.GetKeyState(Key.Number4) == ButtonState.Pressed)
-        {
-            ChangeCamera(4);
-        }
-
         if (state.Mouse.GetButtonState(MouseButton.Left) == ButtonState.Pressed)
         {
-            // Get start point (in center of screen on near plane)
-            Vector3D<float> screenPoint = new Vector3D<float>(0.0f, 0.0f, 0.0f);
-            Vector3D<float> start = _renderer.Unproject(screenPoint);
-
-            // Get end point (in center of screen, between near and far)
-            screenPoint.Z = 0.9f;
-            Vector3D<float> end = _renderer.Unproject(screenPoint);
-
-            // Set spheres to points
-            _startSphere.Position = start;
-            _endSphere.Position = end;
+            _fpsActor.Shoot();
         }
     }
 
@@ -212,29 +198,9 @@ public class Game
     private void LoadData()
     {
         // Create actors
-        var a = new Actor(this)
-        {
-            Position = new Vector3D<float>(200.0f, 75.0f, 0.0f),
-            Scale = 100.0f
-        };
-        var q = GameMath.CreateQuaternion(Vector3D<float>.UnitY, -1 * Scalar<float>.PiOver2);
-        q = Quaternion<float>.Concatenate(q, GameMath.CreateQuaternion(Vector3D<float>.UnitZ, (float)(Math.PI + Math.PI / 4.0f)));
-        a.Rotation = q;
-        _ = new MeshComponent(a)
-        {
-            Mesh = _renderer.GetMesh("Assets/Cube.gpmesh")
-        };
+        Actor a;
+        Quaternion<float> q;
 
-        a = new Actor(this)
-        {
-            Position = new Vector3D<float>(200.0f, -75.0f, 0.0f),
-            Scale = 3.0f
-        };
-        _ = new MeshComponent(a)
-        {
-            Mesh = _renderer.GetMesh("Assets/Sphere.gpmesh")
-        };
-        
         // Setup floor
         var start = -1250.0f;
         var size = 250.0f;
@@ -321,33 +287,16 @@ public class Game
 
         // Different camera actors
         _fpsActor = new FpsActor(this);
-        _followActor = new FollowActor(this);
-        _orbitActor = new OrbitActor(this);
-        _splineActor = new SplineActor(this);
 
-        ChangeCamera('1');
-
-        // Spheres for demonstrating unprojection
-        _startSphere = new Actor(this)
-        {
-            Position = new Vector3D<float>(10000.0f, 0.0f, 0.0f),
-            Scale = 0.25f
-        };
-        _ = new MeshComponent(_startSphere)
-        {
-            Mesh = _renderer.GetMesh("Assets/Sphere.gpmesh")
-        };
-
-        _endSphere = new Actor(this)
-        {
-            Position = new Vector3D<float>(10000.0f, 0.0f, 0.0f),
-            Scale = 0.25f
-        };
-        var mc = new MeshComponent(_endSphere)
-        {
-            Mesh = _renderer.GetMesh("Assets/Sphere.gpmesh"),
-            TextureIndex = 1
-        };
+        // Create target actors
+        a = new TargetActor(this);
+        a.Position = new Vector3D<float>(1450.0f, 0.0f, 100.0f);
+        a = new TargetActor(this);
+        a.Position = new Vector3D<float>(1450.0f, 0.0f, 400.0f);
+        a = new TargetActor(this);
+        a.Position = new Vector3D<float>(1450.0f, -500.0f, 200.0f);
+        a = new TargetActor(this);
+        a.Position = new Vector3D<float>(1450.0f, 500.0f, 200.0f);
     }
 
     private void UnloadData()
@@ -357,42 +306,6 @@ public class Game
         foreach (var actor in _actors.ToArray())
         {
             actor.Dispose();
-        }
-    }
-    
-    private void ChangeCamera(int mode)
-    {
-        // Disable everything
-        _fpsActor.State = ActorState.Paused;
-        _fpsActor.Visible = false;
-        _crosshair.Visible = false;
-        _followActor.State = ActorState.Paused;
-        _followActor.Visible = false;
-        _orbitActor.State = ActorState.Paused;
-        _orbitActor.Visible = false;
-        _splineActor.State = ActorState.Paused;
-
-        // Enable the camera specified by the mode
-        switch (mode)
-        {
-            case 1:
-            default:
-                _fpsActor.State = ActorState.Active;
-                _fpsActor.Visible = true;
-                _crosshair.Visible  = true;
-                break;
-            case 2:
-                _followActor.State = ActorState.Active;
-                _followActor.Visible = true;
-                break;
-            case 3:
-                _orbitActor.State = ActorState.Active;
-                _orbitActor.Visible = true;
-                break;
-            case 4:
-                _splineActor.State = ActorState.Active;
-                _splineActor.RestartSpline();
-                break;
         }
     }
 }

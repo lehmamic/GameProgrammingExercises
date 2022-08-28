@@ -1,16 +1,18 @@
 using System.Text.Json;
+using GameProgrammingExercises.Maths.Geometry;
 using Silk.NET.Maths;
 
 namespace GameProgrammingExercises;
 
 public class Mesh : IDisposable
 {
-    public Mesh(float radius, float specularPower, string shaderName, IReadOnlyList<Texture> textures, VertexArrayObject vertexArray)
+    public Mesh(float radius, float specularPower, string shaderName, IReadOnlyList<Texture> textures, AABB box, VertexArrayObject vertexArray)
     {
         Radius = radius;
         SpecularPower = specularPower;
         ShaderName = shaderName;
         Textures = textures;
+        Box = box;
         VertexArray = vertexArray;
     }
 
@@ -21,6 +23,8 @@ public class Mesh : IDisposable
     public string ShaderName { get; }
 
     public IReadOnlyList<Texture> Textures { get; }
+
+    public AABB Box { get; }
 
     public VertexArrayObject VertexArray { get; }
 
@@ -70,6 +74,9 @@ public class Mesh : IDisposable
         }
 
         float radius = 0.0f;
+        AABB box = new(
+            new Vector3D<float>(Scalar<float>.PositiveInfinity, Scalar<float>.PositiveInfinity, Scalar<float>.PositiveInfinity),
+            new Vector3D<float>(Scalar<float>.NegativeInfinity, Scalar<float>.NegativeInfinity, Scalar<float>.NegativeInfinity)); 
         var vertices = new float[raw.Vertices.Length * vertSize];
         for (int i = 0; i < raw.Vertices.Length; i++)
         {
@@ -81,6 +88,7 @@ public class Mesh : IDisposable
         
             var position = new Vector3D<float>(vertex[0], vertex[1], vertex[2]);
             radius = Scalar.Max(radius, position.LengthSquared);
+            box.UpdateMinMax(position);
 
             // Add the floats
             var offset = i * vertSize;
@@ -116,7 +124,7 @@ public class Mesh : IDisposable
         }
 
         var vao = new VertexArrayObject(game.Renderer.GL, vertices, indices);
-        return new Mesh(radius, raw.SpecularPower, raw.Shader, textures, vao);
+        return new Mesh(radius, raw.SpecularPower, raw.Shader, textures, box, vao);
     }
     
     public Texture? GetTexture(int index)

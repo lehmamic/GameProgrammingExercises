@@ -1,4 +1,4 @@
-using Silk.NET.Input;
+using GameProgrammingExercises.Maths;
 using Silk.NET.Maths;
 
 namespace GameProgrammingExercises;
@@ -108,36 +108,31 @@ public class Actor : IDisposable
             ActorInput(state);
         }
     }
-
-    /// <summary>
-    /// Updates all the components attached.
-    /// </summary>
-    /// <param name="deltaTime">The delta time between two frames.</param>
-    protected void UpdateComponents(float deltaTime)
+    
+    public void RotateToNewForward(Vector3D<float> forward)
     {
-        foreach (var component in _components)
+        // Figure out difference between original (unit x) and new
+        float dot = Vector3D.Dot(Vector3D<float>.UnitX, forward);
+        float angle = Scalar.Acos(dot);
+        // Facing down X
+        if (dot > 0.9999f)
         {
-            component.Update(deltaTime);
+            Rotation = Quaternion<float>.Identity;
+        }
+        // Facing down -X
+        else if (dot < -0.9999f)
+        {
+            Rotation = GameMath.CreateQuaternion(Vector3D<float>.UnitZ, Scalar<float>.Pi);
+        }
+        else
+        {
+            // Rotate about axis from cross product
+            Vector3D<float> axis = Vector3D.Cross(Vector3D<float>.UnitX, forward);
+            axis = Vector3D.Normalize(axis);
+            Rotation = GameMath.CreateQuaternion(axis, angle);
         }
     }
 
-
-    /// <summary>
-    /// Any actor-specific update code (overridable).
-    /// </summary>
-    /// <param name="deltaTime">The delta time between two frames.</param>
-    protected virtual void UpdateActor(float deltaTime)
-    {
-    }
-
-    /// <summary>
-    /// Any actor-specific input code (overridable).
-    /// </summary>
-    /// <param name="state"></param>
-    protected virtual void ActorInput(InputState state)
-    {
-    }
-    
     public void ComputeWorldTransform()
     {
         if (_recomputeWorldTransform)
@@ -186,6 +181,35 @@ public class Actor : IDisposable
     {
         Dispose(true);
         GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// Updates all the components attached.
+    /// </summary>
+    /// <param name="deltaTime">The delta time between two frames.</param>
+    protected void UpdateComponents(float deltaTime)
+    {
+        foreach (var component in _components)
+        {
+            component.Update(deltaTime);
+        }
+    }
+
+
+    /// <summary>
+    /// Any actor-specific update code (overridable).
+    /// </summary>
+    /// <param name="deltaTime">The delta time between two frames.</param>
+    protected virtual void UpdateActor(float deltaTime)
+    {
+    }
+
+    /// <summary>
+    /// Any actor-specific input code (overridable).
+    /// </summary>
+    /// <param name="state"></param>
+    protected virtual void ActorInput(InputState state)
+    {
     }
 
     protected virtual void Dispose(bool disposing)
