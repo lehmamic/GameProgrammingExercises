@@ -1,3 +1,4 @@
+using System.Text.Json;
 using GameProgrammingExercises.Maths;
 using Silk.NET.Input;
 using Silk.NET.Maths;
@@ -9,6 +10,11 @@ public class Game
 {
     // All the actors in the game
     private readonly List<Actor> _actors = new();
+    private readonly List<UIScreen> _uiStack = new();
+    private readonly Dictionary<string, Font> _fonts = new();
+
+    // Map for text localization
+    private readonly Dictionary<string, string> _text = new();
 
     // Any pending actors
     private readonly List<Actor> _pendingActors = new();
@@ -17,8 +23,10 @@ public class Game
     private AudioSystem _audioSystem;
     private InputSystem _inputSystem;
     private PhysWorld _physWorld;
+    private HUD _hud;
 
     private bool _updatingActors;
+
 
     // Game specific
     private FpsActor _fpsActor;
@@ -36,13 +44,17 @@ public class Game
 
     public PhysWorld PhysWorld => _physWorld;
 
+    public HUD HUD => _hud;
+
     public IReadOnlyList<PlaneActor> Planes => _planes;
+
+    public IReadOnlyList<UIScreen> UIStack => _uiStack;
 
     public IWindow Initialize()
     {
         // Create the renderer
         _renderer = new Renderer(this);
-        var window = _renderer.Initialize(1024.0f, 768.0f, "Game Programming in C++ (Chapter 10)"); 
+        var window = _renderer.Initialize(1024.0f, 768.0f, "Game Programming in C++ (Chapter 11)"); 
 
         // Create the audio system
         _audioSystem = new AudioSystem(this);
@@ -113,6 +125,38 @@ public class Game
     public void RemovePlane(PlaneActor plane)
     {
         _planes.Remove(plane);
+    }
+
+    public void PushUI(UIScreen screen)
+    {
+        _uiStack.Add(screen);
+    }
+
+    public Font GetFont(string fileName)
+    {
+        if (!_fonts.ContainsKey(fileName))
+        {
+            var font = Font.Load(fileName, this);
+            _fonts.Add(fileName, font);
+        }
+
+        return _fonts[fileName];
+    }
+
+    public void LoadText(string fileName)
+    {
+        // Clear the existing map, if already loaded
+        _text.Clear();
+
+        // Read the entire file to a string stream
+        var content = File.ReadAllText(fileName);
+
+        // Parse the text map
+        var resources = JsonSerializer.Deserialize<TranslationResource>(content)!;
+        foreach (var pair in resources.TextMap)
+        {
+            _text.Add(pair.Key, pair.Value);
+        }
     }
 
     private void ProcessInput()
@@ -188,6 +232,23 @@ public class Game
 
         // Update audio system
         _audioSystem.Update(deltaTime);
+
+        // Update UI screens
+        foreach (var ui in _uiStack)
+        {
+            if (ui.State == UIScreenState.Active)
+            {
+                ui.Update(deltaTime);
+            }
+        }
+
+        // Delete any UIScreens that are closed
+        var closingScreens = _uiStack.Where(a => a.State == UIScreenState.Closing).ToArray();
+        foreach (var ui in closingScreens)
+        {
+            _uiStack.Remove(ui);
+            ui.Dispose();
+        }
     }
 
     private void GenerateOutput()
@@ -197,6 +258,9 @@ public class Game
 
     private void LoadData()
     {
+        // Load English text
+        LoadText("Assets/English.gptext");
+
         // Create actors
         Actor a;
         Quaternion<float> q;
@@ -250,31 +314,7 @@ public class Game
         );
 
         // UI elements
-        a = new Actor(this)
-        {
-            Position = new Vector3D<float>(-350.0f, -350.0f, 0.0f)
-        };
-        _ = new SpriteComponent(a)
-        {
-            Texture = _renderer.GetTexture("Assets/HealthBar.png")
-        };
-        
-        a = new Actor(this)
-        {
-            Position = new Vector3D<float>(375.0f, -275.0f, 0.0f),
-            Scale = 0.75f
-        };
-        _ = new SpriteComponent(a)
-        {
-            Texture = _renderer.GetTexture("Assets/Radar.png")
-        };
-
-        a = new Actor(this)
-        {
-            Scale = 2.0f
-        };
-        _crosshair = new SpriteComponent(a);
-        _crosshair.Texture = _renderer.GetTexture("Assets/Crosshair.png");
+        _hud = new HUD(this);
 
         // Start music
         _musicEvent = _audioSystem.PlayEvent("event:/Music");
@@ -297,6 +337,13 @@ public class Game
         a.Position = new Vector3D<float>(1450.0f, -500.0f, 200.0f);
         a = new TargetActor(this);
         a.Position = new Vector3D<float>(1450.0f, 500.0f, 200.0f);
+
+        a = new TargetActor(this);
+        a.Position = new Vector3D<float>(0.0f, -1450.0f, 200.0f);
+        a.Rotation = GameMath.CreateQuaternion(Vector3D<float>.UnitZ, Scalar<float>.PiOver2);
+        a = new TargetActor(this);
+        a.Position = new Vector3D<float>(0.0f, 1450.0f, 200.0f);
+        a.Rotation = GameMath.CreateQuaternion(Vector3D<float>.UnitZ, -Scalar<float>.PiOver2);
     }
 
     private void UnloadData()
