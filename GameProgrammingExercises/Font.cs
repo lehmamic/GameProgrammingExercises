@@ -3,6 +3,8 @@ using FreeTypeSharp;
 using FreeTypeSharp.Native;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
+using SixLabors.Fonts;
+using SixLabors.Fonts.Unicode;
 using static FreeTypeSharp.Native.FT;
 
 namespace GameProgrammingExercises;
@@ -11,7 +13,6 @@ public class Font
 {
     private Font(IReadOnlyDictionary<char,Character> characters)
     {
-        throw new NotImplementedException();
     }
     // private readonly Game _game;
     //
@@ -39,6 +40,10 @@ public class Font
             throw new FreeTypeException(result);
         }
 
+        FontCollection collection = new();
+        FontFamily family = collection.Add(fileName);
+        var font = family.CreateFont(48, FontStyle.Regular);
+
         // disable byte-alignment restriction
         game.Renderer.GL.PixelStore(PixelStoreParameter.UnpackAlignment, 1);
 
@@ -51,16 +56,17 @@ public class Font
                 throw new FreeTypeException(result);
             }
 
+            var glyph = font.GetGlyphs(new CodePoint(c), ColorFontSupport.None).First();
+
             var texture = new Texture(game.Renderer.GL, face);
             var character = new Character(
                 (char) c,
                 texture,
                 new Vector2D<float>(face.GlyphBitmap.width, face.GlyphBitmap.rows),
                 new Vector2D<float>(face.FaceRec->glyph->bitmap_left, face.FaceRec->glyph->bitmap_top),
-                Marshal.ReadInt32(face.FaceRec->glyph->advance.x));
+                face.FaceRec->glyph->metrics.horiAdvance.ToInt32()); //->advance.x));
             characters.Add(character.Char, character);
         }
-
         return new Font(characters);
     }
 }

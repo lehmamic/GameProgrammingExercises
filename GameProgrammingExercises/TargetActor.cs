@@ -17,5 +17,7 @@ public class TargetActor : Actor
         // Add collision box
         var bc = new BoxComponent(this);
         bc.ObjectBox = mesh.Box;
+
+        _ = new TargetComponent(this);
     }
 }

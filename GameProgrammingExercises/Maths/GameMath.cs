@@ -107,4 +107,13 @@ public static class GameMath
         }
         return retVal;
     }
+
+    public static Vector2D<float> Transform(Vector2D<float> vec, Matrix3X3<float> mat, float w = 1.0f)
+    {
+        Vector2D<float> retVal;
+        retVal.X = vec.X * mat[0][0] + vec.Y * mat[1][0] + w * mat[2][0];
+        retVal.Y = vec.X * mat[0][1] + vec.Y * mat[1][1] + w * mat[2][1];
+        //ignore w since we aren't returning a new value for it...
+        return retVal;
+    }
 }

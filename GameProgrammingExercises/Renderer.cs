@@ -138,6 +138,12 @@ public class Renderer : IDisposable
                 sprite.Draw(_spriteShader);
             }
         }
+        
+        // Draw any UI screens
+        foreach (var ui in _game.UIStack)
+        {
+            ui.Draw(_spriteShader);
+        }
 
         // Swap the buffers (No need Silk.Net does it for us)
         // SDL_GL_SwapWindow(mWindow);

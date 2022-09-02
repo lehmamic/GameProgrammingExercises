@@ -42,7 +42,11 @@ public class Game
 
     public AudioSystem AudioSystem => _audioSystem;
 
+    public InputSystem InputSystem => _inputSystem;
+
     public PhysWorld PhysWorld => _physWorld;
+
+    public FpsActor Player => _fpsActor;
 
     public HUD HUD => _hud;
 
