@@ -35,7 +35,7 @@ public class BoxComponent : Component
         // Rotate (if we want to)
         if (ShouldRotate)
         {
-            WorldBox.Rotate(Owner.Rotation);
+            _worldBox.Rotate(Owner.Rotation);
         }
 
         // Translate
