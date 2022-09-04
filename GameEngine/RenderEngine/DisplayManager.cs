@@ -21,17 +21,11 @@ public class DisplayManager : IDisposable
 
         Window = Silk.NET.Windowing.Window.Create(options);
 
-        // Window.Load += () =>
-        // {
-        //     // Getting the opengl api for drawing to the screen.
-        //     GL = GL.GetApi(Window);
-        //
-        //     // Make sure we can load and compile shaders
-        //     LoadShaders();
-        //
-        //     // Create quad for drawing sprites
-        //     CreateSpriteVertices();
-        // };
+        Window.Load += () =>
+        {
+            // Getting the opengl api for drawing to the screen.
+            GL = GL.GetApi(Window);
+        };
     }
 
 
@@ -40,6 +34,8 @@ public class DisplayManager : IDisposable
     public int Height { get; }
 
     public IWindow Window { get; }
+
+    public GL GL { get; private set; }
 
     public void Close()
     {
