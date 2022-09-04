@@ -202,7 +202,7 @@ public class Renderer : IDisposable
 
         return _meshes[fileName];
     }
-    
+
     public Vector3D<float> Unproject(Vector3D<float> screenPoint)
     {
         // Convert screenPoint to device coordinates (between -1 and +1)

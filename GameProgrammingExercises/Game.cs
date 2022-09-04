@@ -54,6 +54,8 @@ public class Game
 
     public IReadOnlyList<UIScreen> UIStack => _uiStack;
 
+    public GameState State { get; set; } = GameState.GamePlay;
+
     public IWindow Initialize()
     {
         // Create the renderer
@@ -170,18 +172,25 @@ public class Game
     
         if (state.Keyboard.GetKeyState(Key.Escape) == ButtonState.Released)
         {
-            _renderer.Window.Close();
+            State = GameState.Quit;
         }
 
         HandleKeyPress(state);
     
-        // Process input for all actors
-        _updatingActors = true;
-        foreach (var actor in _actors)
+        if (State == GameState.GamePlay)
         {
-            actor.ProcessInput(state);
+            // Process input for all actors
+            _updatingActors = true;
+            foreach (var actor in _actors.Where(a => a.State == ActorState.Active))
+            {
+                actor.ProcessInput(state);
+            }
+            _updatingActors = false;
         }
-        _updatingActors = false;
+        else
+        {
+            _uiStack.LastOrDefault()?.ProcessInput(state);
+        }
     }
     
     private void HandleKeyPress(InputState state)
@@ -210,28 +219,37 @@ public class Game
 
     private void UpdateGame(float deltaTime)
     {
-        // Update all actors
-        _updatingActors = true;
-        foreach (var actor in _actors)
+        // This belongs actually to the game loop, but we cant to it that way because silk.net makes the game loop as a black box...
+        if (State == GameState.Quit)
         {
-            actor.Update(deltaTime);
-        }
-        _updatingActors = false;
-
-        // Move any pending actors to _actors
-        foreach (var pending in _pendingActors)
-        {
-            pending.ComputeWorldTransform();
-            _actors.Add(pending);
+            _renderer.Window.Close();
         }
 
-        _pendingActors.Clear();
-
-        // Delete dead actors (which removes them from _actors)
-        var deadActors = _actors.Where(a => a.State == ActorState.Dead).ToArray();
-        foreach (var actor in deadActors)
+        if (State == GameState.GamePlay)
         {
-            actor.Dispose();
+            // Update all actors
+            _updatingActors = true;
+            foreach (var actor in _actors)
+            {
+                actor.Update(deltaTime);
+            }
+            _updatingActors = false;
+
+            // Move any pending actors to _actors
+            foreach (var pending in _pendingActors)
+            {
+                pending.ComputeWorldTransform();
+                _actors.Add(pending);
+            }
+
+            _pendingActors.Clear();
+
+            // Delete dead actors (which removes them from _actors)
+            var deadActors = _actors.Where(a => a.State == ActorState.Dead).ToArray();
+            foreach (var actor in deadActors)
+            {
+                actor.Dispose();
+            }
         }
 
         // Update audio system
