@@ -1,3 +1,4 @@
+using GameEngine.Models;
 using Silk.NET.OpenGL;
 
 namespace GameEngine.RenderEngine;
@@ -17,12 +18,18 @@ public class Renderer
         _gl.Clear(ClearBufferMask.ColorBufferBit);
     }
 
-    public unsafe void Render(RawModel model)
+    public unsafe void Render(TexturedModel texturedModel)
     {
+        var model = texturedModel.RawModel;
+
         _gl.BindVertexArray(model.VaoId);
         _gl.EnableVertexAttribArray(0);
+        _gl.EnableVertexAttribArray(1);
+        _gl.ActiveTexture(TextureUnit.Texture0);
+        _gl.BindTexture(TextureTarget.Texture2D, texturedModel.Texture.TextureId);
         _gl.DrawElements(PrimitiveType.Triangles, model.VertexCount, DrawElementsType.UnsignedInt, null);
         _gl.DisableVertexAttribArray(0);
+        _gl.DisableVertexAttribArray(1);
         _gl.BindVertexArray(0);
     }
 }

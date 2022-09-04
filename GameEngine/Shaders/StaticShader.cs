@@ -15,5 +15,6 @@ public class StaticShader : ShaderProgram
     protected override void BindAttributes()
     {
         BindAttribute(0, "position");
+        BindAttribute(1, "textureCoords");
     }
 }

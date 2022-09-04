@@ -1,3 +1,5 @@
+using GameEngine.Models;
+using GameEngine.Textures;
 using Silk.NET.OpenGL;
 
 namespace GameEngine.RenderEngine;
@@ -8,22 +10,32 @@ public class Loader : IDisposable
 
     private readonly List<uint> _vaos = new();
     private readonly List<uint> _vbos = new();
+    private readonly List<ModelTexture> _textures = new();
 
     public Loader(GL gl)
     {
         _gl = gl;
     }
 
-    public RawModel LoadToVAO(float[] positions, uint[] indices)
+    public RawModel LoadToVAO(float[] positions, float[] textureCoords, uint[] indices)
     {
         uint vaoId = CreateVAO();
         _vaos.Add(vaoId);
 
         BindIndicesBuffer(indices);
-        StoreDataInAttributeList(0, positions);
+        StoreDataInAttributeList(0, 3, positions);
+        StoreDataInAttributeList(1, 2, textureCoords);
         UnbindVAO();
 
         return new RawModel(vaoId, (uint)indices.Length);
+    }
+
+    public ModelTexture LoadTexture(string fileName)
+    {
+        var texture = new ModelTexture(_gl, fileName);
+        _textures.Add(texture);
+
+        return texture;
     }
     
     public void Dispose()
@@ -37,6 +49,11 @@ public class Loader : IDisposable
         {
             _gl.DeleteBuffer(vbo);
         }
+
+        foreach (var texture in _textures)
+        {
+            texture.Dispose();
+        }
     }
 
     private uint CreateVAO()
@@ -46,7 +63,7 @@ public class Loader : IDisposable
         return vaoId;
     }
 
-    private unsafe void StoreDataInAttributeList(uint attributeNumber, Span<float> vertices)
+    private unsafe void StoreDataInAttributeList(uint attributeNumber, int size, Span<float> vertices)
     {
         var vboId = _gl.GenBuffer();
         _vbos.Add(vboId);
@@ -58,7 +75,7 @@ public class Loader : IDisposable
             _gl.BufferData(BufferTargetARB.ArrayBuffer, (nuint) (vertices.Length * sizeof(float)), d, BufferUsageARB.StaticDraw);
         }
 
-        VertexAttributePointer(attributeNumber, 3, VertexAttribPointerType.Float, 3, 0);
+        VertexAttributePointer(attributeNumber, size, VertexAttribPointerType.Float, (uint)size, 0);
 
         _gl.BindBuffer(BufferTargetARB.ArrayBuffer, 0);
     }
