@@ -14,15 +14,16 @@ public class Loader : IDisposable
         _gl = gl;
     }
 
-    public RawModel LoadToVAO(float[] positions)
+    public RawModel LoadToVAO(float[] positions, uint[] indices)
     {
         uint vaoId = CreateVAO();
         _vaos.Add(vaoId);
 
+        BindIndicesBuffer(indices);
         StoreDataInAttributeList(0, positions);
         UnbindVAO();
 
-        return new RawModel(vaoId, (uint)positions.Length / 3);
+        return new RawModel(vaoId, (uint)indices.Length);
     }
     
     public void Dispose()
@@ -45,16 +46,16 @@ public class Loader : IDisposable
         return vaoId;
     }
 
-    private unsafe void StoreDataInAttributeList(uint attributeNumber, float[] data)
+    private unsafe void StoreDataInAttributeList(uint attributeNumber, Span<float> vertices)
     {
         var vboId = _gl.GenBuffer();
         _vbos.Add(vboId);
 
         _gl.BindBuffer(BufferTargetARB.ArrayBuffer, vboId);
 
-        fixed (void* d = data)
+        fixed (void* d = vertices)
         {
-            _gl.BufferData(BufferTargetARB.ArrayBuffer, (nuint) (data.Length * sizeof(float)), d, BufferUsageARB.StaticDraw);
+            _gl.BufferData(BufferTargetARB.ArrayBuffer, (nuint) (vertices.Length * sizeof(float)), d, BufferUsageARB.StaticDraw);
         }
 
         VertexAttributePointer(attributeNumber, 3, VertexAttribPointerType.Float, 3, 0);
@@ -66,7 +67,19 @@ public class Loader : IDisposable
     {
         _gl.BindVertexArray(0);
     }
-    
+
+    private unsafe void BindIndicesBuffer(Span<uint> indices)
+    {
+        var vboId = _gl.GenBuffer();
+        _vbos.Add(vboId);
+
+        _gl.BindBuffer(BufferTargetARB.ElementArrayBuffer, vboId);
+        
+        fixed (void* d = indices)
+        {
+            _gl.BufferData(BufferTargetARB.ElementArrayBuffer, (nuint) (indices.Length * sizeof(uint)), d, BufferUsageARB.StaticDraw);
+        }
+    }
     private unsafe void VertexAttributePointer(uint index, int count, VertexAttribPointerType type, uint vertexSize, int offSet)
     {
         _gl.VertexAttribPointer(index, count, type, false, vertexSize * (uint) sizeof(float), (void*) (offSet * sizeof(float)));

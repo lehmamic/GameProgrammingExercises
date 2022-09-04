@@ -17,11 +17,11 @@ public class Renderer
         _gl.Clear(ClearBufferMask.ColorBufferBit);
     }
 
-    public void Render(RawModel model)
+    public unsafe void Render(RawModel model)
     {
         _gl.BindVertexArray(model.VaoId);
         _gl.EnableVertexAttribArray(0);
-        _gl.DrawArrays(PrimitiveType.Triangles, 0, model.VertexCount);
+        _gl.DrawElements(PrimitiveType.Triangles, model.VertexCount, DrawElementsType.UnsignedInt, null);
         _gl.DisableVertexAttribArray(0);
         _gl.BindVertexArray(0);
     }
