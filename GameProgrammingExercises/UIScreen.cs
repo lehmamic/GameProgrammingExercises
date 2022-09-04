@@ -1,3 +1,4 @@
+using GameProgrammingExercises.Maths;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 
@@ -13,13 +14,11 @@ public class UIScreen : IDisposable
     // State
     private UIScreenState _state;
 
-    private Texture? _title;
     private Texture? _background;
     
     // Configure positions
-    private Vector2D<float> _titlePos;
-    private Vector2D<float> _nextButtonPos;
-    private Vector2D<float> _bgPos;
+    private Vector2D<float> _nextButtonPos = new(0.0f, 200.0f);
+    private Vector2D<float> _bgPos = new(0.0f, 250.0f);
 
     public UIScreen(Game game)
     {
@@ -32,11 +31,14 @@ public class UIScreen : IDisposable
         _buttonOff = Game.Renderer.GetTexture("Assets/ButtonBlue.png");
     }
 
+
     public Game Game => _game;
 
     public UIScreenState State => _state;
-    
-    public string Title { get; set; }
+
+    public string? Title { get; set; }
+
+    public Vector2D<float> TitlePos { get; set; } = new(0.0f, 300.0f);
 
     public virtual void Update(float deltaTime)
     {
@@ -48,13 +50,13 @@ public class UIScreen : IDisposable
         // Draw background (if exists)
         if (_background is not null)
         {
-            DrawTexture(shader, _background, _bgPos);
+            Game.Renderer.DrawTexture(_background, _bgPos);
         }
         // Draw title (if exists)
-        // if (_title is not null)
-        // {
-        //     DrawTexture(shader, _title, _titlePos);
-        // }
+        if (Title is not null)
+        {
+            Game.Renderer.DrawText(_font, Title, TitlePos, 1.0f, Color.White);
+        }
         // Draw buttons
         // for (auto b : mButtons)
         // {
@@ -108,29 +110,6 @@ public class UIScreen : IDisposable
     protected void SetRelativeMouseMode(bool relative)
     {
         Game.InputSystem.SetRelativeMouseMode(relative);
-    }
-    
-    protected unsafe void DrawTexture(Shader shader, Texture texture, Vector2D<float> offset, float scale = 1.0f)
-    {
-        // Scale the quad by the width/height of texture
-        Matrix4X4<float> scaleMat = Matrix4X4.CreateScale(
-            texture.Width * scale,
-            texture.Height * scale,
-            1.0f);
-        
-        // Translate to position on screen
-        Matrix4X4<float> transMat = Matrix4X4.CreateTranslation(
-            new Vector3D<float>(offset.X, offset.Y, 0.0f));
-
-        // Set world transform
-        Matrix4X4<float> world = scaleMat * transMat;
-        shader.SetUniform("uWorldTransform", world);
-
-        // Set current texture
-        texture.SetActive();
-
-        // Draw quad
-        Game.Renderer.GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, null);
     }
 
     protected virtual void Dispose(bool disposing)

@@ -4,11 +4,11 @@ namespace GameProgrammingExercises;
 
 public class Character
 {
-    public Character(char @char, Texture texture, Vector2D<float> site, Vector2D<float> bearing, int advance)
+    public Character(char @char, Texture texture, Vector2D<float> size, Vector2D<float> bearing, int advance)
     {
         Char = @char;
         Texture = texture;
-        Site = site;
+        Size = size;
         Bearing = bearing;
         Advance = advance;
     }
@@ -17,7 +17,7 @@ public class Character
 
     public Texture Texture { get; }
 
-    public Vector2D<float> Site { get; }
+    public Vector2D<float> Size { get; }
 
     public Vector2D<float> Bearing { get; }
 

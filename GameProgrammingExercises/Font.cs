@@ -11,8 +11,11 @@ namespace GameProgrammingExercises;
 
 public class Font
 {
+    private readonly IReadOnlyDictionary<char, Character> _characters;
+
     private Font(IReadOnlyDictionary<char,Character> characters)
     {
+        _characters = characters;
     }
     // private readonly Game _game;
     //
@@ -68,5 +71,10 @@ public class Font
             characters.Add(character.Char, character);
         }
         return new Font(characters);
+    }
+
+    public Character GetCharacter(char c)
+    {
+        return _characters[c];
     }
 }

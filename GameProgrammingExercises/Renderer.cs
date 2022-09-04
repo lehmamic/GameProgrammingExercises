@@ -26,7 +26,10 @@ public class Renderer : IDisposable
 
     // Sprite Shader
     private Shader _spriteShader;
-    
+
+    // Text Shader
+    private Shader _textShader;
+
     // Sprite vertex array
     private VertexArrayObject _spriteVertices;
 
@@ -149,6 +152,73 @@ public class Renderer : IDisposable
         // SDL_GL_SwapWindow(mWindow);
     }
     
+    public unsafe void DrawTexture(Texture texture, Vector2D<float> offset, float scale = 1.0f)
+    {
+        _spriteShader.SetActive();
+
+        // Scale the quad by the width/height of texture
+        Matrix4X4<float> scaleMat = Matrix4X4.CreateScale(
+            texture.Width * scale,
+            texture.Height * scale,
+            1.0f);
+        
+        // Translate to position on screen
+        Matrix4X4<float> transMat = Matrix4X4.CreateTranslation(
+            new Vector3D<float>(offset.X, offset.Y, 0.0f));
+
+        // Set world transform
+        Matrix4X4<float> world = scaleMat * transMat;
+        _spriteShader.SetUniform("uWorldTransform", world);
+
+        // Set current texture
+        texture.SetActive();
+
+        // Draw quad
+        GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, null);
+    }
+
+    public unsafe void DrawText(Font font, string text, Vector2D<float> offset, float scale, Vector3D<float> color)
+    {
+        _textShader.SetActive();
+
+        var x = offset.X;
+        var y = offset.Y;
+        
+        _textShader.SetUniform("textColor", color);
+
+        foreach (var c in text)
+        {
+            var character = font.GetCharacter(c);
+            var texture = character.Texture;
+
+            // Scale the quad by the width/height of texture
+            Matrix4X4<float> scaleMat = Matrix4X4.CreateScale(
+                texture.Width * scale,
+                texture.Height * scale,
+                1.0f);
+
+            float xpos = x + character.Bearing.X * scale;
+            float ypos = y - (character.Size.Y - character.Bearing.Y) * scale;
+
+            // Translate to position on screen
+            Matrix4X4<float> transMat = Matrix4X4.CreateTranslation(
+                new Vector3D<float>(xpos, ypos, 0.0f));
+
+            // Set world transform
+            Matrix4X4<float> world = scaleMat * transMat;
+            _textShader.SetUniform("uWorldTransform", world);
+
+            // Set current texture
+            texture.SetActive();
+
+            // Draw quad
+            GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, null);
+
+            // now advance cursors for next glyph (note that advance is number of 1/64 pixels)
+            x += (character.Advance >> 6) * scale; // bitshift by 6 to get value in pixels (2^6 = 64)
+        }
+    }
+    
     public void AddSprite(SpriteComponent sprite)
     {
         // Find the insertion point in the sorted vector
@@ -261,6 +331,13 @@ public class Renderer : IDisposable
         // Set the view-projection matrix
         Matrix4X4<float> viewProj = GameMath.CreateSimpleViewProj(ScreenWidth, ScreenHeight);
         _spriteShader.SetUniform("uViewProj", viewProj);
+        
+        // Create sprite shader
+        _textShader = new Shader(GL, "Shaders/Text.vert", "Shaders/Text.frag");
+        _textShader.SetActive();
+
+        // Set the view-projection matrix
+        _textShader.SetUniform("uViewProj", viewProj);
 
         // Create basic mesh shader
         _meshShader = new Shader(GL, "Shaders/Pong.vert", "Shaders/Pong.frag");

@@ -46,18 +46,18 @@ public class HUD : UIScreen
     {
         // Crosshair
         Texture cross = _targetEnemy ? _crosshairEnemy : _crosshair;
-        DrawTexture(shader, cross, Vector2D<float>.Zero, 2.0f);
+        Game.Renderer.DrawTexture(cross, Vector2D<float>.Zero, 2.0f);
 
         // Radar
         var radarPos = new Vector2D<float>(-390.0f, 275.0f);
-        DrawTexture(shader, _radar, radarPos, 1.0f);
+        Game.Renderer.DrawTexture(_radar, radarPos, 1.0f);
         // Blips
         foreach (var blip in _blips)
         {
-            DrawTexture(shader, _blipTex, radarPos + blip, 1.0f);
+            Game.Renderer.DrawTexture(_blipTex, radarPos + blip, 1.0f);
         }
         // Radar arrow
-        DrawTexture(shader, _radarArrow, radarPos);
+        Game.Renderer.DrawTexture(_radarArrow, radarPos);
 
         //// Health bar
         //DrawTexture(shader, mHealthBar, Vector2(-350.0f, -350.0f));
