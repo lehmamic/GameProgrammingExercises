@@ -35,6 +35,8 @@ public class UIScreen : IDisposable
     public Game Game => _game;
 
     public UIScreenState State => _state;
+    
+    public string Title { get; set; }
 
     public virtual void Update(float deltaTime)
     {
@@ -67,7 +69,30 @@ public class UIScreen : IDisposable
 
     public virtual void ProcessInput(InputState state)
     {
-        
+        // // Do we have buttons?
+        // if (!mButtons.empty())
+        // {
+        //     // Get position of mouse
+        //     int x, y;
+        //     SDL_GetMouseState(&x, &y);
+        //     // Convert to (0,0) center coordinates
+        //     Vector2 mousePos(static_cast<float>(x), static_cast<float>(y));
+        //     mousePos.x -= mGame->GetRenderer()->GetScreenWidth() * 0.5f;
+        //     mousePos.y = mGame->GetRenderer()->GetScreenHeight() * 0.5f - mousePos.y;
+		      //
+        //     // Highlight any buttons
+        //     for (auto b : mButtons)
+        //     {
+        //         if (b->ContainsPoint(mousePos))
+        //         {
+        //             b->SetHighlighted(true);
+        //         }
+        //         else
+        //         {
+        //             b->SetHighlighted(false);
+        //         }
+        //     }
+        // }
     }
 
     public void Close()
@@ -75,7 +100,7 @@ public class UIScreen : IDisposable
         _state = UIScreenState.Closing;
     }
 
-    protected virtual void HandleKeyPress(InputState state)
+    public virtual void HandleKeyPress(InputState state)
     {
         
     }

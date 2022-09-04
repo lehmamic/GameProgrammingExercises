@@ -169,13 +169,15 @@ public class Game
     {
         _inputSystem.Update();
         var state = _inputSystem.State;
-    
-        if (state.Keyboard.GetKeyState(Key.Escape) == ButtonState.Released)
-        {
-            State = GameState.Quit;
-        }
 
-        HandleKeyPress(state);
+        if (State == GameState.GamePlay)
+        {
+            HandleKeyPress(state);
+        }
+        else
+        {
+            _uiStack.LastOrDefault()?.HandleKeyPress(state);
+        }
     
         if (State == GameState.GamePlay)
         {
@@ -195,6 +197,11 @@ public class Game
     
     private void HandleKeyPress(InputState state)
     {
+        if (state.Keyboard.GetKeyState(Key.Escape) == ButtonState.Pressed)
+        {
+            _ = new PauseMenu(this);
+        }
+
         if (state.Keyboard.GetKeyState(Key.Minus) == ButtonState.Pressed)
         {
             // Reduce master volume
