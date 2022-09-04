@@ -4,12 +4,12 @@ namespace GameEngine.Models;
 
 public class TexturedModel
 {
-    public RawModel RawModel { get; }
-    public ModelTexture Texture { get; }
+    public VertexArrayObject VAO { get; }
+    public Texture Texture { get; }
 
-    public TexturedModel(RawModel rawRawModel, ModelTexture texture)
+    public TexturedModel(VertexArrayObject vao, Texture texture)
     {
-        RawModel = rawRawModel;
+        VAO = vao;
         Texture = texture;
     }
 }

@@ -1,7 +1,7 @@
 #version 400 core
 
-in vec3 position;
-in vec2 textureCoords;
+layout(location = 0) in vec3 position;
+layout(location = 1) in vec2 textureCoords;
 
 out vec2 pass_textureCoords;
 

@@ -1,0 +1,80 @@
+using Silk.NET.OpenGL;
+
+namespace GameEngine.Models
+{
+    public class VertexArrayObject : IDisposable
+    {
+        private readonly GL _gl;
+        private readonly uint _vertexArray;
+        private uint _vertexBuffer;
+        private readonly uint _indexBuffer;
+
+        public unsafe VertexArrayObject(GL gl, float[] vertices, uint[] indices)
+        {
+            _gl = gl;
+
+            NumberOfVertices = vertices.Length;
+            NumberOfIndices = indices.Length;
+
+            // Create vertex array
+            _vertexArray = _gl.GenVertexArray();
+            _gl.BindVertexArray(_vertexArray);
+
+            // Create vertex buffer
+            _vertexBuffer = CreateBuffer<float>(vertices, BufferTargetARB.ArrayBuffer);
+
+            // Create index buffer
+            _indexBuffer = CreateBuffer<uint>(indices, BufferTargetARB.ElementArrayBuffer);_gl.GenBuffer();
+
+            // Position is 3 floats with offset 0
+            VertexAttributePointer(0, 3, VertexAttribPointerType.Float, 5, 0);
+
+            // // Normal is 3 floats with offset 3
+            // VertexAttributePointer(1, 3, VertexAttribPointerType.Float, 8, 3);
+
+            // Texture coordinates is 2 floats with offset 6
+            VertexAttributePointer(1, 2, VertexAttribPointerType.Float, 5, 3);
+        }
+
+        private unsafe uint CreateBuffer<T>(Span<T> data, BufferTargetARB type)
+            where T : unmanaged
+        {
+            var vboId = _gl.GenBuffer();
+            _gl.BindBuffer(type, vboId);
+
+            fixed (void* d = data)
+            {
+                _gl.BufferData(type, (nuint) (data.Length * sizeof(T)), d, BufferUsageARB.StaticDraw);
+            }
+
+            return vboId;
+        }
+
+        public int NumberOfVertices { get; }
+
+        public int NumberOfIndices { get; }
+
+        public void Activate()
+        {
+            _gl.BindVertexArray(_vertexArray);
+        }
+        
+        public void Deactivate()
+        {
+            _gl.BindVertexArray(0);
+        }
+
+        public void Dispose()
+        {
+            _gl.DeleteBuffer(_vertexBuffer);
+            _gl.DeleteBuffer(_indexBuffer);
+            _gl.DeleteVertexArray(_vertexArray);
+        }
+
+        private unsafe void VertexAttributePointer(uint index, int count, VertexAttribPointerType type, uint vertexSize, int offSet)
+        {
+            _gl.EnableVertexAttribArray(index);
+            _gl.VertexAttribPointer(index, count, type, false, vertexSize * (uint) sizeof(float), (void*) (offSet * sizeof(float)));
+        }
+    }
+}

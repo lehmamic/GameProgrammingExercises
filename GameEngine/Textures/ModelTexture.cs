@@ -1,16 +1,16 @@
 using System.Buffers;
-using FreeTypeSharp;
 using Silk.NET.OpenGL;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 
 namespace GameEngine.Textures;
 
-public class ModelTexture : IDisposable
+public class Texture : IDisposable
 {
     private readonly GL _gl;
+    private readonly uint _handle;
 
-    public unsafe ModelTexture(GL gl, string path)
+    public unsafe Texture(GL gl, string path)
     {
         _gl = gl;
 
@@ -22,12 +22,12 @@ public class ModelTexture : IDisposable
         Width = image.Width;
         Height = image.Height;
 
-        TextureId = _gl.GenTexture();
-        _gl.BindTexture(TextureTarget.Texture2D, TextureId);
+        _handle = _gl.GenTexture();
+        _gl.BindTexture(TextureTarget.Texture2D, _handle);
 
         if (!image.DangerousTryGetSinglePixelMemory(out Memory<Rgba32> memory))
         {
-            throw new InvalidOperationException("This can only happen with multi-GB images or when PreferContiguousImageBuffers is not set to true.");
+            throw new Exception("This can only happen with multi-GB images or when PreferContiguousImageBuffers is not set to true.");
         }
 
         using MemoryHandle pinHandle = memory.Pin();
@@ -38,14 +38,17 @@ public class ModelTexture : IDisposable
         _gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) GLEnum.Linear);
     }
 
-    public uint TextureId { get; }
-
     public int Width { get; }
 
     public int Height { get; }
 
+    public void Activate()
+    {
+        _gl.BindTexture(TextureTarget.Texture2D, _handle);
+    }
+
     public void Dispose()
     {
-        _gl.DeleteTextures(1, TextureId);
+        _gl.DeleteTextures(1, _handle);
     }
 }

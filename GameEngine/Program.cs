@@ -11,17 +11,17 @@ using var displayManager = new DisplayManager(1024, 768, "OpenGL 3D Game Program
 Loader loader = null!;
 Renderer renderer = null!;
 StaticShader shader = null!;
-RawModel model = null!;
-ModelTexture texture = null!;
+VertexArrayObject model = null!;
+Texture texture = null!;
 TexturedModel texturedModel = null!;
 
 // OpenGL expects vertices to be defined counter clockwise by default
 float[] vertices =
 {
-    -0.5f, 0.5f, 0.0f,    // V0
-    -0.5f, -0.5f, 0.0f,   // V1
-    0.5f, -0.5f, 0.0f,    // V2
-    0.5f, 0.5f, 0.0f,     // V3
+    -0.5f, 0.5f, 0.0f, 0.0f, 0.0f,    // V0
+    -0.5f, -0.5f, 0.0f, 0.0f, 1.0f,   // V1
+    0.5f, -0.5f, 0.0f, 1.0f, 1.0f,    // V2
+    0.5f, 0.5f, 0.0f, 1.0f, 0.0f,     // V3
 
 };
 
@@ -31,21 +31,13 @@ uint[] indices =
     3, 1, 2,
 };
 
-float[] textureCoords =
-{
-    0.0f, 0.0f,     // V0
-    0.0f, 1.0f,     // V1
-    1.0f, 1.0f,     // V3
-    1.0f, 0.0f,     // V4
-};
-
 displayManager.Window.Load += () =>
 {
     loader = new Loader(displayManager.GL);
     renderer = new Renderer(displayManager.GL);
     shader = new StaticShader(displayManager.GL);
 
-    model = loader.LoadToVAO(vertices, textureCoords, indices);
+    model = loader.LoadToVAO(vertices, indices);
     texture = loader.LoadTexture("Assets/Cube.png");
     texturedModel = new TexturedModel(model, texture);
 };
@@ -60,9 +52,9 @@ displayManager.Window.Render += (deltaTime) =>
 {
     // Game logic
     renderer.Prepare();
-    shader.Start();
+    shader.Activate();
     renderer.Render(texturedModel);
-    shader.Stop();
+    shader.Deactivate();
 };
 
 displayManager.Window

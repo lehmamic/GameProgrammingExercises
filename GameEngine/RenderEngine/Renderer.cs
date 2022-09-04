@@ -20,16 +20,9 @@ public class Renderer
 
     public unsafe void Render(TexturedModel texturedModel)
     {
-        var model = texturedModel.RawModel;
-
-        _gl.BindVertexArray(model.VaoId);
-        _gl.EnableVertexAttribArray(0);
-        _gl.EnableVertexAttribArray(1);
-        _gl.ActiveTexture(TextureUnit.Texture0);
-        _gl.BindTexture(TextureTarget.Texture2D, texturedModel.Texture.TextureId);
-        _gl.DrawElements(PrimitiveType.Triangles, model.VertexCount, DrawElementsType.UnsignedInt, null);
-        _gl.DisableVertexAttribArray(0);
-        _gl.DisableVertexAttribArray(1);
-        _gl.BindVertexArray(0);
+        texturedModel.VAO.Activate();
+        texturedModel.Texture.Activate();
+        _gl.DrawElements(PrimitiveType.Triangles, (uint)texturedModel.VAO.NumberOfIndices, DrawElementsType.UnsignedInt, null);
+        texturedModel.VAO.Deactivate();
     }
 }
