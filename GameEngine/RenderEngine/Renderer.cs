@@ -32,8 +32,12 @@ public class Renderer
 
     public void Prepare()
     {
-        _gl.ClearColor(1, 0, 0, 1);
-        _gl.Clear(ClearBufferMask.ColorBufferBit);
+        _gl.ClearColor(0, 0, 0, 1);
+        _gl.Clear((uint) (ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit));
+        
+        // Enable depth buffer/disable alpha blend
+        _gl.Enable(EnableCap.DepthTest);
+        _gl.Disable(EnableCap.Blend);
     }
 
     public unsafe void Render(Entity entity, StaticShader shader)

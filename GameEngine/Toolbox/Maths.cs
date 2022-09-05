@@ -9,11 +9,11 @@ public static class Maths
     public static Matrix4X4<float> CreateTranslationMatrix(Vector3D<float> translation, float rx, float ry, float rz, float scale)
     {
         var matrix = Matrix4X4<float>.Identity;
-        matrix *= Matrix4X4.CreateTranslation(translation);
+        matrix *= Matrix4X4.CreateScale(scale);
         matrix *= Matrix4X4.CreateRotationX(Scalar.DegreesToRadians(rx));
         matrix *= Matrix4X4.CreateRotationY(Scalar.DegreesToRadians(ry));
         matrix *= Matrix4X4.CreateRotationZ(Scalar.DegreesToRadians(rz));
-        matrix *= Matrix4X4.CreateScale(scale);
+        matrix *= Matrix4X4.CreateTranslation(translation);
 
         return matrix;
     }
@@ -21,11 +21,13 @@ public static class Maths
     public static Matrix4X4<float> CreateViewMatrix(Camera camera)
     {
         var matrix = Matrix4X4<float>.Identity;
+
         matrix *= Matrix4X4.CreateFromYawPitchRoll(Scalar.DegreesToRadians(camera.Yaw), Scalar.DegreesToRadians(camera.Pitch), Scalar.DegreesToRadians(camera.Roll));
-        
+
         var cameraPos = camera.Position;
         var negativeCameraPos = new Vector3D<float>(-cameraPos.X, -cameraPos.Y, -cameraPos.Z);
         matrix *= Matrix4X4.CreateTranslation(negativeCameraPos);
+
 
         return matrix;
     }

@@ -27,13 +27,13 @@ namespace GameEngine.Models
             _indexBuffer = CreateBuffer<uint>(indices, BufferTargetARB.ElementArrayBuffer);_gl.GenBuffer();
 
             // Position is 3 floats with offset 0
-            VertexAttributePointer(0, 3, VertexAttribPointerType.Float, 5, 0);
+            VertexAttributePointer(0, 3, VertexAttribPointerType.Float, 8, 0);
 
-            // // Normal is 3 floats with offset 3
-            // VertexAttributePointer(1, 3, VertexAttribPointerType.Float, 8, 3);
+            // Normal is 3 floats with offset 3
+            VertexAttributePointer(1, 3, VertexAttribPointerType.Float, 8, 3);
 
             // Texture coordinates is 2 floats with offset 6
-            VertexAttributePointer(1, 2, VertexAttribPointerType.Float, 5, 3);
+            VertexAttributePointer(2, 2, VertexAttribPointerType.Float, 8, 6);
         }
 
         private unsafe uint CreateBuffer<T>(Span<T> data, BufferTargetARB type)
