@@ -21,8 +21,8 @@ public static class Maths
     public static Matrix4X4<float> CreateViewMatrix(Camera camera)
     {
         var matrix = Matrix4X4<float>.Identity;
-        matrix *= Matrix4X4.CreateFromYawPitchRoll<float>(Scalar.DegreesToRadians(camera.Yaw), Scalar.DegreesToRadians(camera.Pitch), Scalar.DegreesToRadians(camera.Roll));
-
+        matrix *= Matrix4X4.CreateFromYawPitchRoll(Scalar.DegreesToRadians(camera.Yaw), Scalar.DegreesToRadians(camera.Pitch), Scalar.DegreesToRadians(camera.Roll));
+        
         var cameraPos = camera.Position;
         var negativeCameraPos = new Vector3D<float>(-cameraPos.X, -cameraPos.Y, -cameraPos.Z);
         matrix *= Matrix4X4.CreateTranslation(negativeCameraPos);
@@ -36,7 +36,7 @@ public static class Maths
         float yScale = (1.0f / Scalar.Tan(Scalar.DegreesToRadians(fov / 2.0f))) * aspectRation;
         float xScale = yScale / aspectRation;
         float frustumLength = farPlane - nearPlane;
-
+        
         var matrix = Matrix4X4<float>.Identity with
         {
             M11 = xScale,
@@ -46,7 +46,7 @@ public static class Maths
             M43 = -((2.0f * nearPlane * farPlane) / frustumLength),
             M44 = 0.0f,
         };
-
+        
         return matrix;
     }
 }

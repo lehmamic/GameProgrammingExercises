@@ -61,7 +61,7 @@ displayManager.Window.Closing += () =>
 
 displayManager.Window.Update += (deltaTime) =>
 {
-    entity.IncreasePosition(0.0f, 0.0f, -0.1f);
+    entity.IncreasePosition(0.00f, 0.0f, -0.01f);
     camera.Move(primaryKeyboard);
 };
 

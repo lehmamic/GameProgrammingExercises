@@ -11,8 +11,8 @@ public class Renderer
 {
     private readonly DisplayManager _displayManager;
     private const float FOV = 70.0f;
-    private const float NearPlane = 0.0f;
-    private const float FarPlane = 0.0f;
+    private const float NearPlane = 0.1f;
+    private const float FarPlane = 1000.0f;
 
     private readonly GL _gl;
 
@@ -23,6 +23,7 @@ public class Renderer
         _displayManager = displayManager;
         _gl = _displayManager.GL;
 
+        // _projectionMatrix = Matrix4X4.CreatePerspectiveFieldOfView(Scalar.DegreesToRadians(FOV), _displayManager.Width / _displayManager.Height, NearPlane, FarPlane);
         _projectionMatrix = Maths.CreateProjectionMatrix(FOV, _displayManager.Width, _displayManager.Height, NearPlane, FarPlane);
         shader.Activate();
         shader.LoadProjectionMatrix(_projectionMatrix);
