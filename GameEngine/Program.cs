@@ -20,6 +20,7 @@ Texture texture = null!;
 TexturedModel staticModel = null!;
 Entity entity = null!;
 Camera camera = null!;
+Light light = new Light(new Vector3D<float>(0.0f, 0.0f, -20.0f), new Vector3D<float>(1.0f, 1.0f, 1.0f));
 
 displayManager.Window.Load += () =>
 {
@@ -30,10 +31,10 @@ displayManager.Window.Load += () =>
     shader = new StaticShader(displayManager.GL);
     renderer = new Renderer(displayManager, shader);
 
-    model = ObjLoader.LoadObjModel("Assets/stall.obj", loader);
-    texture = loader.LoadTexture("Assets/stallTexture.png");
+    model = ObjLoader.LoadObjModel("Assets/dragon.obj", loader);
+    texture = loader.LoadTexture("Assets/white.png");
     staticModel = new TexturedModel(model, texture);
-    entity = new Entity(staticModel, new Vector3D<float>(0.0f, 0.0f, -50.0f), 0.0f, 0.0f, 0.0f, 1.0f);
+    entity = new Entity(staticModel, new Vector3D<float>(0.0f, 0.0f, -25.0f), 0.0f, 0.0f, 0.0f, 1.0f);
     camera = new Camera();
 };
 
@@ -54,6 +55,7 @@ displayManager.Window.Render += (deltaTime) =>
     // Game logic
     renderer.Prepare();
     shader.Activate();
+    shader.LoadLight(light);
     shader.LoadViewMatrix(camera);
     renderer.Render(entity, shader);
     shader.Deactivate();

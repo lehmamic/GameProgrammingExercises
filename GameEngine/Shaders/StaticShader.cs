@@ -30,4 +30,10 @@ public class StaticShader : Shader
         var viewMatrix = Maths.CreateViewMatrix(camera);
         SetUniform("viewMatrix", viewMatrix);
     }
+
+    public void LoadLight(Light light)
+    {
+        SetUniform("lightPosition", light.Position);
+        SetUniform("lightColor", light.Color);
+    }
 }

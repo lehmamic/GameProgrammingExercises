@@ -32,7 +32,7 @@ public class Renderer
 
     public void Prepare()
     {
-        _gl.ClearColor(0, 0, 0, 1);
+        _gl.ClearColor(0.486f, 0.086f, 0.086f, 1.0f);
         _gl.Clear((uint) (ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit));
         
         // Enable depth buffer/disable alpha blend
