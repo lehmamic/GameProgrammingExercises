@@ -36,4 +36,10 @@ public class StaticShader : Shader
         SetUniform("lightPosition", light.Position);
         SetUniform("lightColor", light.Color);
     }
+
+    public void LoadShineVariables(float damper, float reflectivity)
+    {
+        SetUniform("shineDamper", damper);
+        SetUniform("reflectivity", reflectivity);
+    }
 }

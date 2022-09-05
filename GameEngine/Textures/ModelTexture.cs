@@ -34,6 +34,8 @@ public class Texture : IDisposable
         _gl.TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgba, (uint)image.Width, (uint)image.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, pinHandle.Pointer);
 
         // Enable bilinear filtering
+        _gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int) GLEnum.ClampToEdge);
+        _gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int) GLEnum.ClampToEdge);
         _gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int) GLEnum.Linear);
         _gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) GLEnum.Linear);
     }
@@ -41,6 +43,11 @@ public class Texture : IDisposable
     public int Width { get; }
 
     public int Height { get; }
+
+    // Spec Power
+    public float ShineDamper { get; set; } = 1.0f;
+
+    public float Reflectivity { get; set; } = 0.0f;
 
     public void Activate()
     {

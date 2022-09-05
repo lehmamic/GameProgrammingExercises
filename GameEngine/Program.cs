@@ -20,7 +20,7 @@ Texture texture = null!;
 TexturedModel staticModel = null!;
 Entity entity = null!;
 Camera camera = null!;
-Light light = new Light(new Vector3D<float>(0.0f, 0.0f, -20.0f), new Vector3D<float>(1.0f, 1.0f, 1.0f));
+Light light = new Light(new Vector3D<float>(200.0f, 200.0f, 100.0f), new Vector3D<float>(1.0f, 1.0f, 1.0f));
 
 displayManager.Window.Load += () =>
 {
@@ -32,8 +32,12 @@ displayManager.Window.Load += () =>
     renderer = new Renderer(displayManager, shader);
 
     model = ObjLoader.LoadObjModel("Assets/dragon.obj", loader);
+
     texture = loader.LoadTexture("Assets/white.png");
     staticModel = new TexturedModel(model, texture);
+    staticModel.Texture.ShineDamper = 10.0f;
+    staticModel.Texture.Reflectivity = 1.0f;
+
     entity = new Entity(staticModel, new Vector3D<float>(0.0f, 0.0f, -25.0f), 0.0f, 0.0f, 0.0f, 1.0f);
     camera = new Camera();
 };

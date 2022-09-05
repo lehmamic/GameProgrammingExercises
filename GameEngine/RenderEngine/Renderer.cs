@@ -45,6 +45,7 @@ public class Renderer
         entity.Model.VAO.Activate();
         Matrix4X4<float> transformationMatrix = Maths.CreateTranslationMatrix(entity.Position, entity.RotX, entity.RotY, entity.RotZ, entity.Scale);
         shader.LoadTransformationMatrix(transformationMatrix);
+        shader.LoadShineVariables(entity.Model.Texture.ShineDamper, entity.Model.Texture.Reflectivity);
         entity.Model.Texture.Activate();
         _gl.DrawElements(PrimitiveType.Triangles, (uint)entity.Model.VAO.NumberOfIndices, DrawElementsType.UnsignedInt, null);
         entity.Model.VAO.Deactivate();
