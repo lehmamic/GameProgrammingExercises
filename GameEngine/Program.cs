@@ -13,8 +13,7 @@ using var displayManager = new DisplayManager(1024, 768, "OpenGL 3D Game Program
 IInputContext input = null!;
 IKeyboard primaryKeyboard = null!;
 Loader loader = null!;
-Renderer renderer = null!;
-StaticShader shader = null!;
+MasterRenderer renderer = null!;
 VertexArrayObject model = null!;
 Texture texture = null!;
 TexturedModel staticModel = null!;
@@ -28,8 +27,7 @@ displayManager.Window.Load += () =>
     primaryKeyboard = input.Keyboards.First();
 
     loader = new Loader(displayManager.GL);
-    shader = new StaticShader(displayManager.GL);
-    renderer = new Renderer(displayManager, shader);
+    renderer = new MasterRenderer(displayManager);
 
     model = ObjLoader.LoadObjModel("Assets/dragon.obj", loader);
 
@@ -44,7 +42,7 @@ displayManager.Window.Load += () =>
 
 displayManager.Window.Closing += () =>
 {
-    shader.Dispose();
+    renderer.Dispose();
     loader.Dispose();
 };
 
@@ -57,12 +55,8 @@ displayManager.Window.Update += (deltaTime) =>
 displayManager.Window.Render += (deltaTime) =>
 {
     // Game logic
-    renderer.Prepare();
-    shader.Activate();
-    shader.LoadLight(light);
-    shader.LoadViewMatrix(camera);
-    renderer.Render(entity, shader);
-    shader.Deactivate();
+    renderer.ProcessEntity(entity);
+    renderer.Render(light, camera);
 };
 
 displayManager.Window

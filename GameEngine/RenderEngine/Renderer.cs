@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using GameEngine.Entities;
+using GameEngine.Models;
 using GameEngine.Shaders;
 using GameEngine.Toolbox;
 using Silk.NET.Maths;
@@ -10,6 +11,7 @@ namespace GameEngine.RenderEngine;
 public class Renderer
 {
     private readonly DisplayManager _displayManager;
+    private readonly StaticShader _shader;
     private const float FOV = 70.0f;
     private const float NearPlane = 0.1f;
     private const float FarPlane = 1000.0f;
@@ -21,7 +23,11 @@ public class Renderer
     public Renderer(DisplayManager displayManager, StaticShader shader)
     {
         _displayManager = displayManager;
+        _shader = shader;
         _gl = _displayManager.GL;
+        
+        _gl.Enable(GLEnum.CullFace);
+        _gl.CullFace(CullFaceMode.Back);
 
         // _projectionMatrix = Matrix4X4.CreatePerspectiveFieldOfView(Scalar.DegreesToRadians(FOV), _displayManager.Width / _displayManager.Height, NearPlane, FarPlane);
         _projectionMatrix = Maths.CreateProjectionMatrix(FOV, _displayManager.Width, _displayManager.Height, NearPlane, FarPlane);
@@ -40,14 +46,36 @@ public class Renderer
         _gl.Disable(EnableCap.Blend);
     }
 
-    public unsafe void Render(Entity entity, StaticShader shader)
+    public unsafe void Render(Dictionary<TexturedModel, List<Entity>> entities)
     {
-        entity.Model.VAO.Activate();
+        foreach (var model in entities.Keys)
+        {
+            PrepareTexturedModel(model);
+            foreach (var entity in entities[model])
+            {
+                PrepareInstance(entity);
+                _gl.DrawElements(PrimitiveType.Triangles, (uint)entity.Model.VAO.NumberOfIndices, DrawElementsType.UnsignedInt, null);
+            }
+            UnbindTexturedModel(model);
+        }
+    }
+
+    private void PrepareTexturedModel(TexturedModel model)
+    {
+        model.VAO.Activate();
+
+        _shader.LoadShineVariables(model.Texture.ShineDamper, model.Texture.Reflectivity);
+        model.Texture.Activate();
+    }
+
+    private void UnbindTexturedModel(TexturedModel model)
+    {
+        model.VAO.Deactivate();
+    }
+
+    private void PrepareInstance(Entity entity)
+    {
         Matrix4X4<float> transformationMatrix = Maths.CreateTranslationMatrix(entity.Position, entity.RotX, entity.RotY, entity.RotZ, entity.Scale);
-        shader.LoadTransformationMatrix(transformationMatrix);
-        shader.LoadShineVariables(entity.Model.Texture.ShineDamper, entity.Model.Texture.Reflectivity);
-        entity.Model.Texture.Activate();
-        _gl.DrawElements(PrimitiveType.Triangles, (uint)entity.Model.VAO.NumberOfIndices, DrawElementsType.UnsignedInt, null);
-        entity.Model.VAO.Deactivate();
+        _shader.LoadTransformationMatrix(transformationMatrix);
     }
 }
