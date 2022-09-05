@@ -66,6 +66,11 @@ public abstract class Shader : IDisposable
         }
         _gl.Uniform1(location, value);
     }
+    
+    public void SetUniform(string name, bool value)
+    {
+        SetUniform(name, value ? 1.0f : 0.0f);
+    }
 
     public void SetUniform(string name, Vector3D<float> value)
     {
@@ -87,7 +92,7 @@ public abstract class Shader : IDisposable
         }
 
         // Send the matrix data to the uniform
-        _gl.UniformMatrix4(location, 1, true, (float*) &value);
+        _gl.UniformMatrix4(location, 1, false, (float*) &value);
     }
 
     private uint CompileShader(ShaderType type, string path)
