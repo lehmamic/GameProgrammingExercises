@@ -14,7 +14,6 @@ IInputContext input = null!;
 IKeyboard primaryKeyboard = null!;
 Loader loader = null!;
 
-VertexArrayObject model = null!;
 TexturedModel staticModel = null!;
 TexturedModel grass = null!;
 TexturedModel fern = null!;
@@ -35,9 +34,10 @@ displayManager.Window.Load += () =>
 
     loader = new Loader(displayManager.GL);
 
-    model = ObjLoader.LoadObjModel("Assets/tree.obj", loader);
+    var data = ObjFileLoader.LoadObj("Assets/tree.obj");
+    var treeModel = loader.LoadToVAO(data.Vertices, data.Indices);
 
-    staticModel = new TexturedModel(model, loader.LoadTexture("Assets/tree.png"));
+    staticModel = new TexturedModel(treeModel, loader.LoadTexture("Assets/tree.png"));
     grass = new TexturedModel(
         ObjLoader.LoadObjModel("Assets/grassModel.obj", loader),
         loader.LoadTexture("Assets/grassTexture.png"));
