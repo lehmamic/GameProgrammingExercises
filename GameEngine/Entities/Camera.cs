@@ -30,6 +30,10 @@ public class Camera
         {
             _position.Z -= 0.1f;
         }
+        if (keyboard.IsKeyPressed(Key.S))
+        {
+            _position.Z += 0.1f;
+        }
         if (keyboard.IsKeyPressed(Key.D))
         {
             _position.X += 0.1f;

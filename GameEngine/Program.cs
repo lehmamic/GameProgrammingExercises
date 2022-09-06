@@ -41,8 +41,9 @@ displayManager.Window.Load += () =>
         entities.Add(new Entity(staticModel, new Vector3D<float>(random.NextSingle() * 800 - 400,0,random.NextSingle() * -600),0,0,0,3));
     }
 
-    terrain = new Terrain(0, 0, loader, loader.LoadTexture("Assets/grass.png"));
-    terrain2 = new Terrain(1, 0, loader, loader.LoadTexture("Assets/grass.png"));
+    // originally in teh script: 0,0 / 1,0 but then the terrain was behind the camera 
+    terrain = new Terrain(0, -1, loader, loader.LoadTexture("Assets/grass.png"));
+    terrain2 = new Terrain(-1, -1, loader, loader.LoadTexture("Assets/grass.png"));
 
     camera = new Camera();
     renderer = new MasterRenderer(displayManager);
