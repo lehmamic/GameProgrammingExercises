@@ -88,7 +88,7 @@ public class MasterRenderer : IDisposable
     
     private void Prepare()
     {
-        _gl.ClearColor(0.486f, 0.086f, 0.086f, 1.0f);
+        _gl.ClearColor(0.49f, 89f, 0.98f, 1.0f);
         _gl.Clear((uint) (ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit));
         
         // Enable depth buffer/disable alpha blend
