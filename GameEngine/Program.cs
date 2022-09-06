@@ -84,8 +84,8 @@ displayManager.Window.Load += () =>
     }
 
     // originally in teh script: 0,0 / 1,0 but then the terrain was behind the camera 
-    terrain = new Terrain(0, -1, loader, texturePack, blendMap);
-    terrain2 = new Terrain(-1, -1, loader, texturePack, blendMap);
+    terrain = new Terrain(0, -1, loader, texturePack, blendMap, "Assets/heightmap.png");
+    terrain2 = new Terrain(-1, -1, loader, texturePack, blendMap, "Assets/heightmap.png");
     
     renderer = new MasterRenderer(displayManager);
 
