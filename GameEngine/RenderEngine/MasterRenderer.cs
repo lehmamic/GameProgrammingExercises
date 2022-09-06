@@ -14,6 +14,10 @@ public class MasterRenderer : IDisposable
     private const float NearPlane = 0.1f;
     private const float FarPlane = 1000.0f;
 
+    private const float Red = 0.5f;
+    private const float Green = 0.5f;
+    private const float Blue = 0.5f;
+
     private readonly DisplayManager _displayManager;
     private readonly GL _gl;
 
@@ -50,6 +54,7 @@ public class MasterRenderer : IDisposable
         Prepare();
 
         _entityShader.Activate();
+        _entityShader.LoadSkyColor(Red, Green, Blue);
         _entityShader.LoadLight(sun);
         _entityShader.LoadViewMatrix(camera);
         _entityRenderer.Render(_entities);
@@ -57,6 +62,7 @@ public class MasterRenderer : IDisposable
         _entities.Clear();
 
         _terrainShader.Activate();
+        _terrainShader.LoadSkyColor(Red, Green, Blue);
         _terrainShader.LoadLight(sun);
         _terrainShader.LoadViewMatrix(camera);
         _terrainRenderer.Render(_terrains);
@@ -98,7 +104,7 @@ public class MasterRenderer : IDisposable
     
     private void Prepare()
     {
-        _gl.ClearColor(0.49f, 89f, 0.98f, 1.0f);
+        _gl.ClearColor(Red, Green, Blue, 1.0f);
         _gl.Clear((uint) (ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit));
         
         // Enable depth buffer/disable alpha blend

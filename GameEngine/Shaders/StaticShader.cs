@@ -47,4 +47,9 @@ public class StaticShader : Shader
     {
         SetUniform("useFakeLighting", useFake);
     }
+
+    public void LoadSkyColor(float r, float g, float b)
+    {
+        SetUniform("skyColor", new Vector3D<float>(r, g, b));
+    }
 }

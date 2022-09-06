@@ -42,4 +42,9 @@ public class TerrainShader : Shader
         SetUniform("shineDamper", damper);
         SetUniform("reflectivity", reflectivity);
     }
+
+    public void LoadSkyColor(float r, float g, float b)
+    {
+        SetUniform("skyColor", new Vector3D<float>(r, g, b));
+    }
 }
