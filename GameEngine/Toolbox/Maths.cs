@@ -22,12 +22,14 @@ public static class Maths
     {
         var matrix = Matrix4X4<float>.Identity;
 
-        matrix *= Matrix4X4.CreateFromYawPitchRoll(Scalar.DegreesToRadians(camera.Yaw), Scalar.DegreesToRadians(camera.Pitch), Scalar.DegreesToRadians(camera.Roll));
 
         var cameraPos = camera.Position;
         var negativeCameraPos = new Vector3D<float>(-cameraPos.X, -cameraPos.Y, -cameraPos.Z);
         matrix *= Matrix4X4.CreateTranslation(negativeCameraPos);
 
+        matrix *= Matrix4X4.CreateRotationZ(Scalar.DegreesToRadians(camera.Roll));
+        matrix *= Matrix4X4.CreateRotationY(Scalar.DegreesToRadians(camera.Yaw));
+        matrix *= Matrix4X4.CreateRotationX(Scalar.DegreesToRadians(camera.Pitch));
 
         return matrix;
     }

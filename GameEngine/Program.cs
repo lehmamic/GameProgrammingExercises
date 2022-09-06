@@ -12,6 +12,7 @@ using Silk.NET.Windowing;
 using var displayManager = new DisplayManager(1024, 768, "OpenGL 3D Game Programming Tutorials");
 IInputContext input = null!;
 IKeyboard primaryKeyboard = null!;
+IMouse primaryMouse = null!;
 Loader loader = null!;
 
 List<Entity> entities = new();
@@ -29,6 +30,7 @@ displayManager.Window.Load += () =>
 {
     input = displayManager.Window.CreateInput();
     primaryKeyboard = input.Keyboards.First();
+    primaryMouse = input.Mice.First();
 
     loader = new Loader(displayManager.GL);
 
@@ -84,14 +86,14 @@ displayManager.Window.Load += () =>
     // originally in teh script: 0,0 / 1,0 but then the terrain was behind the camera 
     terrain = new Terrain(0, -1, loader, texturePack, blendMap);
     terrain2 = new Terrain(-1, -1, loader, texturePack, blendMap);
-
-    camera = new Camera();
+    
     renderer = new MasterRenderer(displayManager);
 
-    var bunnyModel = ObjLoader.LoadObjModel("Assets/stanfordBunny.obj", loader);
-    var standfordBunny = new TexturedModel(bunnyModel, loader.LoadModelTexture("Assets/white.png"));
+    var bunnyModel = ObjLoader.LoadObjModel("Assets/person.obj", loader);
+    var standfordBunny = new TexturedModel(bunnyModel, loader.LoadModelTexture("Assets/playerTexture.png"));
 
-    player = new(standfordBunny, new Vector3D<float>(0, 0, -100), 0, 0, 0, 1);
+    player = new(standfordBunny, new Vector3D<float>(100, 0, -50), 0, 180, 0, 0.6f);
+    camera = new Camera(player);
 };
 
 displayManager.Window.Closing += () =>
@@ -107,7 +109,7 @@ displayManager.Window.Update += (deltaTime) =>
         displayManager.Close();
     }
 
-    camera.Move(primaryKeyboard);
+    camera.Move(primaryKeyboard, primaryMouse);
     player.Move((float)deltaTime, primaryKeyboard);
 };
 
