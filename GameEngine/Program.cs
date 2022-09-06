@@ -23,6 +23,8 @@ Terrain terrain2 = null!;
 Camera camera = null!;
 MasterRenderer renderer = null!;
 
+Player player = null!;
+
 displayManager.Window.Load += () =>
 {
     input = displayManager.Window.CreateInput();
@@ -85,6 +87,11 @@ displayManager.Window.Load += () =>
 
     camera = new Camera();
     renderer = new MasterRenderer(displayManager);
+
+    var bunnyModel = ObjLoader.LoadObjModel("Assets/stanfordBunny.obj", loader);
+    var standfordBunny = new TexturedModel(bunnyModel, loader.LoadModelTexture("Assets/white.png"));
+
+    player = new(standfordBunny, new Vector3D<float>(0, 0, -100), 0, 0, 0, 1);
 };
 
 displayManager.Window.Closing += () =>
@@ -101,11 +108,13 @@ displayManager.Window.Update += (deltaTime) =>
     }
 
     camera.Move(primaryKeyboard);
+    player.Move((float)deltaTime, primaryKeyboard);
 };
 
 displayManager.Window.Render += (deltaTime) =>
 {
     // Game logic
+    renderer.ProcessEntity(player);
     renderer.ProcessTerrain(terrain);
     renderer.ProcessTerrain(terrain2);
     foreach(var entity in entities)

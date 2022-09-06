@@ -26,27 +26,11 @@ public class Camera
 
     public void Move(IKeyboard keyboard)
     {
-        if (keyboard.IsKeyPressed(Key.W))
-        {
-            _position.Z -= 0.5f;
-        }
-        if (keyboard.IsKeyPressed(Key.S))
-        {
-            _position.Z += 0.5f;
-        }
-        if (keyboard.IsKeyPressed(Key.D))
-        {
-            _position.X += 0.5f;
-        }
-        if (keyboard.IsKeyPressed(Key.A))
-        {
-            _position.X -= 0.5f;
-        }
-        if (keyboard.IsKeyPressed(Key.Space))
+        if (keyboard.IsKeyPressed(Key.Number1))
         {
             _position.Y += 0.5f;
         }
-        if (keyboard.IsKeyPressed(Key.ShiftLeft))
+        else if (keyboard.IsKeyPressed(Key.Number2))
         {
             _position.Y -= 0.5f;
         }
