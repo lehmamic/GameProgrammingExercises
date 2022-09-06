@@ -5,11 +5,11 @@ namespace GameEngine.Models;
 public class TexturedModel
 {
     public VertexArrayObject VAO { get; }
-    public Texture Texture { get; }
+    public ModelTexture ModelTexture { get; }
 
-    public TexturedModel(VertexArrayObject vao, Texture texture)
+    public TexturedModel(VertexArrayObject vao, ModelTexture modelTexture)
     {
         VAO = vao;
-        Texture = texture;
+        ModelTexture = modelTexture;
     }
 }

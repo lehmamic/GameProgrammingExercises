@@ -20,6 +20,7 @@ public class TerrainRenderer
 
         shader.Activate();
         shader.LoadProjectionMatrix(projectionMatrix);
+        shader.ConnectTextures();
         shader.Deactivate();
     }
 
@@ -38,8 +39,28 @@ public class TerrainRenderer
     {
         terrain.VAO.Activate();
 
-        _shader.LoadShineVariables(terrain.Texture.ShineDamper, terrain.Texture.Reflectivity);
-        terrain.Texture.Activate();
+        BindTextures(terrain);
+        _shader.LoadShineVariables(1.0f, 0.0f);
+    }
+
+    private void BindTextures(Terrain terrain)
+    {
+        var texturePack = terrain.TexturePack;
+
+        _gl.ActiveTexture(TextureUnit.Texture0);
+        texturePack.BackgroundTexture.Activate();
+
+        _gl.ActiveTexture(TextureUnit.Texture1);
+        texturePack.RTexture.Activate();
+
+        _gl.ActiveTexture(TextureUnit.Texture2);
+        texturePack.GTexture.Activate();
+
+        _gl.ActiveTexture(TextureUnit.Texture3);
+        texturePack.BTexture.Activate();
+
+        _gl.ActiveTexture(TextureUnit.Texture4);
+        terrain.BlendMap.Activate();
     }
 
     private void UnbindTerrain(Terrain terrain)

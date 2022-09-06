@@ -23,7 +23,7 @@ void main()
     vec4 worldPosition = transformationMatrix * vec4(position, 1.0);
     vec4 positionRelativeToCam = viewMatrix * worldPosition;
     gl_Position = projectionMatrix * positionRelativeToCam;
-    pass_textureCoords = textureCoords * 40; // tiling => make sure the TextureWrapS and TextureWrapT are set to repeat
+    pass_textureCoords = textureCoords;
 
     surfaceNormal = (transformationMatrix * vec4(normal, 0.0)).xyz;
     toLightVector = lightPosition - worldPosition.xyz;

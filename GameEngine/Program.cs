@@ -14,12 +14,8 @@ IInputContext input = null!;
 IKeyboard primaryKeyboard = null!;
 Loader loader = null!;
 
-TexturedModel staticModel = null!;
-TexturedModel grass = null!;
-TexturedModel fern = null!;
-
 List<Entity> entities = new();
-Light light = new Light(new Vector3D<float>(2000.0f, 2000.0f, 2000.0f), new Vector3D<float>(1.0f, 1.0f, 1.0f));
+Light light = new Light(new Vector3D<float>(20000.0f, 40000.0f, 20000.0f), new Vector3D<float>(1.0f, 1.0f, 1.0f));
 
 Terrain terrain = null!;
 Terrain terrain2 = null!;
@@ -34,30 +30,58 @@ displayManager.Window.Load += () =>
 
     loader = new Loader(displayManager.GL);
 
+    // **********TERRAIN TEXTURE STUFF**********
+    var backgroundTexture = loader.LoadTerrainTexture("Assets/grassy.png");
+    var rTexture = loader.LoadTerrainTexture("Assets/dirt.png");
+    var gTexture = loader.LoadTerrainTexture("Assets/pinkFlowers.png");
+    var bTexture = loader.LoadTerrainTexture("Assets/path.png");
+
+    var texturePack = new TerrainTexturePack(backgroundTexture, rTexture, gTexture, bTexture);
+    var blendMap = loader.LoadTerrainTexture("Assets/blendMap.png");
+    // *****************************************
+
     var data = ObjFileLoader.LoadObj("Assets/tree.obj");
     var treeModel = loader.LoadToVAO(data.Vertices, data.Indices);
 
-    staticModel = new TexturedModel(treeModel, loader.LoadTexture("Assets/tree.png"));
-    grass = new TexturedModel(
+    var staticModel = new TexturedModel(treeModel, loader.LoadModelTexture("Assets/tree.png"));
+    var grass = new TexturedModel(
         ObjLoader.LoadObjModel("Assets/grassModel.obj", loader),
-        loader.LoadTexture("Assets/grassTexture.png"));
-    grass.Texture.HasTransparency = true;
-    grass.Texture.UseFakeLighting = true;
-    fern = new TexturedModel(
+        loader.LoadModelTexture("Assets/grassTexture.png"));
+    var flower = new TexturedModel(
+        ObjLoader.LoadObjModel("Assets/grassModel.obj", loader),
+        loader.LoadModelTexture("Assets/flower.png"));
+    var fern = new TexturedModel(
         ObjLoader.LoadObjModel("Assets/fern.obj", loader),
-        loader.LoadTexture("Assets/fern.png"));
-    fern.Texture.HasTransparency = true;
+        loader.LoadModelTexture("Assets/fern.png"));
+    var bobble = new TexturedModel(
+        ObjLoader.LoadObjModel("Assets/lowPolyTree.obj", loader),
+        loader.LoadModelTexture("Assets/lowPolyTree.png"));
+    
+    grass.ModelTexture.HasTransparency = true;
+    grass.ModelTexture.UseFakeLighting = true;
+    grass.ModelTexture.HasTransparency = true;
+    grass.ModelTexture.UseFakeLighting = true;
+    fern.ModelTexture.HasTransparency = true;
 
-    Random random = new Random();
-    for(int i = 0; i < 500; i++){
-        entities.Add(new Entity(staticModel, new Vector3D<float>(random.NextSingle() * 800 - 400,0,random.NextSingle() * -600),0,0,0,3));
-        entities.Add(new Entity(grass, new Vector3D<float>(random.NextSingle() * 800 - 400,0,random.NextSingle() * -600),0,0,0,1));
-        entities.Add(new Entity(fern, new Vector3D<float>(random.NextSingle() * 800 - 400,0,random.NextSingle() * -600),0,0,0,0.6f));
+    Random random = new Random(676452);
+    for(int i = 0; i < 400; i++){
+        if (i % 7 == 0)
+        {
+            entities.Add(new Entity(grass, new Vector3D<float>(random.NextSingle() * 400 - 200,0,random.NextSingle() * -400),0,0,0,1.8f));
+            entities.Add(new Entity(flower, new Vector3D<float>(random.NextSingle() * 400 - 200,0,random.NextSingle() * -400),0,0,0,2.3f));
+        }
+
+        if (i % 3 == 0)
+        {
+            entities.Add(new Entity(fern, new Vector3D<float>(random.NextSingle() * 400 - 200,0,random.NextSingle() * -400),0,random.NextSingle() * 360,0,0.9f));
+            entities.Add(new Entity(bobble, new Vector3D<float>(random.NextSingle() * 800 - 400,0,random.NextSingle() * -600),0,random.NextSingle() * 360,0,random.NextSingle() * 0.1f + 0.6f));
+            entities.Add(new Entity(staticModel, new Vector3D<float>(random.NextSingle() * 800 - 400,0,random.NextSingle() * -600),0,0,0,random.NextSingle() * 1 + 4));
+        }
     }
 
     // originally in teh script: 0,0 / 1,0 but then the terrain was behind the camera 
-    terrain = new Terrain(0, -1, loader, loader.LoadTexture("Assets/grass.png"));
-    terrain2 = new Terrain(-1, -1, loader, loader.LoadTexture("Assets/grass.png"));
+    terrain = new Terrain(0, -1, loader, texturePack, blendMap);
+    terrain2 = new Terrain(-1, -1, loader, texturePack, blendMap);
 
     camera = new Camera();
     renderer = new MasterRenderer(displayManager);

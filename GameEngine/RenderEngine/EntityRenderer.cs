@@ -42,16 +42,18 @@ public class EntityRenderer
 
     private void PrepareTexturedModel(TexturedModel model)
     {
-        if (model.Texture.HasTransparency)
+        if (model.ModelTexture.HasTransparency)
         {
             _masterRenderer.DisableCulling();
         }
 
         model.VAO.Activate();
 
-        _shader.LoadFakeLighting(model.Texture.UseFakeLighting);
-        _shader.LoadShineVariables(model.Texture.ShineDamper, model.Texture.Reflectivity);
-        model.Texture.Activate();
+        _shader.LoadFakeLighting(model.ModelTexture.UseFakeLighting);
+        _shader.LoadShineVariables(model.ModelTexture.ShineDamper, model.ModelTexture.Reflectivity);
+
+        _gl.ActiveTexture(TextureUnit.Texture0);
+        model.ModelTexture.Activate();
     }
 
     private void UnbindTexturedModel(TexturedModel model)

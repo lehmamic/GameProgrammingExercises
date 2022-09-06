@@ -28,27 +28,27 @@ public class Camera
     {
         if (keyboard.IsKeyPressed(Key.W))
         {
-            _position.Z -= 0.1f;
+            _position.Z -= 0.5f;
         }
         if (keyboard.IsKeyPressed(Key.S))
         {
-            _position.Z += 0.1f;
+            _position.Z += 0.5f;
         }
         if (keyboard.IsKeyPressed(Key.D))
         {
-            _position.X += 0.1f;
+            _position.X += 0.5f;
         }
         if (keyboard.IsKeyPressed(Key.A))
         {
-            _position.X -= 0.1f;
+            _position.X -= 0.5f;
         }
         if (keyboard.IsKeyPressed(Key.Space))
         {
-            _position.Y += 0.1f;
+            _position.Y += 0.5f;
         }
         if (keyboard.IsKeyPressed(Key.ShiftLeft))
         {
-            _position.Y -= 0.1f;
+            _position.Y -= 0.5f;
         }
     }
 }

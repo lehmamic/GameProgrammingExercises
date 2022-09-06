@@ -5,12 +5,12 @@ using SixLabors.ImageSharp.PixelFormats;
 
 namespace GameEngine.Textures;
 
-public class Texture : IDisposable
+public class ModelTexture : IDisposable
 {
     private readonly GL _gl;
     private readonly uint _handle;
 
-    public unsafe Texture(GL gl, string path)
+    public unsafe ModelTexture(GL gl, string path)
     {
         _gl = gl;
 

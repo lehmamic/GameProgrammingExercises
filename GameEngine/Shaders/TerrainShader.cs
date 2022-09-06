@@ -15,6 +15,15 @@ public class TerrainShader : Shader
     {
     }
 
+    public void ConnectTextures()
+    {
+        SetUniform("backgroundTexture", 0);
+        SetUniform("rTexture", 1);
+        SetUniform("gTexture", 2);
+        SetUniform("bTexture", 3);
+        SetUniform("blendMap", 4);
+    }
+
     public void LoadTransformationMatrix(Matrix4X4<float> matrix)
     {
         SetUniform("transformationMatrix", matrix);

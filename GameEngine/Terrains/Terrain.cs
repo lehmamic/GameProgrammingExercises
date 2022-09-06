@@ -9,9 +9,10 @@ public class Terrain
     private const float Size = 800.0f;
     private const int VertexCount = 128;
 
-    public Terrain(int gridX, int gridZ, Loader loader, Texture texture)
+    public Terrain(int gridX, int gridZ, Loader loader, TerrainTexturePack texturePack, TerrainTexture blendMap)
     {
-        Texture = texture;
+        TexturePack = texturePack;
+        BlendMap = blendMap;
         X = gridX * Size;
         Z = gridZ * Size;
         VAO = GenerateTerrain(loader);
@@ -23,7 +24,9 @@ public class Terrain
 
     public VertexArrayObject VAO { get; }
 
-    public Texture Texture { get; }
+    public TerrainTexturePack TexturePack { get; }
+
+    public TerrainTexture BlendMap { get; }
 
     private static VertexArrayObject GenerateTerrain(Loader loader){
         int count = VertexCount * VertexCount;
