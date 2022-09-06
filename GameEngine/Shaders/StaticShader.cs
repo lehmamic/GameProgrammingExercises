@@ -42,4 +42,9 @@ public class StaticShader : Shader
         SetUniform("shineDamper", damper);
         SetUniform("reflectivity", reflectivity);
     }
+
+    public void LoadFakeLighting(bool useFake)
+    {
+        SetUniform("useFakeLighting", useFake);
+    }
 }

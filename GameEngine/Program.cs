@@ -16,6 +16,8 @@ Loader loader = null!;
 
 VertexArrayObject model = null!;
 TexturedModel staticModel = null!;
+TexturedModel grass = null!;
+TexturedModel fern = null!;
 
 List<Entity> entities = new();
 Light light = new Light(new Vector3D<float>(2000.0f, 2000.0f, 2000.0f), new Vector3D<float>(1.0f, 1.0f, 1.0f));
@@ -34,11 +36,23 @@ displayManager.Window.Load += () =>
     loader = new Loader(displayManager.GL);
 
     model = ObjLoader.LoadObjModel("Assets/tree.obj", loader);
+
     staticModel = new TexturedModel(model, loader.LoadTexture("Assets/tree.png"));
+    grass = new TexturedModel(
+        ObjLoader.LoadObjModel("Assets/grassModel.obj", loader),
+        loader.LoadTexture("Assets/grassTexture.png"));
+    grass.Texture.HasTransparency = true;
+    grass.Texture.UseFakeLighting = true;
+    fern = new TexturedModel(
+        ObjLoader.LoadObjModel("Assets/fern.obj", loader),
+        loader.LoadTexture("Assets/fern.png"));
+    fern.Texture.HasTransparency = true;
 
     Random random = new Random();
     for(int i = 0; i < 500; i++){
         entities.Add(new Entity(staticModel, new Vector3D<float>(random.NextSingle() * 800 - 400,0,random.NextSingle() * -600),0,0,0,3));
+        entities.Add(new Entity(grass, new Vector3D<float>(random.NextSingle() * 800 - 400,0,random.NextSingle() * -600),0,0,0,1));
+        entities.Add(new Entity(fern, new Vector3D<float>(random.NextSingle() * 800 - 400,0,random.NextSingle() * -600),0,0,0,0.6f));
     }
 
     // originally in teh script: 0,0 / 1,0 but then the terrain was behind the camera 

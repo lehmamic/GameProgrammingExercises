@@ -21,15 +21,22 @@ void main()
     float brightness = max(nDotl, 0.2);
 
     vec3 diffuse = brightness * lightColor;
-    
+
     vec3 unitVectorToCamera = normalize(toCameraVector); // V
     vec3 lightDirection = -unitLightVector;
     vec3 reflectedLightDirection = reflect(lightDirection, unitNormal); // R
-    
+
     float specularFactor = dot(reflectedLightDirection, unitVectorToCamera); // dot(R,V)
     specularFactor = max(specularFactor, 0.0);
     float dampedFactor = pow(specularFactor, shineDamper); // pow(max(0.0, dot(R, V)), uSpecPower)
     vec3 finalSpecular = dampedFactor * reflectivity * lightColor;
 
-    out_Color = vec4(diffuse, 1.0) * texture(textuerSampler, pass_textureCoords) + vec4(finalSpecular, 1.0);
+    vec4 textureColor = texture(textuerSampler, pass_textureCoords);
+    // don't render transparent pixels
+    if (textureColor.a < 0.5) 
+    {
+        discard;
+    }
+
+    out_Color = vec4(diffuse, 1.0) * textureColor + vec4(finalSpecular, 1.0);
 }

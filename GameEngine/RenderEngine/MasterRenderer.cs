@@ -33,14 +33,13 @@ public class MasterRenderer : IDisposable
         _displayManager = displayManager;
         _gl = displayManager.GL;
 
-        _gl.Enable(GLEnum.CullFace);
-        _gl.CullFace(CullFaceMode.Back);
-        
+        EnableCulling();
+
         // _projectionMatrix = Matrix4X4.CreatePerspectiveFieldOfView(Scalar.DegreesToRadians(FOV), _displayManager.Width / _displayManager.Height, NearPlane, FarPlane);
         _projectionMatrix = Maths.CreateProjectionMatrix(FOV, _displayManager.Width, _displayManager.Height, NearPlane, FarPlane);
 
         _entityShader = new StaticShader(displayManager.GL);
-        _entityRenderer = new EntityRenderer(displayManager, _entityShader, _projectionMatrix);
+        _entityRenderer = new EntityRenderer(displayManager, this, _entityShader, _projectionMatrix);
         
         _terrainShader = new TerrainShader(displayManager.GL);
         _terrainRenderer = new TerrainRenderer(displayManager, _terrainShader, _projectionMatrix);
@@ -78,6 +77,17 @@ public class MasterRenderer : IDisposable
         }
 
         _entities[entity.Model].Add(entity);
+    }
+
+    public void EnableCulling()
+    {
+        _gl.Enable(GLEnum.CullFace);
+        _gl.CullFace(CullFaceMode.Back);
+    }
+
+    public void DisableCulling()
+    {
+        _gl.Disable(GLEnum.CullFace);
     }
 
     public void Dispose()

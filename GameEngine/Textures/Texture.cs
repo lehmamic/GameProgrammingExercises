@@ -48,6 +48,10 @@ public class Texture : IDisposable
     public float ShineDamper { get; set; } = 1.0f;
 
     public float Reflectivity { get; set; } = 0.0f;
+    
+    public bool HasTransparency { get; set; }
+
+    public bool UseFakeLighting { get; set; }
 
     public void Activate()
     {
