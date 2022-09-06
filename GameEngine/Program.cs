@@ -3,7 +3,7 @@
 using GameEngine.Entities;
 using GameEngine.Models;
 using GameEngine.RenderEngine;
-using GameEngine.Shaders;
+using GameEngine.Terrains;
 using GameEngine.Textures;
 using Silk.NET.Input;
 using Silk.NET.Maths;
@@ -13,13 +13,18 @@ using var displayManager = new DisplayManager(1024, 768, "OpenGL 3D Game Program
 IInputContext input = null!;
 IKeyboard primaryKeyboard = null!;
 Loader loader = null!;
-MasterRenderer renderer = null!;
+
 VertexArrayObject model = null!;
-Texture texture = null!;
 TexturedModel staticModel = null!;
-Entity entity = null!;
+
+List<Entity> entities = new();
+Light light = new Light(new Vector3D<float>(2000.0f, 2000.0f, 2000.0f), new Vector3D<float>(1.0f, 1.0f, 1.0f));
+
+Terrain terrain = null!;
+Terrain terrain2 = null!;
+
 Camera camera = null!;
-Light light = new Light(new Vector3D<float>(200.0f, 200.0f, 100.0f), new Vector3D<float>(1.0f, 1.0f, 1.0f));
+MasterRenderer renderer = null!;
 
 displayManager.Window.Load += () =>
 {
@@ -27,17 +32,20 @@ displayManager.Window.Load += () =>
     primaryKeyboard = input.Keyboards.First();
 
     loader = new Loader(displayManager.GL);
-    renderer = new MasterRenderer(displayManager);
 
-    model = ObjLoader.LoadObjModel("Assets/dragon.obj", loader);
+    model = ObjLoader.LoadObjModel("Assets/tree.obj", loader);
+    staticModel = new TexturedModel(model, loader.LoadTexture("Assets/tree.png"));
 
-    texture = loader.LoadTexture("Assets/white.png");
-    staticModel = new TexturedModel(model, texture);
-    staticModel.Texture.ShineDamper = 10.0f;
-    staticModel.Texture.Reflectivity = 1.0f;
+    Random random = new Random();
+    for(int i = 0; i < 500; i++){
+        entities.Add(new Entity(staticModel, new Vector3D<float>(random.NextSingle() * 800 - 400,0,random.NextSingle() * -600),0,0,0,3));
+    }
 
-    entity = new Entity(staticModel, new Vector3D<float>(0.0f, 0.0f, -25.0f), 0.0f, 0.0f, 0.0f, 1.0f);
+    terrain = new Terrain(0, 0, loader, loader.LoadTexture("Assets/grass.png"));
+    terrain2 = new Terrain(1, 0, loader, loader.LoadTexture("Assets/grass.png"));
+
     camera = new Camera();
+    renderer = new MasterRenderer(displayManager);
 };
 
 displayManager.Window.Closing += () =>
@@ -48,14 +56,23 @@ displayManager.Window.Closing += () =>
 
 displayManager.Window.Update += (deltaTime) =>
 {
-    entity.IncreaseRotation(0.0f, 1.0f, 0.0f);
+    if (primaryKeyboard.IsKeyPressed(Key.Escape))
+    {
+        displayManager.Close();
+    }
+
     camera.Move(primaryKeyboard);
 };
 
 displayManager.Window.Render += (deltaTime) =>
 {
     // Game logic
-    renderer.ProcessEntity(entity);
+    renderer.ProcessTerrain(terrain);
+    renderer.ProcessTerrain(terrain2);
+    foreach(var entity in entities)
+    {
+        renderer.ProcessEntity(entity);
+    }
     renderer.Render(light, camera);
 };
 

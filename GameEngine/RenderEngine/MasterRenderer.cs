@@ -1,31 +1,73 @@
 using GameEngine.Entities;
 using GameEngine.Models;
 using GameEngine.Shaders;
+using GameEngine.Terrains;
+using GameEngine.Toolbox;
+using Silk.NET.Maths;
+using Silk.NET.OpenGL;
 
 namespace GameEngine.RenderEngine;
 
 public class MasterRenderer : IDisposable
 {
-    private readonly StaticShader _shader;
-    private readonly Renderer _renderer;
+    private const float FOV = 70.0f;
+    private const float NearPlane = 0.1f;
+    private const float FarPlane = 1000.0f;
+
+    private readonly DisplayManager _displayManager;
+    private readonly GL _gl;
+
+    private readonly StaticShader _entityShader;
+    private readonly EntityRenderer _entityRenderer;
+    
+    private readonly TerrainShader _terrainShader;
+    private readonly TerrainRenderer _terrainRenderer;
+
+    private readonly Matrix4X4<float> _projectionMatrix;
 
     private readonly Dictionary<TexturedModel, List<Entity>> _entities = new();
+    private readonly List<Terrain> _terrains = new();
 
     public MasterRenderer(DisplayManager displayManager)
     {
-        _shader = new StaticShader(displayManager.GL);
-        _renderer = new Renderer(displayManager, _shader);
+        _displayManager = displayManager;
+        _gl = displayManager.GL;
+
+        _gl.Enable(GLEnum.CullFace);
+        _gl.CullFace(CullFaceMode.Back);
+        
+        // _projectionMatrix = Matrix4X4.CreatePerspectiveFieldOfView(Scalar.DegreesToRadians(FOV), _displayManager.Width / _displayManager.Height, NearPlane, FarPlane);
+        _projectionMatrix = Maths.CreateProjectionMatrix(FOV, _displayManager.Width, _displayManager.Height, NearPlane, FarPlane);
+
+        _entityShader = new StaticShader(displayManager.GL);
+        _entityRenderer = new EntityRenderer(displayManager, _entityShader, _projectionMatrix);
+        
+        _terrainShader = new TerrainShader(displayManager.GL);
+        _terrainRenderer = new TerrainRenderer(displayManager, _terrainShader, _projectionMatrix);
     }
 
     public void Render(Light sun, Camera camera)
     {
-        _renderer.Prepare();
-        _shader.Activate();
-        _shader.LoadLight(sun);
-        _shader.LoadViewMatrix(camera);
-        _renderer.Render(_entities);
-        _shader.Deactivate();
+        Prepare();
+
+        _entityShader.Activate();
+        _entityShader.LoadLight(sun);
+        _entityShader.LoadViewMatrix(camera);
+        _entityRenderer.Render(_entities);
+        _entityShader.Deactivate();
         _entities.Clear();
+
+        _terrainShader.Activate();
+        _terrainShader.LoadLight(sun);
+        _terrainShader.LoadViewMatrix(camera);
+        _terrainRenderer.Render(_terrains);
+        _terrainShader.Deactivate();
+        _terrains.Clear();
+    }
+
+    public void ProcessTerrain(Terrain terrain)
+    {
+        _terrains.Add(terrain);
     }
 
     public void ProcessEntity(Entity entity)
@@ -40,6 +82,17 @@ public class MasterRenderer : IDisposable
 
     public void Dispose()
     {
-        _shader.Dispose();
+        _terrainShader.Dispose();
+        _entityShader.Dispose();
+    }
+    
+    private void Prepare()
+    {
+        _gl.ClearColor(0.486f, 0.086f, 0.086f, 1.0f);
+        _gl.Clear((uint) (ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit));
+        
+        // Enable depth buffer/disable alpha blend
+        _gl.Enable(EnableCap.DepthTest);
+        _gl.Disable(EnableCap.Blend);
     }
 }

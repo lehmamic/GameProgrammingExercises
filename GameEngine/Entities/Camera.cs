@@ -28,15 +28,23 @@ public class Camera
     {
         if (keyboard.IsKeyPressed(Key.W))
         {
-            _position.Z -= 0.02f;
+            _position.Z -= 0.1f;
         }
         if (keyboard.IsKeyPressed(Key.D))
         {
-            _position.X += 0.02f;
+            _position.X += 0.1f;
         }
         if (keyboard.IsKeyPressed(Key.A))
         {
-            _position.X -= 0.02f;
+            _position.X -= 0.1f;
+        }
+        if (keyboard.IsKeyPressed(Key.Space))
+        {
+            _position.Y += 0.1f;
+        }
+        if (keyboard.IsKeyPressed(Key.ShiftLeft))
+        {
+            _position.Y -= 0.1f;
         }
     }
 }
