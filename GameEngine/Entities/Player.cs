@@ -1,4 +1,5 @@
 using GameEngine.Models;
+using GameEngine.Terrains;
 using Silk.NET.Input;
 using Silk.NET.Maths;
 
@@ -11,8 +12,6 @@ public class Player : Entity
     private const float Gravity = -50.0f;
     private const float JumpPower = 30.0f;
 
-    private static float TerrainHeight = 0.0f;
-
     private float _currentSpeed = 0.0f;
     private float _currentTurnSpeed = 0.0f;
     private float _upwardsSpeed = 0.0f;
@@ -24,7 +23,7 @@ public class Player : Entity
     {
     }
 
-    public void Move(float deltaTime, IKeyboard keyboard)
+    public void Move(float deltaTime, Terrain terrain, IKeyboard keyboard)
     {
         CheckInputs(keyboard);
 
@@ -37,11 +36,13 @@ public class Player : Entity
 
         _upwardsSpeed += Gravity * deltaTime;
         IncreasePosition(0.0f, _upwardsSpeed * deltaTime, 0.0f);
-        if (Position.Y < TerrainHeight)
+
+        float terrainHeight = terrain.GetHeightOfTerrain(Position.X, Position.Z);
+        if (Position.Y < terrainHeight)
         {
             _upwardsSpeed = 0.0f;
             _isInAir = false;
-            Position = new Vector3D<float>(Position.X, TerrainHeight, Position.Z);
+            Position = new Vector3D<float>(Position.X, terrainHeight, Position.Z);
         }
     }
 

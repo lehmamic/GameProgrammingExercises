@@ -19,7 +19,7 @@ List<Entity> entities = new();
 Light light = new Light(new Vector3D<float>(20000.0f, 40000.0f, 20000.0f), new Vector3D<float>(1.0f, 1.0f, 1.0f));
 
 Terrain terrain = null!;
-Terrain terrain2 = null!;
+// Terrain terrain2 = null!;
 
 Camera camera = null!;
 MasterRenderer renderer = null!;
@@ -67,26 +67,35 @@ displayManager.Window.Load += () =>
     grass.ModelTexture.UseFakeLighting = true;
     fern.ModelTexture.HasTransparency = true;
 
-    Random random = new Random(676452);
-    for(int i = 0; i < 400; i++){
-        if (i % 7 == 0)
-        {
-            entities.Add(new Entity(grass, new Vector3D<float>(random.NextSingle() * 400 - 200,0,random.NextSingle() * -400),0,0,0,1.8f));
-            entities.Add(new Entity(flower, new Vector3D<float>(random.NextSingle() * 400 - 200,0,random.NextSingle() * -400),0,0,0,2.3f));
-        }
+    terrain = new Terrain(0, -1, loader, texturePack, blendMap, "Assets/heightmap.png");
+    // terrain2 = new Terrain(-1, -1, loader, texturePack, blendMap, "Assets/heightmap.png");
 
-        if (i % 3 == 0)
+    Random random = new Random(676452);
+    for(int i = 0; i < 400; i++)
+    {
+        if (i % 20 == 0)
         {
-            entities.Add(new Entity(fern, new Vector3D<float>(random.NextSingle() * 400 - 200,0,random.NextSingle() * -400),0,random.NextSingle() * 360,0,0.9f));
-            entities.Add(new Entity(bobble, new Vector3D<float>(random.NextSingle() * 800 - 400,0,random.NextSingle() * -600),0,random.NextSingle() * 360,0,random.NextSingle() * 0.1f + 0.6f));
-            entities.Add(new Entity(staticModel, new Vector3D<float>(random.NextSingle() * 800 - 400,0,random.NextSingle() * -600),0,0,0,random.NextSingle() * 1 + 4));
+            var x = random.NextSingle() * 800 - 400;
+            var z = random.NextSingle() * -400;
+            var y = terrain.GetHeightOfTerrain(x, z);
+            entities.Add(new Entity(fern, new Vector3D<float>(x,y,z),0,random.NextSingle() * 360,0,0.9f));
+        }
+        if (i % 5 == 0)
+        {
+            // entities.Add(new Entity(grass, new Vector3D<float>(random.NextSingle() * 400 - 200,0,random.NextSingle() * -400),0,0,0,1.8f));
+            // entities.Add(new Entity(flower, new Vector3D<float>(random.NextSingle() * 400 - 200,0,random.NextSingle() * -400),0,0,0,2.3f));
+            var x = random.NextSingle() * 800 - 400;
+            var z = random.NextSingle() * -600;
+            var y = terrain.GetHeightOfTerrain(x, z);
+            entities.Add(new Entity(bobble, new Vector3D<float>(x,y,z),0,random.NextSingle() * 360,0,random.NextSingle() * 0.1f + 0.6f));
+
+            x = random.NextSingle() * 800 - 400;
+            z = random.NextSingle() * -600;
+            y = terrain.GetHeightOfTerrain(x, z);
+            entities.Add(new Entity(staticModel, new Vector3D<float>(x,y,z),0,0,0,random.NextSingle() * 1 + 4));
         }
     }
 
-    // originally in teh script: 0,0 / 1,0 but then the terrain was behind the camera 
-    terrain = new Terrain(0, -1, loader, texturePack, blendMap, "Assets/heightmap.png");
-    terrain2 = new Terrain(-1, -1, loader, texturePack, blendMap, "Assets/heightmap.png");
-    
     renderer = new MasterRenderer(displayManager);
 
     var bunnyModel = ObjLoader.LoadObjModel("Assets/person.obj", loader);
@@ -110,7 +119,7 @@ displayManager.Window.Update += (deltaTime) =>
     }
 
     camera.Move(primaryKeyboard, primaryMouse);
-    player.Move((float)deltaTime, primaryKeyboard);
+    player.Move((float)deltaTime, terrain, primaryKeyboard);
 };
 
 displayManager.Window.Render += (deltaTime) =>
@@ -118,7 +127,7 @@ displayManager.Window.Render += (deltaTime) =>
     // Game logic
     renderer.ProcessEntity(player);
     renderer.ProcessTerrain(terrain);
-    renderer.ProcessTerrain(terrain2);
+    // renderer.ProcessTerrain(terrain2);
     foreach(var entity in entities)
     {
         renderer.ProcessEntity(entity);

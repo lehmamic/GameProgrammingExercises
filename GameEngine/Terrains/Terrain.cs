@@ -1,6 +1,7 @@
 using GameEngine.Models;
 using GameEngine.RenderEngine;
 using GameEngine.Textures;
+using GameEngine.Toolbox;
 using Silk.NET.Maths;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
@@ -12,6 +13,8 @@ public class Terrain
     private const float Size = 800.0f;
     private const float MaxHeight = 40.0f;
     private const float MaxPixelColor = 256.0f; // 256.0f * 256.0f * 256.0f; its grayscale so we use only one pixel attribute
+
+    private float[,]? _heights;
 
     public Terrain(int gridX, int gridZ, Loader loader, TerrainTexturePack texturePack, TerrainTexture blendMap, string heightMap)
     {
@@ -32,7 +35,47 @@ public class Terrain
 
     public TerrainTexture BlendMap { get; }
 
-    private static VertexArrayObject GenerateTerrain(Loader loader, string heightMap)
+    public float GetHeightOfTerrain(float worldX, float worldZ)
+    {
+        float terrainX = worldX - X;
+        float terrainZ = worldZ - Z;
+
+        float gridSquareSize = Size / ((float) _heights!.GetLength(0) - 1);
+        int gridX = (int) Scalar.Floor(terrainX / gridSquareSize);
+        int gridZ = (int) Scalar.Floor(terrainZ / gridSquareSize);
+        if (gridX >= _heights!.GetLength(0) - 1 || gridZ >= _heights!.GetLength(0) - 1 || gridX < 0 || gridZ < 0)
+        {
+            return 0;
+        }
+
+        // calculate the coord on the square
+        float xCoord = (terrainX % gridSquareSize) / gridSquareSize;
+        float zCoord = (terrainZ % gridSquareSize) / gridSquareSize;
+        
+        // We will du Barycentryc interpolation
+        float answer;
+        
+        // First, find out on which triangle we are
+        if (xCoord <= (1-zCoord)) {
+            answer = Maths
+                .BarryCentric(
+                    new Vector3D<float>(0, _heights[gridX, gridZ], 0),
+                    new Vector3D<float>(1, _heights[gridX + 1, gridZ], 0),
+                    new Vector3D<float>(0, _heights[gridX, gridZ + 1], 1),
+                    new Vector2D<float>(xCoord, zCoord));
+        } else {
+            answer = Maths
+                .BarryCentric(
+                    new Vector3D<float>(1, _heights[gridX + 1, gridZ], 0),
+                    new Vector3D<float>(1, _heights[gridX + 1, gridZ + 1], 1),
+                    new Vector3D<float>(0, _heights[gridX, gridZ + 1], 1),
+                    new Vector2D<float>(xCoord, zCoord));
+        }
+
+        return answer;
+    }
+
+    private VertexArrayObject GenerateTerrain(Loader loader, string heightMap)
     {
         var imageConfig = Configuration.Default.Clone();
         imageConfig.PreferContiguousImageBuffers = true;
@@ -40,7 +83,9 @@ public class Terrain
         using var image = Image.Load<Rgba32>(imageConfig, heightMap);
         
         var vertexCount = image.Height;
-        
+
+        _heights = new float[vertexCount, vertexCount];
+
         int count = vertexCount * vertexCount;
         float[] vertices = new float[count * 8];
         uint[] indices = new uint[6 * (vertexCount - 1) * (vertexCount - 1)];
@@ -49,8 +94,10 @@ public class Terrain
         for(int i = 0; i < vertexCount; i++){
             for(int j = 0; j < vertexCount; j++){
                 // position
+                var height = GetHeight(j, i, image);
+                _heights[j, i] = height;
                 vertices[vertexPointer * 8] = (float)j / ((float)vertexCount - 1) * Size;
-                vertices[vertexPointer * 8 + 1] = GetHeight(j, i, image);
+                vertices[vertexPointer * 8 + 1] = height;
                 vertices[vertexPointer * 8 + 2] = (float)i / ((float)vertexCount - 1) * Size;
 
                 // normals
