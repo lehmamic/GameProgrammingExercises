@@ -11,7 +11,7 @@ public class Terrain
 {
     private const float Size = 800.0f;
     private const float MaxHeight = 40.0f;
-    private const float MaxPixelColor = 256.0f * 256.0f * 256.0f;
+    private const float MaxPixelColor = 256.0f; // 256.0f * 256.0f * 256.0f; its grayscale so we use only one pixel attribute
 
     public Terrain(int gridX, int gridZ, Loader loader, TerrainTexturePack texturePack, TerrainTexture blendMap, string heightMap)
     {
@@ -104,13 +104,11 @@ public class Terrain
         }
 
         var pixelColor = image[x, z];
-        float height = pixelColor.R * pixelColor.G * pixelColor.B;
+        // its grayscale so we an use only one color attribute
+        float height = -1 * pixelColor.R;
         height += MaxPixelColor / 2.0f;
         height /= MaxPixelColor / 2.0f;
         height *= MaxHeight;
-
-        // I don't know why, but my terrain is to height
-        height -= 50;
 
         return height;
     }
