@@ -1,4 +1,5 @@
 using System.Numerics;
+using System.Transactions;
 using GameEngine.Entities;
 using Silk.NET.Maths;
 
@@ -14,6 +15,15 @@ public static class Maths
         matrix *= Matrix4X4.CreateRotationY(Scalar.DegreesToRadians(ry));
         matrix *= Matrix4X4.CreateRotationZ(Scalar.DegreesToRadians(rz));
         matrix *= Matrix4X4.CreateTranslation(translation);
+
+        return matrix;
+    }
+    
+    public static Matrix4X4<float> CreateTransformationMatrix(Vector2D<float> translation, Vector2D<float> scale) {
+        var matrix = Matrix4X4<float>.Identity;
+
+        matrix *= Matrix4X4.CreateScale(scale.X, scale.Y, 1f);
+        matrix *= Matrix4X4.CreateTranslation(new Vector3D<float>(translation.X, translation.Y,  0.0f));
 
         return matrix;
     }

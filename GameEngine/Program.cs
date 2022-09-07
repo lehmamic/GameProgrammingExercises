@@ -1,6 +1,7 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
 using GameEngine.Entities;
+using GameEngine.Guis;
 using GameEngine.Models;
 using GameEngine.RenderEngine;
 using GameEngine.Terrains;
@@ -17,12 +18,14 @@ Loader loader = null!;
 
 List<Entity> entities = new();
 Light light = new Light(new Vector3D<float>(20000.0f, 40000.0f, 20000.0f), new Vector3D<float>(1.0f, 1.0f, 1.0f));
+List<GuiTexture> guis = new();
 
 Terrain terrain = null!;
 // Terrain terrain2 = null!;
 
 Camera camera = null!;
 MasterRenderer renderer = null!;
+GuiRenderer guiRenderer = null!;
 
 Player player = null!;
 
@@ -109,17 +112,24 @@ displayManager.Window.Load += () =>
     }
 
     renderer = new MasterRenderer(displayManager);
+    guiRenderer = new GuiRenderer(displayManager, renderer, loader, Matrix4X4<float>.Identity);
 
     var bunnyModel = ObjLoader.LoadObjModel("Assets/person.obj", loader);
     var standfordBunny = new TexturedModel(bunnyModel, loader.LoadModelTexture("Assets/playerTexture.png"));
 
     player = new(standfordBunny, new Vector3D<float>(100, 0, -50), 0, 180, 0, 0.6f);
     camera = new Camera(player);
+
+    var gui = loader.LoadGuiTexture("Assets/socuwan.png", new Vector2D<float>(0.5f, 0.5f), new Vector2D<float>(0.25f, 0.25f));
+    var gui2 = loader.LoadGuiTexture("Assets/thinmatrix.png", new Vector2D<float>(0.3f, 0.58f), new Vector2D<float>(0.4f, 0.4f));
+    guis.Add(gui);
+    guis.Add(gui2);
 };
 
 displayManager.Window.Closing += () =>
 {
     renderer.Dispose();
+    guiRenderer.Dispose();
     loader.Dispose();
 };
 
@@ -145,6 +155,7 @@ displayManager.Window.Render += (deltaTime) =>
         renderer.ProcessEntity(entity);
     }
     renderer.Render(light, camera);
+    guiRenderer.Render(guis);
 };
 
 displayManager.Window

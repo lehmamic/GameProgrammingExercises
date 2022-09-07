@@ -1,5 +1,7 @@
+using GameEngine.Guis;
 using GameEngine.Models;
 using GameEngine.Textures;
+using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 
 namespace GameEngine.RenderEngine;
@@ -23,6 +25,14 @@ public class Loader : IDisposable
 
         return vao;
     }
+    
+    public VertexArrayObject LoadToVAO(float[] vertices)
+    {
+        var vao = new VertexArrayObject(_gl, vertices);
+        _vaos.Add(vao);
+
+        return vao;
+    }
 
     public ModelTexture LoadModelTexture(string fileName)
     {
@@ -35,6 +45,14 @@ public class Loader : IDisposable
     public TerrainTexture LoadTerrainTexture(string fileName)
     {
         var texture = new TerrainTexture(_gl, fileName);
+        _textures.Add(texture);
+
+        return texture;
+    }
+    
+    public GuiTexture LoadGuiTexture(string fileName, Vector2D<float> position, Vector2D<float> scale)
+    {
+        var texture = new GuiTexture(_gl, fileName, position, scale);
         _textures.Add(texture);
 
         return texture;
