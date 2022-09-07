@@ -54,18 +54,30 @@ displayManager.Window.Load += () =>
     var flower = new TexturedModel(
         ObjLoader.LoadObjModel("Assets/grassModel.obj", loader),
         loader.LoadModelTexture("Assets/flower.png"));
+
+    var fernTextureAtlas = loader.LoadModelTexture("Assets/fern.png");
+    fernTextureAtlas.NumberOfRows = 2;
     var fern = new TexturedModel(
         ObjLoader.LoadObjModel("Assets/fern.obj", loader),
-        loader.LoadModelTexture("Assets/fern.png"));
+        fernTextureAtlas);
+
+    var lowPolyTreeTextureAtlas = loader.LoadModelTexture("Assets/lowPolyTree.png");
+    lowPolyTreeTextureAtlas.NumberOfRows = 2;
     var bobble = new TexturedModel(
         ObjLoader.LoadObjModel("Assets/lowPolyTree.obj", loader),
-        loader.LoadModelTexture("Assets/lowPolyTree.png"));
+        lowPolyTreeTextureAtlas);
+    var box = new TexturedModel(
+        ObjLoader.LoadObjModel("Assets/box.obj", loader),
+        loader.LoadModelTexture("Assets/box.png"));
+    var box2 = new TexturedModel(
+        ObjLoader.LoadObjModel("Assets/box.obj", loader),
+        loader.LoadModelTexture("Assets/box.png"));
     
-    grass.ModelTexture.HasTransparency = true;
-    grass.ModelTexture.UseFakeLighting = true;
-    grass.ModelTexture.HasTransparency = true;
-    grass.ModelTexture.UseFakeLighting = true;
-    fern.ModelTexture.HasTransparency = true;
+    grass.Texture.HasTransparency = true;
+    grass.Texture.UseFakeLighting = true;
+    grass.Texture.HasTransparency = true;
+    grass.Texture.UseFakeLighting = true;
+    fern.Texture.HasTransparency = true;
 
     terrain = new Terrain(0, -1, loader, texturePack, blendMap, "Assets/heightmap.png");
     // terrain2 = new Terrain(-1, -1, loader, texturePack, blendMap, "Assets/heightmap.png");
@@ -73,12 +85,12 @@ displayManager.Window.Load += () =>
     Random random = new Random(676452);
     for(int i = 0; i < 400; i++)
     {
-        if (i % 20 == 0)
+        if (i % 2 == 0)
         {
             var x = random.NextSingle() * 800 - 400;
-            var z = random.NextSingle() * -400;
+            var z = random.NextSingle() * -600;
             var y = terrain.GetHeightOfTerrain(x, z);
-            entities.Add(new Entity(fern, new Vector3D<float>(x,y,z),0,random.NextSingle() * 360,0,0.9f));
+            entities.Add(new Entity(fern, random.Next(0, 3),new Vector3D<float>(x,y,z),0,random.NextSingle() * 360,0,0.9f));
         }
         if (i % 5 == 0)
         {
@@ -87,7 +99,7 @@ displayManager.Window.Load += () =>
             var x = random.NextSingle() * 800 - 400;
             var z = random.NextSingle() * -600;
             var y = terrain.GetHeightOfTerrain(x, z);
-            entities.Add(new Entity(bobble, new Vector3D<float>(x,y,z),0,random.NextSingle() * 360,0,random.NextSingle() * 0.1f + 0.6f));
+            entities.Add(new Entity(bobble, random.Next(0, 3), new Vector3D<float>(x,y,z),0,random.NextSingle() * 360,0,random.NextSingle() * 0.1f + 0.6f));
 
             x = random.NextSingle() * 800 - 400;
             z = random.NextSingle() * -600;

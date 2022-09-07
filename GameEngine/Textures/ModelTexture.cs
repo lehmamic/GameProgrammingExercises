@@ -18,4 +18,6 @@ public class ModelTexture : Texture
     public bool HasTransparency { get; set; }
 
     public bool UseFakeLighting { get; set; }
+
+    public int NumberOfRows { get; set; } = 1;
 }

@@ -52,4 +52,14 @@ public class StaticShader : Shader
     {
         SetUniform("skyColor", new Vector3D<float>(r, g, b));
     }
+
+    public void LoadNumberOfRows(int numberOfRows)
+    {
+        SetUniform("numberOfRows", (float)numberOfRows);
+    }
+
+    public void LoadOffset(float x, float y)
+    {
+        SetUniform("offset", new Vector2D<float>(x, y));
+    }
 }

@@ -82,6 +82,16 @@ public abstract class Shader : IDisposable
         _gl.Uniform3(location, value.X, value.Y, value.Z);
     }
 
+    public void SetUniform(string name, Vector2D<float> value)
+    {
+        int location = _gl.GetUniformLocation(_handle, name);
+        if (location == -1)
+        {
+            throw new ShaderException($"{name} uniform not found on shader.");
+        }
+        _gl.Uniform2(location, value.X, value.Y);
+    }
+
     public unsafe void SetUniform(string name, Matrix4X4<float> value)
     {
         // Find the uniform by this name

@@ -42,18 +42,19 @@ public class EntityRenderer
 
     private void PrepareTexturedModel(TexturedModel model)
     {
-        if (model.ModelTexture.HasTransparency)
+        model.VAO.Activate();
+
+        if (model.Texture.HasTransparency)
         {
             _masterRenderer.DisableCulling();
         }
 
-        model.VAO.Activate();
-
-        _shader.LoadFakeLighting(model.ModelTexture.UseFakeLighting);
-        _shader.LoadShineVariables(model.ModelTexture.ShineDamper, model.ModelTexture.Reflectivity);
+        _shader.LoadNumberOfRows(model.Texture.NumberOfRows);
+        _shader.LoadFakeLighting(model.Texture.UseFakeLighting);
+        _shader.LoadShineVariables(model.Texture.ShineDamper, model.Texture.Reflectivity);
 
         _gl.ActiveTexture(TextureUnit.Texture0);
-        model.ModelTexture.Activate();
+        model.Texture.Activate();
     }
 
     private void UnbindTexturedModel(TexturedModel model)
@@ -67,5 +68,6 @@ public class EntityRenderer
     {
         Matrix4X4<float> transformationMatrix = Maths.CreateTranslationMatrix(entity.Position, entity.RotX, entity.RotY, entity.RotZ, entity.Scale);
         _shader.LoadTransformationMatrix(transformationMatrix);
+        _shader.LoadOffset(entity.TextureXOffset, entity.TextureYOffset);
     }
 }

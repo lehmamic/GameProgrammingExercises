@@ -5,6 +5,8 @@ namespace GameEngine.Entities;
 
 public class Entity
 {
+    private readonly int _textureIndex;
+
     private Vector3D<float> _position;
     private float _rotX;
     private float _rotY;
@@ -12,8 +14,14 @@ public class Entity
     private float _scale;
 
     public Entity(TexturedModel model, Vector3D<float> position, float rotX, float rotY, float rotZ, float scale)
+    : this(model, 0, position, rotX, rotY, rotZ, scale)
+    {
+    }
+    
+    public Entity(TexturedModel model, int textureIndex, Vector3D<float> position, float rotX, float rotY, float rotZ, float scale)
     {
         Model = model;
+        _textureIndex = textureIndex;
         Position = position;
         RotX = rotX;
         RotY = rotY;
@@ -65,5 +73,23 @@ public class Entity
     {
         get => _scale;
         set => _scale = value;
+    }
+
+    public float TextureXOffset
+    {
+        get
+        {
+            int column = _textureIndex % Model.Texture.NumberOfRows;
+            return (float) column / (float) Model.Texture.NumberOfRows;
+        }
+    }
+    
+    public float TextureYOffset
+    {
+        get
+        {
+            int row = _textureIndex / Model.Texture.NumberOfRows;
+            return (float) row / (float) Model.Texture.NumberOfRows;
+        }
     }
 }
