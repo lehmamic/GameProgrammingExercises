@@ -21,7 +21,6 @@ List<Light> lights = new();
 List<GuiTexture> guis = new();
 
 Terrain terrain = null!;
-// Terrain terrain2 = null!;
 
 Camera camera = null!;
 MasterRenderer renderer = null!;
@@ -57,6 +56,9 @@ displayManager.Window.Load += () =>
     var flower = new TexturedModel(
         ObjLoader.LoadObjModel("Assets/grassModel.obj", loader),
         loader.LoadModelTexture("Assets/flower.png"));
+    var pine = new TexturedModel(
+        ObjLoader.LoadObjModel("Assets/pine.obj", loader),
+        loader.LoadModelTexture("Assets/pine.png"));
 
     var fernTextureAtlas = loader.LoadModelTexture("Assets/fern.png");
     fernTextureAtlas.NumberOfRows = 2;
@@ -87,7 +89,6 @@ displayManager.Window.Load += () =>
     lamp.Texture.UseFakeLighting = true;
 
     terrain = new Terrain(0, -1, loader, texturePack, blendMap, "Assets/heightmap.png");
-    // terrain2 = new Terrain(-1, -1, loader, texturePack, blendMap, "Assets/heightmap.png");
 
     Random random = new Random(676452);
     for(int i = 0; i < 400; i++)
@@ -106,12 +107,12 @@ displayManager.Window.Load += () =>
             var x = random.NextSingle() * 800 - 400;
             var z = random.NextSingle() * -600;
             var y = terrain.GetHeightOfTerrain(x, z);
-            entities.Add(new Entity(bobble, random.Next(0, 3), new Vector3D<float>(x,y,z),0,random.NextSingle() * 360,0,random.NextSingle() * 0.1f + 0.6f));
+            entities.Add(new Entity(pine, random.Next(0, 3), new Vector3D<float>(x,y,z),0,random.NextSingle() * 360,0,random.NextSingle() * 0.1f + 0.6f));
 
             x = random.NextSingle() * 800 - 400;
             z = random.NextSingle() * -600;
             y = terrain.GetHeightOfTerrain(x, z);
-            entities.Add(new Entity(staticModel, new Vector3D<float>(x,y,z),0,0,0,random.NextSingle() * 1 + 4));
+            entities.Add(new Entity(pine, new Vector3D<float>(x,y,z),0,0,0,random.NextSingle() * 1 + 4));
         }
     }
 
