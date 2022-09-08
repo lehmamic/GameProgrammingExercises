@@ -7,6 +7,8 @@ namespace GameEngine.Shaders;
 
 public class TerrainShader : Shader
 {
+    public const int MaxLights = 4;
+
     private const string VertexFile = "Shaders/Terrain.vert";
     private const string FragmentFile = "Shaders/Terrain.frag";
 
@@ -40,10 +42,22 @@ public class TerrainShader : Shader
         SetUniform("viewMatrix", viewMatrix);
     }
 
-    public void LoadLight(Light light)
+    public void LoadLights(List<Light> light)
     {
-        SetUniform("lightPosition", light.Position);
-        SetUniform("lightColor", light.Color);
+        for (int i = 0; i < MaxLights; i++)
+        {
+            if (i < light.Count)
+            {
+                SetUniform($"lightPosition[{i}]", light[i].Position);
+                SetUniform($"lightColor[{i}]", light[i].Color);
+            }
+            else
+            {
+                SetUniform($"lightPosition[{i}]", Vector3D<float>.Zero);
+                SetUniform($"lightColor[{i}]", Vector3D<float>.Zero);
+            }
+
+        }
     }
 
     public void LoadShineVariables(float damper, float reflectivity)

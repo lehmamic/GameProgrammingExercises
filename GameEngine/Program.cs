@@ -17,7 +17,7 @@ IMouse primaryMouse = null!;
 Loader loader = null!;
 
 List<Entity> entities = new();
-Light light = new Light(new Vector3D<float>(20000.0f, 40000.0f, 20000.0f), new Vector3D<float>(1.0f, 1.0f, 1.0f));
+List<Light> lights = new();
 List<GuiTexture> guis = new();
 
 Terrain terrain = null!;
@@ -110,7 +110,12 @@ displayManager.Window.Load += () =>
             entities.Add(new Entity(staticModel, new Vector3D<float>(x,y,z),0,0,0,random.NextSingle() * 1 + 4));
         }
     }
-
+    
+    Light light = new Light(new Vector3D<float>(0.0f, 10000.0f, -7000.0f), new Vector3D<float>(1.0f, 1.0f, 1.0f));
+    lights.Add(light);
+    // lights.Add(new Light(new Vector3D<float>(-200.0f, 10.0f, -200.0f), new Vector3D<float>(10.0f, 1.0f, 1.0f)));
+    // lights.Add(new Light(new Vector3D<float>(200.0f, 10.0f, 200.0f), new Vector3D<float>(1.0f, 1.0f, 10.0f)));
+    
     renderer = new MasterRenderer(displayManager);
     guiRenderer = new GuiRenderer(displayManager, renderer, loader, Matrix4X4<float>.Identity);
 
@@ -120,10 +125,8 @@ displayManager.Window.Load += () =>
     player = new(standfordBunny, new Vector3D<float>(100, 0, -50), 0, 180, 0, 0.6f);
     camera = new Camera(player);
 
-    var gui = loader.LoadGuiTexture("Assets/socuwan.png", new Vector2D<float>(0.5f, 0.5f), new Vector2D<float>(0.25f, 0.25f));
-    var gui2 = loader.LoadGuiTexture("Assets/thinmatrix.png", new Vector2D<float>(0.3f, 0.58f), new Vector2D<float>(0.4f, 0.4f));
+    var gui = loader.LoadGuiTexture("Assets/health.png", new Vector2D<float>(0.4f, -0.6f), new Vector2D<float>(0.25f, 0.25f));
     guis.Add(gui);
-    guis.Add(gui2);
 };
 
 displayManager.Window.Closing += () =>
@@ -154,7 +157,7 @@ displayManager.Window.Render += (deltaTime) =>
     {
         renderer.ProcessEntity(entity);
     }
-    renderer.Render(light, camera);
+    renderer.Render(lights, camera);
     guiRenderer.Render(guis);
 };
 

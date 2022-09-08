@@ -49,13 +49,13 @@ public class MasterRenderer : IDisposable
         _terrainRenderer = new TerrainRenderer(displayManager, _terrainShader, _projectionMatrix);
     }
 
-    public void Render(Light sun, Camera camera)
+    public void Render(List<Light> lights, Camera camera)
     {
         Prepare();
 
         _entityShader.Activate();
         _entityShader.LoadSkyColor(Red, Green, Blue);
-        _entityShader.LoadLight(sun);
+        _entityShader.LoadLights(lights);
         _entityShader.LoadViewMatrix(camera);
         _entityRenderer.Render(_entities);
         _entityShader.Deactivate();
@@ -63,7 +63,7 @@ public class MasterRenderer : IDisposable
 
         _terrainShader.Activate();
         _terrainShader.LoadSkyColor(Red, Green, Blue);
-        _terrainShader.LoadLight(sun);
+        _terrainShader.LoadLights(lights);
         _terrainShader.LoadViewMatrix(camera);
         _terrainRenderer.Render(_terrains);
         _terrainShader.Deactivate();
