@@ -75,12 +75,16 @@ displayManager.Window.Load += () =>
     var box2 = new TexturedModel(
         ObjLoader.LoadObjModel("Assets/box.obj", loader),
         loader.LoadModelTexture("Assets/box.png"));
+    var lamp = new TexturedModel(
+        ObjLoader.LoadObjModel("Assets/lamp.obj", loader),
+        loader.LoadModelTexture("Assets/lamp.png"));
     
     grass.Texture.HasTransparency = true;
     grass.Texture.UseFakeLighting = true;
     grass.Texture.HasTransparency = true;
     grass.Texture.UseFakeLighting = true;
     fern.Texture.HasTransparency = true;
+    lamp.Texture.UseFakeLighting = true;
 
     terrain = new Terrain(0, -1, loader, texturePack, blendMap, "Assets/heightmap.png");
     // terrain2 = new Terrain(-1, -1, loader, texturePack, blendMap, "Assets/heightmap.png");
@@ -110,12 +114,27 @@ displayManager.Window.Load += () =>
             entities.Add(new Entity(staticModel, new Vector3D<float>(x,y,z),0,0,0,random.NextSingle() * 1 + 4));
         }
     }
+
+    lights.Add(new Light(new Vector3D<float>(0.0f, 10000.0f, -7000.0f), new Vector3D<float>(0.4f, 0.4f, 0.4f)));
+
+    var lightX = 185.0f;
+    var lightZ = -293.0f;
+    var lightY = terrain.GetHeightOfTerrain(lightX, lightZ);
+    lights.Add(new Light(new Vector3D<float>(lightX, lightY + 12.8f, lightZ), new Vector3D<float>(2.0f, 0.0f, 0.0f), new Vector3D<float>(1.0f, 0.01f, 0.002f)));
+    entities.Add(new Entity(lamp, new Vector3D<float>(lightX, lightY, lightZ), 0, 0, 0,1));
+
+    lightX = 370.0f;
+    lightZ = -300.0f;
+    lightY = terrain.GetHeightOfTerrain(lightX, lightZ);
+    lights.Add(new Light(new Vector3D<float>(lightX, lightY + 12.8f, lightZ), new Vector3D<float>(0.0f, 2.0f, 2.0f), new Vector3D<float>(1.0f, 0.01f, 0.002f)));
+    entities.Add(new Entity(lamp, new Vector3D<float>(lightX, lightY, lightZ), 0, 0, 0,1));
     
-    Light light = new Light(new Vector3D<float>(0.0f, 10000.0f, -7000.0f), new Vector3D<float>(1.0f, 1.0f, 1.0f));
-    lights.Add(light);
-    // lights.Add(new Light(new Vector3D<float>(-200.0f, 10.0f, -200.0f), new Vector3D<float>(10.0f, 1.0f, 1.0f)));
-    // lights.Add(new Light(new Vector3D<float>(200.0f, 10.0f, 200.0f), new Vector3D<float>(1.0f, 1.0f, 10.0f)));
-    
+    lightX = 293.0f;
+    lightZ = -305.0f;
+    lightY = terrain.GetHeightOfTerrain(lightX, lightZ);
+    lights.Add(new Light(new Vector3D<float>(lightX, lightY + 12.8f, lightZ), new Vector3D<float>(2.0f, 2.0f, 0.0f), new Vector3D<float>(1.0f, 0.01f, 0.002f)));
+    entities.Add(new Entity(lamp, new Vector3D<float>(lightX, lightY, lightZ), 0, 0, 0,1));
+
     renderer = new MasterRenderer(displayManager);
     guiRenderer = new GuiRenderer(displayManager, renderer, loader, Matrix4X4<float>.Identity);
 

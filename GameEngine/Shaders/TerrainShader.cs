@@ -50,13 +50,14 @@ public class TerrainShader : Shader
             {
                 SetUniform($"lightPosition[{i}]", light[i].Position);
                 SetUniform($"lightColor[{i}]", light[i].Color);
+                SetUniform($"attenuation[{i}]", light[i].Attenuation);
             }
             else
             {
                 SetUniform($"lightPosition[{i}]", Vector3D<float>.Zero);
                 SetUniform($"lightColor[{i}]", Vector3D<float>.Zero);
+                SetUniform($"attenuation[{i}]", new Vector3D<float>(1.0f, 0.0f, 0.0f));
             }
-
         }
     }
 
