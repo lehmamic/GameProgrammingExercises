@@ -15,6 +15,8 @@ uniform float shineDamper; // specular power
 uniform float reflectivity;
 uniform vec3 skyColor; // for the fog
 
+const float levels = 3.0;
+
 void main()
 {
     vec3 unitNormal = normalize(surfaceNormal); // N
@@ -30,11 +32,15 @@ void main()
         vec3 unitLightVector = normalize(toLightVector[i]); // L
         float nDotl = dot(unitNormal, unitLightVector); // dot(N,L)
         float brightness = max(nDotl, 0.0);
+        float level = floor(brightness * levels);
+        brightness = level / levels;
         vec3 lightDirection = -unitLightVector;
         vec3 reflectedLightDirection = reflect(lightDirection, unitNormal); // R
         float specularFactor = dot(reflectedLightDirection, unitVectorToCamera); // dot(R,V)
         specularFactor = max(specularFactor, 0.0);
         float dampedFactor = pow(specularFactor, shineDamper); // pow(max(0.0, dot(R, V)), uSpecPower)
+        level = floor(dampedFactor * levels);
+        dampedFactor = level / levels;
 
         totalDiffuse = totalDiffuse + (brightness * lightColor[i]) / attFactor;
         totalSpecular = totalSpecular + (dampedFactor * reflectivity * lightColor[i]) / attFactor;
