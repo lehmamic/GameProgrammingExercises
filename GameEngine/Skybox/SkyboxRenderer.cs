@@ -87,10 +87,10 @@ public class SkyboxRenderer
         _shader.Deactivate();
     }
 
-    public void Render(Camera camera, float r, float g, float b)
+    public void Render(float deltaTime, Camera camera, float r, float g, float b)
     {
         _shader.Activate();
-        _shader.LoadViewMatrix(camera);
+        _shader.LoadViewMatrix(deltaTime, camera);
         _shader.LoadFogColor(r, g, b);
         _cube.Activate();
         _gl.ActiveTexture(TextureUnit.Texture0);

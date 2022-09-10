@@ -54,7 +54,7 @@ public class MasterRenderer : IDisposable
         _skyboxRenderer = new SkyboxRenderer(displayManager, loader, _projectionMatrix);
     }
 
-    public void Render(List<Light> lights, Camera camera)
+    public void Render(float deltaTime, List<Light> lights, Camera camera)
     {
         Prepare();
 
@@ -74,7 +74,7 @@ public class MasterRenderer : IDisposable
         _terrainShader.Deactivate();
         _terrains.Clear();
         
-        _skyboxRenderer.Render(camera, Red, Green, Blue);
+        _skyboxRenderer.Render(deltaTime, camera, Red, Green, Blue);
     }
 
     public void ProcessTerrain(Terrain terrain)

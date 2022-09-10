@@ -177,7 +177,7 @@ displayManager.Window.Render += (deltaTime) =>
     {
         renderer.ProcessEntity(entity);
     }
-    renderer.Render(lights, camera);
+    renderer.Render((float)deltaTime, lights, camera);
     guiRenderer.Render(guis);
 };
 
