@@ -20,6 +20,7 @@ IMouse primaryMouse = null!;
 Loader loader = null!;
 
 List<Entity> entities = new();
+Light sun = null!;
 List<Light> lights = new();
 List<Terrain> terrains = new();
 List<GuiTexture> guis = new();
@@ -110,7 +111,8 @@ displayManager.Window.Load += () =>
     y = terrain.GetHeightOfTerrain(x, z);
     entities.Add(new Entity(pine, 0, new Vector3D<float>(x,y,z),0,0,0,1.4f));
 
-    lights.Add(new Light(new Vector3D<float>(0.0f, 10000.0f, -7000.0f), new Vector3D<float>(0.4f, 0.4f, 0.4f)));
+    sun = new Light(new Vector3D<float>(0.0f, 10000.0f, -7000.0f), new Vector3D<float>(0.4f, 0.4f, 0.4f));
+    lights.Add(sun);
 
     renderer = new MasterRenderer(displayManager, loader);
     guiRenderer = new GuiRenderer(displayManager, renderer, loader, Matrix4X4<float>.Identity);
@@ -173,7 +175,7 @@ displayManager.Window.Render += (deltaTime) =>
     displayManager.GL.Disable(EnableCap.ClipDistance0);
     fbos.UnbindCurrentFrameBuffer();
     renderer.RenderScene((float) deltaTime, entities, terrains, lights, camera, new Vector4D<float>(0, -1, 0, 100000));
-    waterRenderer.Render((float) deltaTime, waters, camera);
+    waterRenderer.Render((float) deltaTime, waters, camera, sun);
     guiRenderer.Render(guis);
 };
 

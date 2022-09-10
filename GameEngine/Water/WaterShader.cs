@@ -21,6 +21,7 @@ public class WaterShader : Shader
         SetUniform("reflectionTexture", 0);
         SetUniform("refractionTexture", 1);
         SetUniform("dudvMap", 2);
+        SetUniform("normalMap", 3);
     }
 
     public void LoadModelMatrix(Matrix4X4<float> matrix)
@@ -43,5 +44,11 @@ public class WaterShader : Shader
     public void LoadMoveFactor(float moveFactor)
     {
         SetUniform("moveFactor", moveFactor);
+    }
+
+    public void LoadLight(Light light)
+    {
+        SetUniform("lightPosition", light.Position);
+        SetUniform("lightColor", light.Color);
     }
 }

@@ -17,6 +17,7 @@ public class WaterRenderer : IDisposable
     private readonly WaterShader _shader;
     private readonly WaterFrameBuffers _fbos;
     private readonly ModelTexture _dudvTexture;
+    private readonly ModelTexture _normalMap;
 
     private float _moveFactor = 0.0f;
 
@@ -26,6 +27,7 @@ public class WaterRenderer : IDisposable
         _gl = displayManager.GL;
         _shader = new WaterShader(displayManager.GL);
         _dudvTexture = loader.LoadModelTexture("Assets/waterDUDV.png");
+        _normalMap = loader.LoadModelTexture("Assets/normalMap.png");
 
         _shader.Activate();
         _shader.ConnectTextureUnits();
@@ -34,9 +36,9 @@ public class WaterRenderer : IDisposable
         _quad = SetUpVAO(loader);
     }
 
-    public void Render(float deltaTime, List<WaterTile> water, Camera camera)
+    public void Render(float deltaTime, List<WaterTile> water, Camera camera, Light sun)
     {
-        PrepareRender(deltaTime, camera);
+        PrepareRender(deltaTime, camera, sun);
         foreach (var tile in water)
         {
             var modelMatrix = Maths.CreateTransformationMatrix(
@@ -58,7 +60,7 @@ public class WaterRenderer : IDisposable
         return loader.LoadToVAO(vertices, 2);
     }
     
-    private void PrepareRender(float deltaTime, Camera camera){
+    private void PrepareRender(float deltaTime, Camera camera, Light sun){
         _shader.Activate();
         _shader.LoadViewMatrix(camera);
         
@@ -66,6 +68,7 @@ public class WaterRenderer : IDisposable
         _moveFactor %= 1;
         _shader.LoadMoveFactor(_moveFactor);
 
+        _shader.LoadLight(sun);
         _quad.Activate();
         _gl.ActiveTexture(TextureUnit.Texture0);
         _gl.BindTexture(TextureTarget.Texture2D, _fbos.ReflectionTexture);
@@ -73,6 +76,8 @@ public class WaterRenderer : IDisposable
         _gl.BindTexture(TextureTarget.Texture2D, _fbos.RefractionTexture);
         _gl.ActiveTexture(TextureUnit.Texture2);
         _dudvTexture.Activate();
+        _gl.ActiveTexture(TextureUnit.Texture3);
+        _normalMap.Activate();
     }
 
     private void Unbind(){
