@@ -136,7 +136,7 @@ displayManager.Window.Load += () =>
     lights.Add(new Light(new Vector3D<float>(lightX, lightY + 12.8f, lightZ), new Vector3D<float>(2.0f, 2.0f, 0.0f), new Vector3D<float>(1.0f, 0.01f, 0.002f)));
     entities.Add(new Entity(lamp, new Vector3D<float>(lightX, lightY, lightZ), 0, 0, 0,1));
 
-    renderer = new MasterRenderer(displayManager);
+    renderer = new MasterRenderer(displayManager, loader);
     guiRenderer = new GuiRenderer(displayManager, renderer, loader, Matrix4X4<float>.Identity);
 
     var bunnyModel = ObjLoader.LoadObjModel("Assets/person.obj", loader);
