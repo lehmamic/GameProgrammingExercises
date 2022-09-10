@@ -7,6 +7,12 @@ namespace GameEngine.Textures;
 
 public abstract class Texture : IDisposable
 {
+    public unsafe Texture(GL gl, uint handle)
+    {
+        Gl = gl;
+        Handle = handle;
+    }
+   
     public unsafe Texture(GL gl, string path)
     {
         Gl = gl;
