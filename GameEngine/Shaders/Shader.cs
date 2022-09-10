@@ -72,6 +72,16 @@ public abstract class Shader : IDisposable
         SetUniform(name, value ? 1.0f : 0.0f);
     }
 
+    public void SetUniform(string name, Vector4D<float> value)
+    {
+        int location = _gl.GetUniformLocation(_handle, name);
+        if (location == -1)
+        {
+            throw new ShaderException($"{name} uniform not found on shader.");
+        }
+        _gl.Uniform4(location, value.X, value.Y, value.Z, value.W);
+    }
+
     public void SetUniform(string name, Vector3D<float> value)
     {
         int location = _gl.GetUniformLocation(_handle, name);

@@ -77,4 +77,9 @@ public class StaticShader : Shader
     {
         SetUniform("offset", new Vector2D<float>(x, y));
     }
+
+    public void LoadClipPlane(Vector4D<float> plane)
+    {
+        SetUniform("plane", plane);
+    }
 }

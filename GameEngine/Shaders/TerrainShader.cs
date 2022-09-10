@@ -71,4 +71,9 @@ public class TerrainShader : Shader
     {
         SetUniform("skyColor", new Vector3D<float>(r, g, b));
     }
+
+    public void LoadClipPlane(Vector4D<float> plane)
+    {
+        SetUniform("plane", plane);
+    }
 }

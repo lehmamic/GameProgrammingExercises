@@ -48,6 +48,11 @@ public class Camera
         _lastMousePosition = mouse.Position.ToGeneric();
     }
 
+    public void InvertPitch()
+    {
+        Pitch = -Pitch;
+    }
+
     private void CalculateCameraPosition(float horizDistance, float verticDistance)
     {
         var theta = _player.RotY + _angleAroundPlayer;

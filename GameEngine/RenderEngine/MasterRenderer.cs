@@ -56,7 +56,7 @@ public class MasterRenderer : IDisposable
 
     public Matrix4X4<float> ProjectionMatrix => _projectionMatrix;
 
-    public void RenderScene(float deltaTime, List<Entity> entities, List<Terrain> terrains, List<Light> lights, Camera camera)
+    public void RenderScene(float deltaTime, List<Entity> entities, List<Terrain> terrains, List<Light> lights, Camera camera, Vector4D<float> clipPlane)
     {
         foreach (Terrain terrain in terrains)
         {
@@ -66,14 +66,15 @@ public class MasterRenderer : IDisposable
         {
             ProcessEntity(entity);
         }
-        Render(deltaTime, lights, camera);
+        Render(deltaTime, lights, camera, clipPlane);
     }
 
-    public void Render(float deltaTime, List<Light> lights, Camera camera)
+    public void Render(float deltaTime, List<Light> lights, Camera camera, Vector4D<float> clipPlane)
     {
         Prepare();
 
         _entityShader.Activate();
+        _entityShader.LoadClipPlane(clipPlane);
         _entityShader.LoadSkyColor(Red, Green, Blue);
         _entityShader.LoadLights(lights);
         _entityShader.LoadViewMatrix(camera);
@@ -82,6 +83,7 @@ public class MasterRenderer : IDisposable
         _entities.Clear();
 
         _terrainShader.Activate();
+        _terrainShader.LoadClipPlane(clipPlane);
         _terrainShader.LoadSkyColor(Red, Green, Blue);
         _terrainShader.LoadLights(lights);
         _terrainShader.LoadViewMatrix(camera);
