@@ -78,9 +78,15 @@ public class WaterRenderer : IDisposable
         _dudvTexture.Activate();
         _gl.ActiveTexture(TextureUnit.Texture3);
         _normalMap.Activate();
+        _gl.ActiveTexture(TextureUnit.Texture4);
+        _gl.BindTexture(TextureTarget.Texture2D, _fbos.RefractionDepthTexture);
+        
+        _gl.Enable(GLEnum.Blend);
+        _gl.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
     }
 
     private void Unbind(){
+        _gl.Disable(GLEnum.Blend);
         _quad.Deactivate();
         _shader.Deactivate();
     }

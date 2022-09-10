@@ -22,6 +22,7 @@ public class WaterShader : Shader
         SetUniform("refractionTexture", 1);
         SetUniform("dudvMap", 2);
         SetUniform("normalMap", 3);
+        SetUniform("depthMap", 4);
     }
 
     public void LoadModelMatrix(Matrix4X4<float> matrix)
