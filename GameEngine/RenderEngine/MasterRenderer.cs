@@ -54,6 +54,8 @@ public class MasterRenderer : IDisposable
         _skyboxRenderer = new SkyboxRenderer(displayManager, loader, _projectionMatrix);
     }
 
+    public Matrix4X4<float> ProjectionMatrix => _projectionMatrix;
+
     public void Render(float deltaTime, List<Light> lights, Camera camera)
     {
         Prepare();

@@ -16,9 +16,9 @@ public class Light
         Attenuation = attenuation;
     }
 
-    public Vector3D<float> Position { get; }
+    public Vector3D<float> Position { get; set; }
 
-    public Vector3D<float> Color { get; }
+    public Vector3D<float> Color { get; set; }
 
-    public Vector3D<float> Attenuation { get; }
+    public Vector3D<float> Attenuation { get; set; }
 }

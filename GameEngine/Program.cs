@@ -6,6 +6,7 @@ using GameEngine.Models;
 using GameEngine.RenderEngine;
 using GameEngine.Terrains;
 using GameEngine.Textures;
+using GameEngine.Toolbox;
 using Silk.NET.Input;
 using Silk.NET.Maths;
 using Silk.NET.Windowing;
@@ -20,13 +21,18 @@ List<Entity> entities = new();
 List<Light> lights = new();
 List<GuiTexture> guis = new();
 
+Light light = null!;
+Entity lampEntity = null!;
+
 Terrain terrain = null!;
 
+Player player = null!;
 Camera camera = null!;
+
 MasterRenderer renderer = null!;
 GuiRenderer guiRenderer = null!;
 
-Player player = null!;
+MousePicker picker = null!;
 
 displayManager.Window.Load += () =>
 {
@@ -117,25 +123,33 @@ displayManager.Window.Load += () =>
     }
 
     lights.Add(new Light(new Vector3D<float>(0.0f, 10000.0f, -7000.0f), new Vector3D<float>(0.4f, 0.4f, 0.4f)));
-
-    var lightX = 185.0f;
-    var lightZ = -293.0f;
-    var lightY = terrain.GetHeightOfTerrain(lightX, lightZ);
-    lights.Add(new Light(new Vector3D<float>(lightX, lightY + 12.8f, lightZ), new Vector3D<float>(2.0f, 0.0f, 0.0f), new Vector3D<float>(1.0f, 0.01f, 0.002f)));
-    entities.Add(new Entity(lamp, new Vector3D<float>(lightX, lightY, lightZ), 0, 0, 0,1));
-
-    lightX = 370.0f;
-    lightZ = -300.0f;
-    lightY = terrain.GetHeightOfTerrain(lightX, lightZ);
-    lights.Add(new Light(new Vector3D<float>(lightX, lightY + 12.8f, lightZ), new Vector3D<float>(0.0f, 2.0f, 2.0f), new Vector3D<float>(1.0f, 0.01f, 0.002f)));
-    entities.Add(new Entity(lamp, new Vector3D<float>(lightX, lightY, lightZ), 0, 0, 0,1));
     
-    lightX = 293.0f;
-    lightZ = -305.0f;
-    lightY = terrain.GetHeightOfTerrain(lightX, lightZ);
-    lights.Add(new Light(new Vector3D<float>(lightX, lightY + 12.8f, lightZ), new Vector3D<float>(2.0f, 2.0f, 0.0f), new Vector3D<float>(1.0f, 0.01f, 0.002f)));
-    entities.Add(new Entity(lamp, new Vector3D<float>(lightX, lightY, lightZ), 0, 0, 0,1));
+    // var lightX = 185.0f;
+    // var lightZ = -293.0f;
+    // var lightY = terrain.GetHeightOfTerrain(lightX, lightZ);
+    // lights.Add(new Light(new Vector3D<float>(lightX, lightY + 12.8f, lightZ), new Vector3D<float>(2.0f, 0.0f, 0.0f), new Vector3D<float>(1.0f, 0.01f, 0.002f)));
+    // entities.Add(new Entity(lamp, new Vector3D<float>(lightX, lightY, lightZ), 0, 0, 0,1));
+    //
+    // lightX = 370.0f;
+    // lightZ = -300.0f;
+    // lightY = terrain.GetHeightOfTerrain(lightX, lightZ);
+    // lights.Add(new Light(new Vector3D<float>(lightX, lightY + 12.8f, lightZ), new Vector3D<float>(0.0f, 2.0f, 2.0f), new Vector3D<float>(1.0f, 0.01f, 0.002f)));
+    // entities.Add(new Entity(lamp, new Vector3D<float>(lightX, lightY, lightZ), 0, 0, 0,1));
+    //
+    // lightX = 293.0f;
+    // lightZ = -305.0f;
+    // lightY = terrain.GetHeightOfTerrain(lightX, lightZ);
+    // lights.Add(new Light(new Vector3D<float>(lightX, lightY + 12.8f, lightZ), new Vector3D<float>(2.0f, 2.0f, 0.0f), new Vector3D<float>(1.0f, 0.01f, 0.002f)));
+    // entities.Add(new Entity(lamp, new Vector3D<float>(lightX, lightY, lightZ), 0, 0, 0,1));
 
+    var lightX = 293.0f;
+    var lightZ = -305.0f;
+    var lightY = terrain.GetHeightOfTerrain(lightX, lightZ);
+    light = new Light(new Vector3D<float>(lightX, lightY + 12.8f, lightZ), new Vector3D<float>(0.0f, 2.0f, 2.0f), new Vector3D<float>(1.0f, 0.01f, 0.002f));
+    lights.Add(light);
+    lampEntity = new Entity(lamp, new Vector3D<float>(lightX, lightY, lightZ), 0, 0, 0,1);
+    entities.Add(lampEntity);
+    
     renderer = new MasterRenderer(displayManager, loader);
     guiRenderer = new GuiRenderer(displayManager, renderer, loader, Matrix4X4<float>.Identity);
 
@@ -144,8 +158,9 @@ displayManager.Window.Load += () =>
 
     player = new(standfordBunny, new Vector3D<float>(100, 0, -50), 0, 180, 0, 0.6f);
     camera = new Camera(player);
+    picker = new MousePicker(displayManager, camera, renderer.ProjectionMatrix, terrain);
 
-    var gui = loader.LoadGuiTexture("Assets/health.png", new Vector2D<float>(0.4f, -0.6f), new Vector2D<float>(0.25f, 0.25f));
+    var gui = loader.LoadGuiTexture("Assets/health.png", new Vector2D<float>(-0.6f, 0.9f), new Vector2D<float>(0.25f, 0.25f));
     guis.Add(gui);
 };
 
@@ -163,8 +178,16 @@ displayManager.Window.Update += (deltaTime) =>
         displayManager.Close();
     }
 
-    camera.Move(primaryKeyboard, primaryMouse);
     player.Move((float)deltaTime, terrain, primaryKeyboard);
+    camera.Move(primaryKeyboard, primaryMouse);
+
+    picker.Update(primaryMouse);
+    var terrainPoint = picker.CurrentTerrainPoint;
+    if (terrainPoint != null)
+    {
+        lampEntity.Position = terrainPoint.Value;
+        light.Position = new Vector3D<float>(terrainPoint.Value.X, terrainPoint.Value.Y + 15, terrainPoint.Value.Z);
+    }
 };
 
 displayManager.Window.Render += (deltaTime) =>
