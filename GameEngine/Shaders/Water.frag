@@ -2,6 +2,7 @@
 
 in vec4 clipSpace;
 in vec2 textureCoords;
+in vec3 toCameraVector;
 
 out vec4 out_Color;
 
@@ -32,7 +33,11 @@ void main(void)
 
     vec4 reflectColor = texture(reflectionTexture, reflectTexCoords);
     vec4 refractColor = texture(refractionTexture, refractTexCoords);
+    
+    vec3 viewVector = normalize(toCameraVector);
+    float refractiveFactor = dot(viewVector, vec3(0.0, 1.0, 0.0)); // up (y axis)
+    refractiveFactor = pow(refractiveFactor, 0.5); // defines how much reflective the water is
 
-    out_Color = mix(reflectColor, refractColor, 0.5);
+    out_Color = mix(reflectColor, refractColor, refractiveFactor);
     out_Color = mix(out_Color, vec4(0.0, 0.3, 0.5, 1.0), 0.2); // give it a bit blueish color
 }

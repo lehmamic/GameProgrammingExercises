@@ -37,6 +37,7 @@ public class WaterShader : Shader
     {
         var viewMatrix = Maths.CreateViewMatrix(camera);
         SetUniform("viewMatrix", viewMatrix);
+        SetUniform("cameraPosition", camera.Position);
     }
 
     public void LoadMoveFactor(float moveFactor)
