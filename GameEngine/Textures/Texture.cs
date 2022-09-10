@@ -7,17 +7,23 @@ namespace GameEngine.Textures;
 
 public abstract class Texture : IDisposable
 {
+    private readonly GL _gl;
+    private readonly uint _handle;
+    
     public unsafe Texture(GL gl, string path)
     {
-        Gl = gl;
+        _gl = gl;
 
         var imageConfig = Configuration.Default.Clone();
         imageConfig.PreferContiguousImageBuffers = true;
 
         using var image = Image.Load<Rgba32>(imageConfig, path);
 
-        Handle = Gl.GenTexture();
-        Gl.BindTexture(TextureTarget.Texture2D, Handle);
+        Width = image.Width;
+        Height = image.Height;
+
+        _handle = _gl.GenTexture();
+        _gl.BindTexture(TextureTarget.Texture2D, _handle);
 
         if (!image.DangerousTryGetSinglePixelMemory(out Memory<Rgba32> memory))
         {
@@ -25,32 +31,27 @@ public abstract class Texture : IDisposable
         }
 
         using MemoryHandle pinHandle = memory.Pin();
-        Gl.TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgba, (uint)image.Width, (uint)image.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, pinHandle.Pointer);
+        _gl.TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgba, (uint)image.Width, (uint)image.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, pinHandle.Pointer);
 
-        Gl.GenerateMipmap(TextureTarget.Texture2D);
+        _gl.GenerateMipmap(TextureTarget.Texture2D);
 
         // Enable bilinear filtering
-        Gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int) GLEnum.Repeat);
-        Gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int) GLEnum.Repeat);
-        Gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int) GLEnum.LinearMipmapLinear);
-        Gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) GLEnum.LinearMipmapLinear);
+        _gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int) GLEnum.Repeat);
+        _gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int) GLEnum.Repeat);
+        _gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int) GLEnum.LinearMipmapLinear);
+        _gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) GLEnum.LinearMipmapLinear);
 
         // Renders the texture in a slightly higher resolution with mipmap, should not be to high otherwise we lose the advantage from mipmaping
-        Gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureLodBias, -0.4f);
+        _gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureLodBias, -0.4f);
     }
 
-    protected Texture(GL gl)
+    public int Width { get; }
+
+    public int Height { get; }
+
+    public void Activate()
     {
-        Gl = gl;
-    }
-
-    protected uint Handle { get; set; }
-
-    protected GL Gl { get; }
-
-    public virtual void Activate()
-    {
-        Gl.BindTexture(TextureTarget.Texture2D, Handle);
+        _gl.BindTexture(TextureTarget.Texture2D, _handle);
     }
 
     public void Dispose()
@@ -63,7 +64,7 @@ public abstract class Texture : IDisposable
     {
         if (disposing)
         {
-            Gl.DeleteTextures(1, Handle);
+            _gl.DeleteTextures(1, _handle);
         }
     }
 }

@@ -23,7 +23,7 @@ public class GuiRenderer : IDisposable
         _gl = _displayManager.GL;
 
         var positions = new[]{ -1.0f, 1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 1.0f, -1.0f };
-        _quad = loader.LoadToVAO(positions, 2);
+        _quad = loader.LoadToVAO(positions);
 
         // shader.Activate()};
         // shader.LoadProjectionMatrix(projectionMatrix);

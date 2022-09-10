@@ -3,7 +3,6 @@ using GameEngine.Models;
 using GameEngine.Textures;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
-using Texture = GameEngine.Textures.Texture;
 
 namespace GameEngine.RenderEngine;
 
@@ -27,9 +26,9 @@ public class Loader : IDisposable
         return vao;
     }
     
-    public VertexArrayObject LoadToVAO(float[] vertices, int dimensions)
+    public VertexArrayObject LoadToVAO(float[] vertices)
     {
-        var vao = new VertexArrayObject(_gl, vertices, dimensions);
+        var vao = new VertexArrayObject(_gl, vertices);
         _vaos.Add(vao);
 
         return vao;
@@ -50,15 +49,7 @@ public class Loader : IDisposable
 
         return texture;
     }
-
-    public CubeMapTexture LoadCubeMap(string[] textureFiles)
-    {
-        var texture = new CubeMapTexture(_gl, textureFiles);
-        _textures.Add(texture);
-
-        return texture;
-    }
-
+    
     public GuiTexture LoadGuiTexture(string fileName, Vector2D<float> position, Vector2D<float> scale)
     {
         var texture = new GuiTexture(_gl, fileName, position, scale);
@@ -66,7 +57,7 @@ public class Loader : IDisposable
 
         return texture;
     }
-
+    
     public void Dispose()
     {
         foreach (var vao in _vaos)

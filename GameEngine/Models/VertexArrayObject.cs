@@ -36,11 +36,11 @@ namespace GameEngine.Models
             VertexAttributePointer(2, 2, VertexAttribPointerType.Float, 8, 6);
         }
 
-        public VertexArrayObject(GL gl, float[] vertices, int dimensions)
+        public VertexArrayObject(GL gl, float[] vertices)
         {
             _gl = gl;
 
-            NumberOfVertices = vertices.Length / dimensions;
+            NumberOfVertices = vertices.Length / 2;
             NumberOfIndices = 0;
 
             // Create vertex array
@@ -50,8 +50,8 @@ namespace GameEngine.Models
             // Create vertex buffer
             _vertexBuffer = CreateBuffer<float>(vertices, BufferTargetARB.ArrayBuffer);
 
-            // Position is (dimensions) floats with offset 0
-            VertexAttributePointer(0, dimensions, VertexAttribPointerType.Float, (uint) dimensions, 0);
+            // Position is 2 floats with offset 0
+            VertexAttributePointer(0, 2, VertexAttribPointerType.Float, 2, 0);
         }
 
         private unsafe uint CreateBuffer<T>(Span<T> data, BufferTargetARB type)
