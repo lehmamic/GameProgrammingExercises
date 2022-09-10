@@ -30,7 +30,8 @@ Camera camera = null!;
 
 MasterRenderer renderer = null!;
 GuiRenderer guiRenderer = null!;
-WaterRenderer waterRenderer = null;
+WaterRenderer waterRenderer = null!;
+WaterFrameBuffers fbos = null!;
 
 MousePicker picker = null!;
 
@@ -105,6 +106,10 @@ displayManager.Window.Load += () =>
     // **********Water Renderer Set-up**********
     waterRenderer = new WaterRenderer(displayManager, loader, renderer.ProjectionMatrix);
     waters.Add(new WaterTile(75.0f, -75.0f, 0));
+
+    fbos = new WaterFrameBuffers(displayManager);
+    var gui = new GuiTexture(displayManager.GL, fbos.ReflectionTexture, new Vector2D<float>(-0.5f, 0.5f), new Vector2D<float>(0.5f, 0.5f));
+    guis.Add(gui);
     // *****************************************
 
     var bunnyModel = ObjLoader.LoadObjModel("Assets/person.obj", loader);
@@ -113,9 +118,6 @@ displayManager.Window.Load += () =>
     player = new(standfordBunny, new Vector3D<float>(100, 0, -50), 0, 180, 0, 0.6f);
     camera = new Camera(player);
     picker = new MousePicker(displayManager, camera, renderer.ProjectionMatrix, terrains[0]);
-
-    var gui = loader.LoadGuiTexture("Assets/health.png", new Vector2D<float>(-0.6f, 0.9f), new Vector2D<float>(0.25f, 0.25f));
-    guis.Add(gui);
 };
 
 displayManager.Window.Closing += () =>
@@ -124,6 +126,7 @@ displayManager.Window.Closing += () =>
     guiRenderer.Dispose();
     loader.Dispose();
     waterRenderer.Dispose();
+    fbos.Dispose();
 };
 
 displayManager.Window.Update += (deltaTime) =>
@@ -141,6 +144,10 @@ displayManager.Window.Update += (deltaTime) =>
 
 displayManager.Window.Render += (deltaTime) =>
 {
+    fbos.BindReflectionFrameBuffer();
+    renderer.RenderScene((float) deltaTime, entities, terrains, lights, camera);
+    fbos.UnbindCurrentFrameBuffer();
+
     renderer.RenderScene((float) deltaTime, entities, terrains, lights, camera);
     waterRenderer.Render(waters, camera);
     guiRenderer.Render(guis);
