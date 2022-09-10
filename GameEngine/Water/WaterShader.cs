@@ -16,10 +16,11 @@ public class WaterShader : Shader
     {
     }
     
-    public void ConnectTextures()
+    public void ConnectTextureUnits()
     {
         SetUniform("reflectionTexture", 0);
         SetUniform("refractionTexture", 1);
+        SetUniform("dudvMap", 2);
     }
 
     public void LoadModelMatrix(Matrix4X4<float> matrix)
@@ -36,5 +37,10 @@ public class WaterShader : Shader
     {
         var viewMatrix = Maths.CreateViewMatrix(camera);
         SetUniform("viewMatrix", viewMatrix);
+    }
+
+    public void LoadMoveFactor(float moveFactor)
+    {
+        SetUniform("moveFactor", moveFactor);
     }
 }

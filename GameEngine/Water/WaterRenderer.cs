@@ -1,6 +1,7 @@
 using GameEngine.Entities;
 using GameEngine.Models;
 using GameEngine.RenderEngine;
+using GameEngine.Textures;
 using GameEngine.Toolbox;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
@@ -9,27 +10,33 @@ namespace GameEngine.Water;
 
 public class WaterRenderer : IDisposable
 {
+    private const float WaveSpeed = 0.03f;
+
     private readonly GL _gl;
     private readonly VertexArrayObject _quad;
     private readonly WaterShader _shader;
     private readonly WaterFrameBuffers _fbos;
+    private readonly ModelTexture _dudvTexture;
+
+    private float _moveFactor = 0.0f;
 
     public WaterRenderer(DisplayManager displayManager, Loader loader, Matrix4X4<float> projectionMatrix, WaterFrameBuffers fbos)
     {
         _fbos = fbos;
         _gl = displayManager.GL;
         _shader = new WaterShader(displayManager.GL);
+        _dudvTexture = loader.LoadModelTexture("Assets/waterDUDV.png");
 
         _shader.Activate();
-        _shader.ConnectTextures();
+        _shader.ConnectTextureUnits();
         _shader.LoadProjectionMatrix(projectionMatrix);
         _shader.Deactivate();
         _quad = SetUpVAO(loader);
     }
 
-    public void Render(List<WaterTile> water, Camera camera)
+    public void Render(float deltaTime, List<WaterTile> water, Camera camera)
     {
-        PrepareRender(camera);
+        PrepareRender(deltaTime, camera);
         foreach (var tile in water)
         {
             var modelMatrix = Maths.CreateTransformationMatrix(
@@ -51,14 +58,21 @@ public class WaterRenderer : IDisposable
         return loader.LoadToVAO(vertices, 2);
     }
     
-    private void PrepareRender(Camera camera){
+    private void PrepareRender(float deltaTime, Camera camera){
         _shader.Activate();
         _shader.LoadViewMatrix(camera);
+        
+        _moveFactor += WaveSpeed * deltaTime;
+        _moveFactor %= 1;
+        _shader.LoadMoveFactor(_moveFactor);
+
         _quad.Activate();
         _gl.ActiveTexture(TextureUnit.Texture0);
         _gl.BindTexture(TextureTarget.Texture2D, _fbos.ReflectionTexture);
         _gl.ActiveTexture(TextureUnit.Texture1);
         _gl.BindTexture(TextureTarget.Texture2D, _fbos.RefractionTexture);
+        _gl.ActiveTexture(TextureUnit.Texture3);
+        _dudvTexture.Activate();
     }
 
     private void Unbind(){

@@ -173,7 +173,7 @@ displayManager.Window.Render += (deltaTime) =>
     displayManager.GL.Disable(EnableCap.ClipDistance0);
     fbos.UnbindCurrentFrameBuffer();
     renderer.RenderScene((float) deltaTime, entities, terrains, lights, camera, new Vector4D<float>(0, -1, 0, 100000));
-    waterRenderer.Render(waters, camera);
+    waterRenderer.Render((float) deltaTime, waters, camera);
     guiRenderer.Render(guis);
 };
 
