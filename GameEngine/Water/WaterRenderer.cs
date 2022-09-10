@@ -12,13 +12,16 @@ public class WaterRenderer : IDisposable
     private readonly GL _gl;
     private readonly VertexArrayObject _quad;
     private readonly WaterShader _shader;
+    private readonly WaterFrameBuffers _fbos;
 
-    public WaterRenderer(DisplayManager displayManager, Loader loader, Matrix4X4<float> projectionMatrix)
+    public WaterRenderer(DisplayManager displayManager, Loader loader, Matrix4X4<float> projectionMatrix, WaterFrameBuffers fbos)
     {
+        _fbos = fbos;
         _gl = displayManager.GL;
         _shader = new WaterShader(displayManager.GL);
 
         _shader.Activate();
+        _shader.ConnectTextures();
         _shader.LoadProjectionMatrix(projectionMatrix);
         _shader.Deactivate();
         _quad = SetUpVAO(loader);
@@ -52,6 +55,10 @@ public class WaterRenderer : IDisposable
         _shader.Activate();
         _shader.LoadViewMatrix(camera);
         _quad.Activate();
+        _gl.ActiveTexture(TextureUnit.Texture0);
+        _gl.BindTexture(TextureTarget.Texture2D, _fbos.ReflectionTexture);
+        _gl.ActiveTexture(TextureUnit.Texture1);
+        _gl.BindTexture(TextureTarget.Texture2D, _fbos.RefractionTexture);
     }
 
     private void Unbind(){

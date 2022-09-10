@@ -116,15 +116,10 @@ displayManager.Window.Load += () =>
     guiRenderer = new GuiRenderer(displayManager, renderer, loader, Matrix4X4<float>.Identity);
     
     // **********Water Renderer Set-up**********
-    waterRenderer = new WaterRenderer(displayManager, loader, renderer.ProjectionMatrix);
+    fbos = new WaterFrameBuffers(displayManager);
+    waterRenderer = new WaterRenderer(displayManager, loader, renderer.ProjectionMatrix, fbos);
     water = new WaterTile(75.0f, -75.0f, 0);
     waters.Add(water);
-
-    fbos = new WaterFrameBuffers(displayManager);
-    var refraction = new GuiTexture(displayManager.GL, fbos.RefractionTexture, new Vector2D<float>(0.5f, 0.5f), new Vector2D<float>(0.25f, 0.25f));
-    var reflection = new GuiTexture(displayManager.GL, fbos.ReflectionTexture, new Vector2D<float>(-0.5f, 0.5f), new Vector2D<float>(0.25f, 0.25f));
-    guis.Add(refraction);
-    guis.Add(reflection);
     // *****************************************
 
     var bunnyModel = ObjLoader.LoadObjModel("Assets/person.obj", loader);

@@ -15,6 +15,12 @@ public class WaterShader : Shader
         : base(gl, VertexFile, FragmentFile)
     {
     }
+    
+    public void ConnectTextures()
+    {
+        SetUniform("reflectionTexture", 0);
+        SetUniform("refractionTexture", 1);
+    }
 
     public void LoadModelMatrix(Matrix4X4<float> matrix)
     {
