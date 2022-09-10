@@ -71,7 +71,7 @@ public class WaterRenderer : IDisposable
         _gl.BindTexture(TextureTarget.Texture2D, _fbos.ReflectionTexture);
         _gl.ActiveTexture(TextureUnit.Texture1);
         _gl.BindTexture(TextureTarget.Texture2D, _fbos.RefractionTexture);
-        _gl.ActiveTexture(TextureUnit.Texture3);
+        _gl.ActiveTexture(TextureUnit.Texture2);
         _dudvTexture.Activate();
     }
 
