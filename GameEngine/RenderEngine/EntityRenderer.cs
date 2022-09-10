@@ -66,7 +66,7 @@ public class EntityRenderer
 
     private void PrepareInstance(Entity entity)
     {
-        Matrix4X4<float> transformationMatrix = Maths.CreateTranslationMatrix(entity.Position, entity.RotX, entity.RotY, entity.RotZ, entity.Scale);
+        Matrix4X4<float> transformationMatrix = Maths.CreateTransformationMatrix(entity.Position, entity.RotX, entity.RotY, entity.RotZ, entity.Scale);
         _shader.LoadTransformationMatrix(transformationMatrix);
         _shader.LoadOffset(entity.TextureXOffset, entity.TextureYOffset);
     }

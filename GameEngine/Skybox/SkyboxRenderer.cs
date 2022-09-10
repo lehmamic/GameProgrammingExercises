@@ -4,14 +4,11 @@ using GameEngine.RenderEngine;
 using GameEngine.Textures;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
-using Texture = GameEngine.Textures.Texture;
 
 namespace GameEngine.Skybox;
 
 public class SkyboxRenderer
 {
-    private readonly DisplayManager _displayManager;
-    private readonly Loader _loader;
     private const float Size = 500f;
 
     private static readonly float[] Vertices = {        
@@ -88,9 +85,7 @@ public class SkyboxRenderer
 
     public SkyboxRenderer(DisplayManager displayManager, Loader loader, Matrix4X4<float> projectionMatrix)
     {
-        _displayManager = displayManager;
         _gl = displayManager.GL;
-        _loader = loader;
         _cube = loader.LoadToVAO(Vertices, 3);
         _texture = loader.LoadCubeMap(TextureFiles);
         _nightTexture = loader.LoadCubeMap(NightTextureFiles);

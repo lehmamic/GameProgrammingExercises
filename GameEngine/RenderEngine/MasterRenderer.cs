@@ -56,6 +56,19 @@ public class MasterRenderer : IDisposable
 
     public Matrix4X4<float> ProjectionMatrix => _projectionMatrix;
 
+    public void RenderScene(float deltaTime, List<Entity> entities, List<Terrain> terrains, List<Light> lights, Camera camera)
+    {
+        foreach (Terrain terrain in terrains)
+        {
+            ProcessTerrain(terrain);
+        }
+        foreach(var entity in entities)
+        {
+            ProcessEntity(entity);
+        }
+        Render(deltaTime, lights, camera);
+    }
+
     public void Render(float deltaTime, List<Light> lights, Camera camera)
     {
         Prepare();

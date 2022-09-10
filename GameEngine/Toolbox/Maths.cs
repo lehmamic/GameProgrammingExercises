@@ -7,7 +7,7 @@ namespace GameEngine.Toolbox;
 
 public static class Maths
 {
-    public static Matrix4X4<float> CreateTranslationMatrix(Vector3D<float> translation, float rx, float ry, float rz, float scale)
+    public static Matrix4X4<float> CreateTransformationMatrix(Vector3D<float> translation, float rx, float ry, float rz, float scale)
     {
         var matrix = Matrix4X4<float>.Identity;
         matrix *= Matrix4X4.CreateScale(scale);

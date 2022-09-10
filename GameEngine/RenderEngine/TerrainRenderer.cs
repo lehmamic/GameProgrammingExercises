@@ -70,7 +70,7 @@ public class TerrainRenderer
 
     private void LoadModelMatrix(Terrain terrain)
     {
-        Matrix4X4<float> transformationMatrix = Maths.CreateTranslationMatrix(new Vector3D<float>(terrain.X, 0.0f, terrain.Z), 0.0f, 0.0f, 0.0f, 1.0f);
+        Matrix4X4<float> transformationMatrix = Maths.CreateTransformationMatrix(new Vector3D<float>(terrain.X, 0.0f, terrain.Z), 0.0f, 0.0f, 0.0f, 1.0f);
         _shader.LoadTransformationMatrix(transformationMatrix);
     }
 }

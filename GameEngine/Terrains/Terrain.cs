@@ -10,7 +10,7 @@ namespace GameEngine.Terrains;
 
 public class Terrain
 {
-    private const float Size = 800.0f;
+    private const float Size = 150.0f;
     private const float MaxHeight = 40.0f;
     private const float MaxPixelColor = 256.0f; // 256.0f * 256.0f * 256.0f; its grayscale so we use only one pixel attribute
 
