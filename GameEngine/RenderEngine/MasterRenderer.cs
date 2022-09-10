@@ -74,7 +74,7 @@ public class MasterRenderer : IDisposable
         _terrainShader.Deactivate();
         _terrains.Clear();
         
-        _skyboxRenderer.Render(camera);
+        _skyboxRenderer.Render(camera, Red, Green, Blue);
     }
 
     public void ProcessTerrain(Terrain terrain)

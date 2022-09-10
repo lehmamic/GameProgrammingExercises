@@ -28,4 +28,9 @@ public class SkyboxShader : Shader
         matrix.M43 = 0;
         SetUniform("viewMatrix", matrix);
     }
+
+    public void LoadFogColor(float r, float g, float b)
+    {
+        SetUniform("fogColor", new Vector3D<float>(r, g, b));
+    }
 }
