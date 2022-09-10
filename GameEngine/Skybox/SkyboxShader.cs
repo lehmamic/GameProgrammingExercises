@@ -39,4 +39,15 @@ public class SkyboxShader : Shader
     {
         SetUniform("fogColor", new Vector3D<float>(r, g, b));
     }
+
+    public void LoadBlendFactor(float blend)
+    {
+        SetUniform("blendFactor", blend);
+    }
+
+    public void ConnectTextureUnits()
+    {
+        SetUniform("cubeMap", 0);
+        SetUniform("cubeMap2", 1);
+    }
 }
