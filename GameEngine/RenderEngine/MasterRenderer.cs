@@ -1,6 +1,7 @@
 using GameEngine.Entities;
 using GameEngine.Models;
 using GameEngine.Shaders;
+using GameEngine.Skybox;
 using GameEngine.Terrains;
 using GameEngine.Toolbox;
 using Silk.NET.Maths;
@@ -14,9 +15,9 @@ public class MasterRenderer : IDisposable
     private const float NearPlane = 0.1f;
     private const float FarPlane = 1000.0f;
 
-    private const float Red = 0.5f;
-    private const float Green = 0.5f;
-    private const float Blue = 0.5f;
+    private const float Red = 0.5444f;
+    private const float Green = 0.62f;
+    private const float Blue = 0.69f;
 
     private readonly DisplayManager _displayManager;
     private readonly GL _gl;
@@ -27,12 +28,14 @@ public class MasterRenderer : IDisposable
     private readonly TerrainShader _terrainShader;
     private readonly TerrainRenderer _terrainRenderer;
 
+    private readonly SkyboxRenderer _skyboxRenderer;
+
     private readonly Matrix4X4<float> _projectionMatrix;
 
     private readonly Dictionary<TexturedModel, List<Entity>> _entities = new();
     private readonly List<Terrain> _terrains = new();
 
-    public MasterRenderer(DisplayManager displayManager)
+    public MasterRenderer(DisplayManager displayManager, Loader loader)
     {
         _displayManager = displayManager;
         _gl = displayManager.GL;
@@ -47,6 +50,8 @@ public class MasterRenderer : IDisposable
         
         _terrainShader = new TerrainShader(displayManager.GL);
         _terrainRenderer = new TerrainRenderer(displayManager, _terrainShader, _projectionMatrix);
+
+        _skyboxRenderer = new SkyboxRenderer(displayManager, loader, _projectionMatrix);
     }
 
     public void Render(List<Light> lights, Camera camera)
@@ -68,6 +73,8 @@ public class MasterRenderer : IDisposable
         _terrainRenderer.Render(_terrains);
         _terrainShader.Deactivate();
         _terrains.Clear();
+        
+        _skyboxRenderer.Render(camera);
     }
 
     public void ProcessTerrain(Terrain terrain)
