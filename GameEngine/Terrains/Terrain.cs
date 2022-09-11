@@ -157,6 +157,6 @@ public class Terrain
         height /= MaxPixelColor / 2.0f;
         height *= MaxHeight;
 
-        return height;
+        return -height;
     }
 }
