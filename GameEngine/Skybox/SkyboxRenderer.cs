@@ -57,12 +57,12 @@ public class SkyboxRenderer
 
     private static readonly string[] TextureFiles =
     {
-        "Assets/right.png",
-        "Assets/left.png",
-        "Assets/top.png",
-        "Assets/bottom.png",
-        "Assets/back.png",
-        "Assets/front.png"
+        "Assets/sRight.png",
+        "Assets/sLeft.png",
+        "Assets/sUp.png",
+        "Assets/sDown.png",
+        "Assets/sBack.png",
+        "Assets/sFront.png"
     };
 
     private static readonly string[] NightTextureFiles =
