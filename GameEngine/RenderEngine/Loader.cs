@@ -19,9 +19,9 @@ public class Loader : IDisposable
         _gl = gl;
     }
 
-    public VertexArrayObject LoadToVAO(float[] vertices, uint[] indices)
+    public VertexArrayObject LoadToVAO(float[] vertices, uint[] indices, bool includeTangents = false)
     {
-        var vao = new VertexArrayObject(_gl, vertices, indices);
+        var vao = new VertexArrayObject(_gl, vertices, indices, includeTangents);
         _vaos.Add(vao);
 
         return vao;

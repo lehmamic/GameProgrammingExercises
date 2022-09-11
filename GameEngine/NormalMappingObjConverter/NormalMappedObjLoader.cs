@@ -1,12 +1,15 @@
+using GameEngine.Models;
+using GameEngine.NormalMappingObjConverter;
+using GameEngine.RenderEngine;
 using Silk.NET.Maths;
 
-namespace GameEngine.RenderEngine;
+namespace GameEngine.ObjConverter;
 
-public static class ObjFileLoader
+public static class NormalMappedObjLoader
 {
-    public static ModelData LoadObj(string fileName)
+    public static VertexArrayObject LoadObj(string fileName, Loader loader)
     {
-        List<Vertex> vertices = new();
+        List<VertexNormalMap> vertices = new();
         List<Vector2D<float>> textures = new();
         List<Vector3D<float>> normals = new();
         List<uint> indices = new();
@@ -21,7 +24,7 @@ public static class ObjFileLoader
                     float.Parse(currentLine[1]),
                     float.Parse(currentLine[2]),
                     float.Parse(currentLine[3]));
-                Vertex newVertex = new Vertex((uint)vertices.Count, vertex);
+                VertexNormalMap newVertex = new VertexNormalMap((uint)vertices.Count, vertex);
                 vertices.Add(newVertex);
             }
             else if (line.StartsWith("vt "))
@@ -45,25 +48,46 @@ public static class ObjFileLoader
                 var vertex2 = currentLine[2].Split("/");
                 var vertex3 = currentLine[3].Split("/");
 
-                ProcessVertex(vertex1, vertices, indices);
-                ProcessVertex(vertex2, vertices, indices);
-                ProcessVertex(vertex3, vertices, indices);
+                var v0 = ProcessVertex(vertex1, vertices, indices);
+                var v1 = ProcessVertex(vertex2, vertices, indices);
+                var v2 = ProcessVertex(vertex3, vertices, indices);
+                CalculateTangents(v0, v1, v2, textures);
             }
         }
 
         RemoveUnusedVertices(vertices);
 
-        float[] verticesArray = new float[vertices.Count * 8];
+        float[] verticesArray = new float[vertices.Count * 11];
         float furthest = ConvertDataToArrays(vertices, textures, normals, verticesArray);
         uint[] indicesArray = indices.ToArray();
 
-        return new ModelData(verticesArray, indicesArray, furthest);
+        return loader.LoadToVAO(verticesArray, indicesArray, true);
     }
 
-    private static void ProcessVertex(String[] vertex, List<Vertex> vertices, List<uint> indices)
+    private static void CalculateTangents(VertexNormalMap v0, VertexNormalMap v1, VertexNormalMap v2, List<Vector2D<float>> textures)
+    {
+        var delatPos1 = v1.Position - v0.Position;
+        var delatPos2 = v2.Position - v0.Position;
+        var uv0 = textures[v0.TextureIndex];
+        var uv1 = textures[v1.TextureIndex];
+        var uv2 = textures[v2.TextureIndex];
+        var deltaUv1 = uv1 - uv0;
+        var deltaUv2 = uv2 - uv0;
+
+        float r = 1.0f / (deltaUv1.X * deltaUv2.Y - deltaUv1.Y * deltaUv2.X);
+        delatPos1 *= deltaUv2.Y;
+        delatPos2 *= deltaUv1.Y;
+        var tangent = delatPos1 - delatPos2;
+        tangent *= r;
+        v0.AddTangent(tangent);
+        v1.AddTangent(tangent);
+        v2.AddTangent(tangent);
+    }
+
+    private static VertexNormalMap ProcessVertex(String[] vertex, List<VertexNormalMap> vertices, List<uint> indices)
     {
         int index = int.Parse(vertex[0]) - 1;
-        Vertex currentVertex = vertices[index];
+        VertexNormalMap currentVertex = vertices[index];
 
         int textureIndex = int.Parse(vertex[1]) - 1;
         int normalIndex = int.Parse(vertex[2]) - 1;
@@ -73,19 +97,20 @@ public static class ObjFileLoader
             currentVertex.TextureIndex = textureIndex;
             currentVertex.NormalIndex = normalIndex;
             indices.Add((uint)index);
+            return currentVertex;
         }
         else
         {
-            DealWithAlreadyProcessedVertex(currentVertex, textureIndex, normalIndex, indices, vertices);
+            return DealWithAlreadyProcessedVertex(currentVertex, textureIndex, normalIndex, indices, vertices);
         }
     }
 
-    private static float ConvertDataToArrays(List<Vertex> vertices, List<Vector2D<float>> textures, List<Vector3D<float>> normals, float[] verticesArray)
+    private static float ConvertDataToArrays(List<VertexNormalMap> vertices, List<Vector2D<float>> textures, List<Vector3D<float>> normals, float[] verticesArray)
     {
         float furthestPoint = 0;
         for (int i = 0; i < vertices.Count; i++)
         {
-            Vertex currentVertex = vertices[i];
+            VertexNormalMap currentVertex = vertices[i];
 
             if (currentVertex.Length > furthestPoint) {
                 furthestPoint = currentVertex.Length;
@@ -94,6 +119,7 @@ public static class ObjFileLoader
             var position = currentVertex.Position;
             var textureCoord = textures[currentVertex.TextureIndex];
             var normalVector = normals[currentVertex.NormalIndex];
+            var tangent = currentVertex.AveragedTangent;
 
             // position
             verticesArray[i * 8] = position.X;
@@ -108,32 +134,38 @@ public static class ObjFileLoader
             // tex coord
             verticesArray[i * 8 + 6] = textureCoord.X;
             verticesArray[i * 8 + 7] = 1 - textureCoord.Y;
+
+            // tangent
+            verticesArray[i * 8 + 8] = tangent.X;
+            verticesArray[i * 8 + 9] = tangent.Y;
+            verticesArray[i * 8 + 10] = tangent.Z;
         }
 
         return furthestPoint;
     }
 
-    private static void DealWithAlreadyProcessedVertex(
-        Vertex previousVertex,
+    private static VertexNormalMap DealWithAlreadyProcessedVertex(
+        VertexNormalMap previousVertex,
         int newTextureIndex,
         int newNormalIndex,
         List<uint> indices,
-        List<Vertex> vertices)
+        List<VertexNormalMap> vertices)
     {
         if (previousVertex.HasSameTextureAndNormal(newTextureIndex, newNormalIndex))
         {
             indices.Add(previousVertex.Index);
+            return previousVertex;
         }
         else
         {
             var anotherVertex = previousVertex.DuplicateVertex;
             if (anotherVertex != null)
             {
-                DealWithAlreadyProcessedVertex(anotherVertex, newTextureIndex, newNormalIndex, indices, vertices);
+                return DealWithAlreadyProcessedVertex(anotherVertex, newTextureIndex, newNormalIndex, indices, vertices);
             }
             else
             {
-                var duplicateVertex = new Vertex((uint)vertices.Count, previousVertex.Position)
+                var duplicateVertex = new VertexNormalMap((uint)vertices.Count, previousVertex.Position)
                 {
                     TextureIndex = newTextureIndex,
                     NormalIndex = newNormalIndex
@@ -142,11 +174,13 @@ public static class ObjFileLoader
                 previousVertex.DuplicateVertex = duplicateVertex;
                 vertices.Add(duplicateVertex);
                 indices.Add(duplicateVertex.Index);
+                return duplicateVertex;
             }
         }
     }
     
-    private static void RemoveUnusedVertices(List<Vertex> vertices){
+    private static void RemoveUnusedVertices(List<VertexNormalMap> vertices)
+    {
         foreach(var vertex in vertices)
         {
             if(!vertex.IsSet)

@@ -1,6 +1,6 @@
 using Silk.NET.Maths;
 
-namespace GameEngine.RenderEngine;
+namespace GameEngine.ObjConverter;
 
 public class Vertex
 {

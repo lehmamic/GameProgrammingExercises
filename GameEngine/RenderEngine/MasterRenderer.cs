@@ -11,13 +11,13 @@ namespace GameEngine.RenderEngine;
 
 public class MasterRenderer : IDisposable
 {
-    private const float FOV = 70.0f;
-    private const float NearPlane = 0.1f;
-    private const float FarPlane = 1000.0f;
+    public const float Red = 0.5444f;
+    public const float Green = 0.62f;
+    public const float Blue = 0.69f;
 
-    private const float Red = 0.5444f;
-    private const float Green = 0.62f;
-    private const float Blue = 0.69f;
+    public const float FOV = 70.0f;
+    public const float NearPlane = 0.1f;
+    public const float FarPlane = 1000.0f;
 
     private readonly DisplayManager _displayManager;
     private readonly GL _gl;
@@ -28,11 +28,14 @@ public class MasterRenderer : IDisposable
     private readonly TerrainShader _terrainShader;
     private readonly TerrainRenderer _terrainRenderer;
 
+    private readonly NormalMappingRenderer.NormalMappingRenderer _normalMapRenderer;
+
     private readonly SkyboxRenderer _skyboxRenderer;
 
     private readonly Matrix4X4<float> _projectionMatrix;
 
     private readonly Dictionary<TexturedModel, List<Entity>> _entities = new();
+    private readonly Dictionary<TexturedModel, List<Entity>> _normalMapEntities = new();
     private readonly List<Terrain> _terrains = new();
 
     public MasterRenderer(DisplayManager displayManager, Loader loader)
@@ -47,16 +50,18 @@ public class MasterRenderer : IDisposable
 
         _entityShader = new StaticShader(displayManager.GL);
         _entityRenderer = new EntityRenderer(displayManager, this, _entityShader, _projectionMatrix);
-        
+
         _terrainShader = new TerrainShader(displayManager.GL);
         _terrainRenderer = new TerrainRenderer(displayManager, _terrainShader, _projectionMatrix);
+
+        _normalMapRenderer = new NormalMappingRenderer.NormalMappingRenderer(displayManager, this, _projectionMatrix);
 
         _skyboxRenderer = new SkyboxRenderer(displayManager, loader, _projectionMatrix);
     }
 
     public Matrix4X4<float> ProjectionMatrix => _projectionMatrix;
 
-    public void RenderScene(float deltaTime, List<Entity> entities, List<Terrain> terrains, List<Light> lights, Camera camera, Vector4D<float> clipPlane)
+    public void RenderScene(float deltaTime, List<Entity> entities, List<Entity> normalEntities, List<Terrain> terrains, List<Light> lights, Camera camera, Vector4D<float> clipPlane)
     {
         foreach (Terrain terrain in terrains)
         {
@@ -66,6 +71,12 @@ public class MasterRenderer : IDisposable
         {
             ProcessEntity(entity);
         }
+        
+        foreach(var entity in normalEntities)
+        {
+            ProcessNormalMapEntity(entity);
+        }
+
         Render(deltaTime, lights, camera, clipPlane);
     }
 
@@ -81,6 +92,9 @@ public class MasterRenderer : IDisposable
         _entityRenderer.Render(_entities);
         _entityShader.Deactivate();
         _entities.Clear();
+
+        _normalMapRenderer.Render(_normalMapEntities, clipPlane, lights, camera);
+        _normalMapEntities.Clear();
 
         _terrainShader.Activate();
         _terrainShader.LoadClipPlane(clipPlane);
@@ -108,6 +122,16 @@ public class MasterRenderer : IDisposable
 
         _entities[entity.Model].Add(entity);
     }
+    
+    public void ProcessNormalMapEntity(Entity entity)
+    {
+        if (!_normalMapEntities.ContainsKey(entity.Model))
+        {
+            _normalMapEntities[entity.Model] = new List<Entity>();
+        }
+
+        _normalMapEntities[entity.Model].Add(entity);
+    }
 
     public void EnableCulling()
     {
@@ -124,6 +148,7 @@ public class MasterRenderer : IDisposable
     {
         _terrainShader.Dispose();
         _entityShader.Dispose();
+        _normalMapRenderer.Dispose();
     }
     
     private void Prepare()

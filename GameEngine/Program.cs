@@ -3,6 +3,7 @@
 using GameEngine.Entities;
 using GameEngine.Guis;
 using GameEngine.Models;
+using GameEngine.ObjConverter;
 using GameEngine.RenderEngine;
 using GameEngine.Terrains;
 using GameEngine.Textures;
@@ -23,6 +24,7 @@ Entity entity = null!;
 Entity entity2 = null!;
 Entity entity3 = null!;
 List<Entity> entities = new();
+List<Entity> normalMapEntities = new ();
 Light sun = null!;
 List<Light> lights = new();
 List<Terrain> terrains = new();
@@ -86,29 +88,35 @@ displayManager.Window.Load += () =>
 
     //******************NORMAL MAP MODELS************************
 
-    // TexturedModel barrelModel = new TexturedModel(NormalMappedObjLoader.loadOBJ("barrel", loader),
-    //     new ModelTexture(loader.loadTexture("barrel")));
-    // barrelModel.Texture.SetNormalMap(loader.loadTexture("barrelNormal"));
-    // barrelModel.Texture.SetShineDamper(10);
-    // barrelModel.Texture.SetReflectivity(0.5f);
-    //
-    // TexturedModel crateModel = new TexturedModel(NormalMappedObjLoader.loadOBJ("crate", loader),
-    //     new ModelTexture(loader.loadTexture("crate")));
-    // crateModel.Texture.NormalMap(loader.loadTexture("crateNormal"));
-    // crateModel.Texture.ShineDamper(10);
-    // crateModel.Texture.Reflectivity(0.5f);
-    //
-    // TexturedModel boulderModel = new TexturedModel(NormalMappedObjLoader.loadOBJ("boulder", loader),
-    //     new ModelTexture(loader.loadTexture("boulder")));
-    // boulderModel.Texture.NormalMap(loader.loadTexture("boulderNormal"));
-    // boulderModel.Texture.ShineDamper(10);
-    // boulderModel.Texture.Reflectivity(0.5f);
+    TexturedModel barrelModel = new TexturedModel(
+        NormalMappedObjLoader.LoadObj("Assets/barrel.obj", loader),
+        loader.LoadModelTexture("Assets/barrel.png"),
+        loader.LoadModelTexture("Assets/barrelNormal.png"));
+    barrelModel.Texture.ShineDamper = 10;
+    barrelModel.Texture.Reflectivity = 0.5f;
+    
+    TexturedModel crateModel = new TexturedModel(
+        NormalMappedObjLoader.LoadObj("Assets/crate.obj", loader),
+        loader.LoadModelTexture("Assets/crate.png"),
+        loader.LoadModelTexture("Assets/crateNormal.png"));
+    crateModel.Texture.ShineDamper = 10;
+    crateModel.Texture.Reflectivity = 0.5f;
+    
+    TexturedModel boulderModel = new TexturedModel(NormalMappedObjLoader.LoadObj("Assets/boulder.obj", loader),
+        loader.LoadModelTexture("Assets/boulder.png"),
+        loader.LoadModelTexture("Assets/boulderNormal.png"));
+    boulderModel.Texture.ShineDamper = 10;
+    boulderModel.Texture.Reflectivity = 0.5f;
 
     //************ENTITIES*******************
-    
-    // entity = new Entity(barrelModel, new Vector3f(75, 10, -75), 0, 0, 0, 1f);
-    // entity2 = new Entity(boulderModel, new Vector3f(85, 10, -75), 0, 0, 0, 1f);
-    // entity3 = new Entity(crateModel, new Vector3f(65, 10, -75), 0, 0, 0, 0.04f);
+
+    entity = new Entity(barrelModel, new Vector3D<float>(75, 10, -75), 0, 0, 0, 1f);
+    entity2 = new Entity(boulderModel, new Vector3D<float>(85, 10, -75), 0, 0, 0, 1f);
+    entity3 = new Entity(crateModel, new Vector3D<float>(65, 10, -75), 0, 0, 0, 0.04f);
+
+    normalMapEntities.Add(entity);
+    normalMapEntities.Add(entity2);
+    normalMapEntities.Add(entity3);
 
     Random random = new Random(676452);
     for(int i = 0; i < 100; i++)
@@ -189,9 +197,9 @@ displayManager.Window.Update += (deltaTime) =>
     camera.Move(primaryKeyboard, primaryMouse);
     picker.Update(primaryMouse);
 
-    // entity.increaseRotation(0, 1, 0);
-    // entity2.increaseRotation(0, 1, 0);
-    // entity3.increaseRotation(0, 1, 0);
+    entity.IncreaseRotation(0, 1, 0);
+    entity2.IncreaseRotation(0, 1, 0);
+    entity3.IncreaseRotation(0, 1, 0);
 };
 
 displayManager.Window.Render += (deltaTime) =>
@@ -203,18 +211,18 @@ displayManager.Window.Render += (deltaTime) =>
     float distance = 2 * (camera.Position.Y - water.Height);
     camera.Position = new Vector3D<float>(camera.Position.X, camera.Position.Y - distance, camera.Position.Z);
     camera.InvertPitch();
-    renderer.RenderScene((float) deltaTime, entities, terrains, lights, camera, new Vector4D<float>(0, 1, 0, -water.Height + 1.0f));
+    renderer.RenderScene((float) deltaTime, entities, normalMapEntities, terrains, lights, camera, new Vector4D<float>(0, 1, 0, -water.Height + 1.0f));
     camera.Position = new Vector3D<float>(camera.Position.X, camera.Position.Y + distance, camera.Position.Z);
     camera.InvertPitch();
     
     // render refraction texture
     fbos.BindRefractionFrameBuffer();
-    renderer.RenderScene((float) deltaTime, entities, terrains, lights, camera, new Vector4D<float>(0, -1, 0, water.Height));
+    renderer.RenderScene((float) deltaTime, entities, normalMapEntities, terrains, lights, camera, new Vector4D<float>(0, -1, 0, water.Height));
     
     // render to screen
     displayManager.GL.Disable(EnableCap.ClipDistance0);
     fbos.UnbindCurrentFrameBuffer();
-    renderer.RenderScene((float) deltaTime, entities, terrains, lights, camera, new Vector4D<float>(0, -1, 0, 100000));
+    renderer.RenderScene((float) deltaTime, entities, normalMapEntities, terrains, lights, camera, new Vector4D<float>(0, -1, 0, 100000));
     waterRenderer.Render((float) deltaTime, waters, camera, sun);
     guiRenderer.Render(guis);
 };

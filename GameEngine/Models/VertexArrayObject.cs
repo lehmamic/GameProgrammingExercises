@@ -6,14 +6,16 @@ namespace GameEngine.Models
     {
         private readonly GL _gl;
         private readonly uint _vertexArray;
-        private uint _vertexBuffer;
+        private readonly uint _vertexBuffer;
         private readonly uint _indexBuffer;
 
-        public VertexArrayObject(GL gl, float[] vertices, uint[] indices)
+        public VertexArrayObject(GL gl, float[] vertices, uint[] indices, bool includesTangents)
         {
             _gl = gl;
 
-            NumberOfVertices = vertices.Length / 8;
+            var vertexSize = includesTangents ? 11 : 8;
+
+            NumberOfVertices = vertices.Length / vertexSize;
             NumberOfIndices = indices.Length;
 
             // Create vertex array
@@ -27,13 +29,18 @@ namespace GameEngine.Models
             _indexBuffer = CreateBuffer<uint>(indices, BufferTargetARB.ElementArrayBuffer);_gl.GenBuffer();
 
             // Position is 3 floats with offset 0
-            VertexAttributePointer(0, 3, VertexAttribPointerType.Float, 8, 0);
+            VertexAttributePointer(0, 3, VertexAttribPointerType.Float, (uint) vertexSize, 0);
 
             // Normal is 3 floats with offset 3
-            VertexAttributePointer(1, 3, VertexAttribPointerType.Float, 8, 3);
+            VertexAttributePointer(1, 3, VertexAttribPointerType.Float, (uint) vertexSize, 3);
 
             // Texture coordinates is 2 floats with offset 6
-            VertexAttributePointer(2, 2, VertexAttribPointerType.Float, 8, 6);
+            VertexAttributePointer(2, 2, VertexAttribPointerType.Float, (uint) vertexSize, 6);
+
+            if (includesTangents)
+            {
+                VertexAttributePointer(3, 3, VertexAttribPointerType.Float, (uint) vertexSize, 8);
+            }
         }
 
         public VertexArrayObject(GL gl, float[] vertices, int dimensions)
