@@ -27,7 +27,7 @@ public class WaterRenderer : IDisposable
         _gl = displayManager.GL;
         _shader = new WaterShader(displayManager.GL);
         _dudvTexture = loader.LoadModelTexture("Assets/waterDUDV.png");
-        _normalMap = loader.LoadModelTexture("Assets/normalMap.png");
+        _normalMap = loader.LoadModelTexture("Assets/normal.png");
 
         _shader.Activate();
         _shader.ConnectTextureUnits();
