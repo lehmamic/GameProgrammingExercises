@@ -39,7 +39,7 @@ public class Texture : IDisposable
         _gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) GLEnum.Linear);
     }
 
-    public Texture(GL gl, FreeTypeFaceFacade fontFace)
+    public unsafe Texture(GL gl, FreeTypeFaceFacade fontFace)
     {
         _gl = gl;
 
@@ -50,14 +50,13 @@ public class Texture : IDisposable
         _handle = _gl.GenTexture();
         _gl.BindTexture(TextureTarget.Texture2D, _handle);
 
-        _gl.TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgba, fontFace.GlyphBitmap.width, fontFace.GlyphBitmap.rows, 0, PixelFormat.Red, PixelType.UnsignedByte, fontFace.GlyphBitmap.buffer);
+        _gl.TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Red, fontFace.GlyphBitmap.width, fontFace.GlyphBitmap.rows, 0, PixelFormat.Red, PixelType.UnsignedByte, fontFace.GlyphBitmap.buffer.ToPointer());
 
         // Set texture options
         _gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int) GLEnum.ClampToEdge);
         _gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int) GLEnum.ClampToEdge);
         _gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) GLEnum.Linear);
         _gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int) GLEnum.Linear);
-        _gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) GLEnum.Linear);
     }
 
     public int Width { get; }

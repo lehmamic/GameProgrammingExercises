@@ -8,7 +8,7 @@ public class PauseMenu : UIScreen
         : base(game)
     {
         Game.State = GameState.Paused;
-        Title = "PauseTitle";
+        Title = Game.GetText("PauseTitle");
         SetRelativeMouseMode(false);
     }
 

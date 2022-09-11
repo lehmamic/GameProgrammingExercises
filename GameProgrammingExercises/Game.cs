@@ -165,6 +165,18 @@ public class Game
         }
     }
 
+    public string GetText(string key)
+    {
+        var errorMsg = "**KEY NOT FOUND**";
+        // Find this text in the map, if it exists
+        if (_text.TryGetValue(key, out var text))
+        {
+            return text;
+        }
+
+        return errorMsg;
+    }
+
     private void ProcessInput()
     {
         _inputSystem.Update();

@@ -75,6 +75,9 @@ public class Renderer : IDisposable
             // Getting the opengl api for drawing to the screen.
             GL = GL.GetApi(Window);
 
+            // Disable 4-byte texture alignment for teh font rendering
+            GL.PixelStore(PixelStoreParameter.UnpackAlignment, 1);
+
             // Make sure we can load and compile shaders
             LoadShaders();
 

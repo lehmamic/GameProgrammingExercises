@@ -38,7 +38,7 @@ public class UIScreen : IDisposable
 
     public string? Title { get; set; }
 
-    public Vector2D<float> TitlePos { get; set; } = new(0.0f, 300.0f);
+    public Vector2D<float> TitlePos { get; set; } = new(-70.0f, 300.0f);
 
     public virtual void Update(float deltaTime)
     {
