@@ -50,13 +50,13 @@ displayManager.Window.Load += () =>
     // **********TERRAIN TEXTURE STUFF**********
     var backgroundTexture = loader.LoadTerrainTexture("Assets/grassy.png");
     var rTexture = loader.LoadTerrainTexture("Assets/dirt.png");
-    var gTexture = loader.LoadTerrainTexture("Assets/pinkFlowers.png");
+    var gTexture = loader.LoadTerrainTexture("Assets/mud.png");
     var bTexture = loader.LoadTerrainTexture("Assets/path.png");
 
     var texturePack = new TerrainTexturePack(backgroundTexture, rTexture, gTexture, bTexture);
-    var blendMap = loader.LoadTerrainTexture("Assets/blendmap_water.png");
-    
-    terrain = new Terrain(0, -1, loader, texturePack, blendMap, "Assets/heightmap_water.png");
+    var blendMap = loader.LoadTerrainTexture("Assets/blendMap.png");
+
+    terrain = new Terrain(0, -1, loader, texturePack, blendMap, "Assets/heightmap.png");
     terrains.Add(terrain);
     // *****************************************
 
@@ -94,25 +94,39 @@ displayManager.Window.Load += () =>
     // var lamp = new TexturedModel(
     //     ObjLoader.LoadObjModel("Assets/lamp.obj", loader),
     //     loader.LoadModelTexture("Assets/lamp.png"));
-    
-    grass.Texture.HasTransparency = true;
-    grass.Texture.UseFakeLighting = true;
+    var rocks = new TexturedModel(
+        ObjLoader.LoadObjModel("Assets/rocks.obj", loader),
+        loader.LoadModelTexture("Assets/rocks.png"));
+
     grass.Texture.HasTransparency = true;
     grass.Texture.UseFakeLighting = true;
     // fern.Texture.HasTransparency = true;
     // lamp.Texture.UseFakeLighting = true;
-    
-    var x = 20;
-    var z = -80;
-    var y = terrain.GetHeightOfTerrain(x, z);
-    entities.Add(new Entity(pine, 0, new Vector3D<float>(x,y,z),0,0,0,1.4f));
-    x = 140;
-    z = -80;
-    y = terrain.GetHeightOfTerrain(x, z);
-    entities.Add(new Entity(pine, 0, new Vector3D<float>(x,y,z),0,0,0,1.4f));
+
+    // Add the rock below the terrain
+    entities.Add(new Entity(rocks, new Vector3D<float>(75,4.4f,-75), 0,0,0, 75.0f));
+
+    Random random = new Random(676452);
+    var circle = new Circle<float> {Center = new Vector2D<float>(75, -75), Radius = 3300};
+    for(int i = 0; i < 100; i++)
+    {
+        if (i % 5 == 0)
+        {
+            var x = random.NextSingle() * 150;
+            var z = random.NextSingle() * -150;
+            if (circle.Contains(new Vector2D<float>(x, z)))
+            {
+                continue;
+            }
+
+            var y = terrain.GetHeightOfTerrain(x, z);
+            entities.Add(new Entity(pine, 0, new Vector3D<float>(x,y,z),0,random.NextSingle() * 360,0,1.6f));
+        }
+    }
 
     sun = new Light(new Vector3D<float>(0.0f, 10000.0f, -7000.0f), new Vector3D<float>(1.0f, 1.0f, 1.0f));
     lights.Add(sun);
+    lights.Add(new Light(new Vector3D<float>(0.0f, -1000.0f, 0.0f), new Vector3D<float>(1.0f, 1.0f, 1.0f)));
 
     renderer = new MasterRenderer(displayManager, loader);
     guiRenderer = new GuiRenderer(displayManager, renderer, loader, Matrix4X4<float>.Identity);
