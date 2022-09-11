@@ -183,15 +183,16 @@ public class Renderer : IDisposable
     public unsafe void DrawText(Font font, string text, Vector2D<float> offset, float scale, Vector3D<float> color)
     {
         _textShader.SetActive();
-
-        var x = offset.X;
-        var y = offset.Y;
-        
         _textShader.SetUniform("textColor", color);
 
-        foreach (var c in text)
+        var chars = text.ToCharArray().Select(font.GetCharacter).ToArray();
+        var textWidth = chars.Select(c => (c.Advance >> 6)  * scale).Sum();
+
+        var x = offset.X -= textWidth / 2.0f;
+        var y = offset.Y;
+
+        foreach (var character in chars)
         {
-            var character = font.GetCharacter(c);
             var texture = character.Texture;
 
             // Scale the quad by the width/height of texture

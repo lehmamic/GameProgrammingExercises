@@ -8,8 +8,13 @@ public class PauseMenu : UIScreen
         : base(game)
     {
         Game.State = GameState.Paused;
-        Title = Game.GetText("PauseTitle");
         SetRelativeMouseMode(false);
+        Title = Game.GetText("PauseTitle");
+        AddButton(Game.GetText("ResumeButton"), Close);
+        AddButton(Game.GetText("QuitButton"), () =>
+        {
+            Game.State = GameState.Quit;
+        });
     }
 
     public override void HandleKeyPress(InputState state)

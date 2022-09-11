@@ -1,4 +1,5 @@
 using GameProgrammingExercises.Maths;
+using Silk.NET.Input;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 
@@ -15,10 +16,12 @@ public class UIScreen : IDisposable
     private UIScreenState _state;
 
     private Texture? _background;
-    
+
     // Configure positions
     private Vector2D<float> _nextButtonPos = new(0.0f, 200.0f);
     private Vector2D<float> _bgPos = new(0.0f, 250.0f);
+
+    private List<Button> _buttons = new();
 
     public UIScreen(Game game)
     {
@@ -38,7 +41,7 @@ public class UIScreen : IDisposable
 
     public string? Title { get; set; }
 
-    public Vector2D<float> TitlePos { get; set; } = new(-70.0f, 300.0f);
+    public Vector2D<float> TitlePos { get; set; } = new(0.0f, 300.0f);
 
     public virtual void Update(float deltaTime)
     {
@@ -58,43 +61,63 @@ public class UIScreen : IDisposable
             Game.Renderer.DrawText(_font, Title, TitlePos, 1.0f, Color.White);
         }
         // Draw buttons
-        // for (auto b : mButtons)
-        // {
-        //     // Draw background of button
-        //     Texture* tex = b->GetHighlighted() ? mButtonOn : mButtonOff;
-        //     DrawTexture(shader, tex, b->GetPosition());
-        //     // Draw text of button
-        //     DrawTexture(shader, b->GetNameTex(), b->GetPosition());
-        // }
+        foreach (var b in _buttons)
+        {
+            // Draw background of button
+            Texture tex = b.Highlighted ? _buttonOn : _buttonOff;
+            _game.Renderer.DrawTexture(tex, b.Position);
+
+            // Draw text of button
+            Game.Renderer.DrawText(_font, b.Name, b.Position, 0.5f, Color.White);
+        }
         // Override in subclasses to draw any textures
     }
 
     public virtual void ProcessInput(InputState state)
     {
-        // // Do we have buttons?
-        // if (!mButtons.empty())
-        // {
-        //     // Get position of mouse
-        //     int x, y;
-        //     SDL_GetMouseState(&x, &y);
-        //     // Convert to (0,0) center coordinates
-        //     Vector2 mousePos(static_cast<float>(x), static_cast<float>(y));
-        //     mousePos.x -= mGame->GetRenderer()->GetScreenWidth() * 0.5f;
-        //     mousePos.y = mGame->GetRenderer()->GetScreenHeight() * 0.5f - mousePos.y;
-		      //
-        //     // Highlight any buttons
-        //     for (auto b : mButtons)
-        //     {
-        //         if (b->ContainsPoint(mousePos))
-        //         {
-        //             b->SetHighlighted(true);
-        //         }
-        //         else
-        //         {
-        //             b->SetHighlighted(false);
-        //         }
-        //     }
-        // }
+        // Do we have buttons?
+        if (_buttons.Any())
+        {
+            // Get position of mouse
+            float x, y;
+            x = state.Mouse.Position.X;
+            y = state.Mouse.Position.Y;
+
+            // Convert to (0,0) center coordinates
+            var mousePos = new Vector2D<float>(x, y);
+            mousePos.X -= Game.Renderer.ScreenWidth * 0.5f;
+            mousePos.Y = Game.Renderer.ScreenHeight * 0.5f - mousePos.Y;
+
+            // Highlight any buttons
+            foreach (var b in _buttons)
+            {
+                if (b.ContainsPoint(mousePos))
+                {
+                    b.Highlighted = true;
+                }
+                else
+                {
+                    b. Highlighted = false;
+                }
+            }
+        }
+    }
+
+    public virtual void HandleKeyPress(InputState state)
+    {
+        if (state.Mouse.GetButtonState(MouseButton.Left) == ButtonState.Pressed)
+        {
+            if (_buttons.Any())
+            {
+                foreach (var b in _buttons)
+                {
+                    if (b.Highlighted)
+                    {
+                        b.Click();
+                    }
+                }
+            }
+        }
     }
 
     public void Close()
@@ -102,9 +125,15 @@ public class UIScreen : IDisposable
         _state = UIScreenState.Closing;
     }
 
-    public virtual void HandleKeyPress(InputState state)
+    public void AddButton(string name, Action onClick)
     {
-        
+        Vector2D<float> dims = new(_buttonOn.Width, _buttonOn.Height);
+        Button b = new Button(name, onClick, _nextButtonPos, dims);
+        _buttons.Add(b);
+
+        // Update position of next button
+        // Move down by height of button plus padding
+        _nextButtonPos.Y -= _buttonOff.Height + 20.0f;
     }
 
     protected void SetRelativeMouseMode(bool relative)
