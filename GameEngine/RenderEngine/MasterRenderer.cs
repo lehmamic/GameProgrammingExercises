@@ -15,9 +15,9 @@ public class MasterRenderer : IDisposable
     private const float NearPlane = 0.1f;
     private const float FarPlane = 1000.0f;
 
-    private const float Red = 0.5444f;
-    private const float Green = 0.62f;
-    private const float Blue = 0.69f;
+    private const float Red = 0.949f;
+    private const float Green = 0.667f;
+    private const float Blue = 0.667f;
 
     private readonly DisplayManager _displayManager;
     private readonly GL _gl;
