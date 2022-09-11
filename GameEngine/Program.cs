@@ -50,21 +50,24 @@ displayManager.Window.Load += () =>
 
     var texturePack = new TerrainTexturePack(backgroundTexture, rTexture, gTexture, bTexture);
     var blendMap = loader.LoadTerrainTexture("Assets/blendMap.png");
+
+    terrain = new Terrain(0, -1, loader, texturePack, blendMap, "Assets/heightmap.png");
+    terrains.Add(terrain);
     // *****************************************
 
     // var data = ObjFileLoader.LoadObj("Assets/tree.obj");
     // var treeModel = loader.LoadToVAO(data.Vertices, data.Indices);
 
     // var staticModel = new TexturedModel(treeModel, loader.LoadModelTexture("Assets/tree.png"));
-    // var grass = new TexturedModel(
-    //     ObjLoader.LoadObjModel("Assets/grassModel.obj", loader),
-    //     loader.LoadModelTexture("Assets/grassTexture.png"));
+    var grass = new TexturedModel(
+        ObjLoader.LoadObjModel("Assets/grassModel.obj", loader),
+        loader.LoadModelTexture("Assets/grassTexture.png"));
     // var flower = new TexturedModel(
     //     ObjLoader.LoadObjModel("Assets/grassModel.obj", loader),
     //     loader.LoadModelTexture("Assets/flower.png"));
-    // var pine = new TexturedModel(
-    //     ObjLoader.LoadObjModel("Assets/pine.obj", loader),
-    //     loader.LoadModelTexture("Assets/pine.png"));
+    var pine = new TexturedModel(
+        ObjLoader.LoadObjModel("Assets/pine.obj", loader),
+        loader.LoadModelTexture("Assets/pine.png"));
 
     // var fernTextureAtlas = loader.LoadModelTexture("Assets/fern.png");
     // fernTextureAtlas.NumberOfRows = 2;
@@ -89,18 +92,32 @@ displayManager.Window.Load += () =>
     var rocks = new TexturedModel(
         ObjLoader.LoadObjModel("Assets/rocks.obj", loader),
         loader.LoadModelTexture("Assets/rocks.png"));
-    
-    // grass.Texture.HasTransparency = true;
-    // grass.Texture.UseFakeLighting = true;
-    // grass.Texture.HasTransparency = true;
-    // grass.Texture.UseFakeLighting = true;
+
+    grass.Texture.HasTransparency = true;
+    grass.Texture.UseFakeLighting = true;
     // fern.Texture.HasTransparency = true;
     // lamp.Texture.UseFakeLighting = true;
-    
+
+    // Add the rock below the terrain
     entities.Add(new Entity(rocks, new Vector3D<float>(75,4.4f,-75), 0,0,0, 75.0f));
 
-    terrain = new Terrain(0, -1, loader, texturePack, blendMap, "Assets/heightmap.png");
-    terrains.Add(terrain);
+    Random random = new Random(676452);
+    var circle = new Circle<float> {Center = new Vector2D<float>(75, -75), Radius = 3300};
+    for(int i = 0; i < 100; i++)
+    {
+        if (i % 5 == 0)
+        {
+            var x = random.NextSingle() * 150;
+            var z = random.NextSingle() * -150;
+            if (circle.Contains(new Vector2D<float>(x, z)))
+            {
+                continue;
+            }
+
+            var y = terrain.GetHeightOfTerrain(x, z);
+            entities.Add(new Entity(pine, 0, new Vector3D<float>(x,y,z),0,random.NextSingle() * 360,0,1.6f));
+        }
+    }
 
     lights.Add(new Light(new Vector3D<float>(0.0f, 10000.0f, -7000.0f), new Vector3D<float>(1.0f, 1.0f, 1.0f)));
     lights.Add(new Light(new Vector3D<float>(0.0f, -1000.0f, 0.0f), new Vector3D<float>(1.0f, 1.0f, 1.0f)));

@@ -94,7 +94,7 @@ public class Terrain
         for(int i = 0; i < vertexCount; i++){
             for(int j = 0; j < vertexCount; j++){
                 // position
-                var height = -GetHeight(j, i, image);
+                var height = GetHeight(j, i, image);
                 _heights[j, i] = height;
                 vertices[vertexPointer * 8] = (float)j / ((float)vertexCount - 1) * Size;
                 vertices[vertexPointer * 8 + 1] = height;
@@ -157,6 +157,6 @@ public class Terrain
         height /= MaxPixelColor / 2.0f;
         height *= MaxHeight;
 
-        return height;
+        return -height;
     }
 }
