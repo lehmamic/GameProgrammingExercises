@@ -45,11 +45,11 @@ displayManager.Window.Load += () =>
     // **********TERRAIN TEXTURE STUFF**********
     var backgroundTexture = loader.LoadTerrainTexture("Assets/grassy.png");
     var rTexture = loader.LoadTerrainTexture("Assets/dirt.png");
-    var gTexture = loader.LoadTerrainTexture("Assets/pinkFlowers.png");
+    var gTexture = loader.LoadTerrainTexture("Assets/mud.png");
     var bTexture = loader.LoadTerrainTexture("Assets/path.png");
 
     var texturePack = new TerrainTexturePack(backgroundTexture, rTexture, gTexture, bTexture);
-    var blendMap = loader.LoadTerrainTexture("Assets/blendmap_water.png");
+    var blendMap = loader.LoadTerrainTexture("Assets/blendMap.png");
     // *****************************************
 
     // var data = ObjFileLoader.LoadObj("Assets/tree.obj");
@@ -86,6 +86,9 @@ displayManager.Window.Load += () =>
     // var lamp = new TexturedModel(
     //     ObjLoader.LoadObjModel("Assets/lamp.obj", loader),
     //     loader.LoadModelTexture("Assets/lamp.png"));
+    var rocks = new TexturedModel(
+        ObjLoader.LoadObjModel("Assets/rocks.obj", loader),
+        loader.LoadModelTexture("Assets/rocks.png"));
     
     // grass.Texture.HasTransparency = true;
     // grass.Texture.UseFakeLighting = true;
@@ -93,11 +96,14 @@ displayManager.Window.Load += () =>
     // grass.Texture.UseFakeLighting = true;
     // fern.Texture.HasTransparency = true;
     // lamp.Texture.UseFakeLighting = true;
+    
+    entities.Add(new Entity(rocks, new Vector3D<float>(75,4.4f,-75), 0,0,0, 75.0f));
 
-    terrain = new Terrain(0, -1, loader, texturePack, blendMap, "Assets/heightmap_water.png");
+    terrain = new Terrain(0, -1, loader, texturePack, blendMap, "Assets/heightmap.png");
     terrains.Add(terrain);
 
-    lights.Add(new Light(new Vector3D<float>(0.0f, 10000.0f, -7000.0f), new Vector3D<float>(0.4f, 0.4f, 0.4f)));
+    lights.Add(new Light(new Vector3D<float>(0.0f, 10000.0f, -7000.0f), new Vector3D<float>(1.0f, 1.0f, 1.0f)));
+    lights.Add(new Light(new Vector3D<float>(0.0f, -1000.0f, 0.0f), new Vector3D<float>(1.0f, 1.0f, 1.0f)));
 
     renderer = new MasterRenderer(displayManager, loader);
     guiRenderer = new GuiRenderer(displayManager, renderer, loader, Matrix4X4<float>.Identity);
