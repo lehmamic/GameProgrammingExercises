@@ -140,9 +140,6 @@ displayManager.Window.Load += () =>
     guis.Add(refraction);
     guis.Add(reflection);
 
-    fbos = new WaterFrameBuffers(displayManager);
-    var gui = new GuiTexture(displayManager.GL, fbos.ReflectionTexture, new Vector2D<float>(-0.5f, 0.5f), new Vector2D<float>(0.5f, 0.5f));
-    guis.Add(gui);
     // *****************************************
 
     var bunnyModel = ObjLoader.LoadObjModel("Assets/person.obj", loader);
