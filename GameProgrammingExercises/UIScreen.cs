@@ -7,7 +7,6 @@ namespace GameProgrammingExercises;
 public class UIScreen : IDisposable
 {
     private readonly Game _game;
-    private readonly Font _font;
     private readonly Texture _buttonOn;
     private readonly Texture _buttonOff;
 
@@ -25,7 +24,7 @@ public class UIScreen : IDisposable
         
         // Add to UI Stack
         Game.PushUI(this);
-        _font = Game.GetFont("Assets/Carlito-Regular.ttf");
+        Font = Game.GetFont("Assets/Carlito-Regular.ttf");
         _buttonOn = Game.Renderer.GetTexture("Assets/ButtonYellow.png");
         _buttonOff = Game.Renderer.GetTexture("Assets/ButtonBlue.png");
     }
@@ -34,6 +33,8 @@ public class UIScreen : IDisposable
     public Game Game => _game;
 
     public UIScreenState State => _state;
+
+    public Font Font { get; }
 
     protected string? Title { get; set; }
 
@@ -67,7 +68,7 @@ public class UIScreen : IDisposable
         // Draw title (if exists)
         if (Title is not null)
         {
-            Game.Renderer.DrawText(_font, Title, TitlePos, TitleScale, TitleColor);
+            Game.Renderer.DrawText(Font, Title, TitlePos, TitleScale, TitleColor);
         }
         // Draw buttons
         foreach (var b in _buttons)
@@ -77,7 +78,7 @@ public class UIScreen : IDisposable
             _game.Renderer.DrawTexture(tex, b.Position);
 
             // Draw text of button
-            Game.Renderer.DrawText(_font, b.Name, b.Position, 0.5f, Color.White);
+            Game.Renderer.DrawText(Font, b.Name, b.Position, 0.5f, Color.White);
         }
         // Override in subclasses to draw any textures
     }

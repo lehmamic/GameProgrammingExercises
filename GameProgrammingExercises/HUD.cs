@@ -22,7 +22,10 @@ public class HUD : UIScreen
     private float _radarRadius = 92.0f;
     // Whether the crosshair targets an enemy
     private bool _targetEnemy;
-    
+
+    private float _fps = 0.0f;
+    private float _lastFpsRefreshTime = 0.0f;
+
     public HUD(Game game)
         : base(game)
     {
@@ -40,6 +43,13 @@ public class HUD : UIScreen
 
         UpdateCrosshair(deltaTime);
         UpdateRadar(deltaTime);
+
+        if (_lastFpsRefreshTime >= 0.8f)
+        {
+            _fps = 1.0f / deltaTime;
+            _lastFpsRefreshTime = 0.0f;
+        }
+        _lastFpsRefreshTime += deltaTime;
     }
 
     public override void Draw(Shader shader)
@@ -59,8 +69,7 @@ public class HUD : UIScreen
         // Radar arrow
         Game.Renderer.DrawTexture(_radarArrow, radarPos);
 
-        //// Health bar
-        //DrawTexture(shader, mHealthBar, Vector2(-350.0f, -350.0f));
+        Game.Renderer.DrawText(Font, $"{_fps:F1} FPS", new Vector2D<float>(470.0f, 370.0f), 0.4f, Color.Green);
     }
 
     public void AddTargetComponent(TargetComponent tc)
@@ -111,7 +120,7 @@ public class HUD : UIScreen
         // Use atan2 to get rotation of radar
         float angle = Scalar.Atan2(playerForward2D.Y, playerForward2D.X);
         // Make a 2D rotation matrix
-        Matrix3X3<float> rotMat = Matrix3X3.CreateRotationZ(angle); //.CreateRotation(angle);
+        Matrix3X3<float> rotMat = Matrix3X3.CreateRotationZ(angle);
 
         // Get positions of blips
         foreach (var tc in _targetComps)
