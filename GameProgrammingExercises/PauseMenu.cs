@@ -13,7 +13,7 @@ public class PauseMenu : UIScreen
         AddButton(Game.GetText("ResumeButton"), Close);
         AddButton(Game.GetText("QuitButton"), () =>
         {
-            Game.State = GameState.Quit;
+            _ = new DialogBox(Game, Game.GetText("QuitText"), () => { Game.State = GameState.Quit; });
         });
     }
 

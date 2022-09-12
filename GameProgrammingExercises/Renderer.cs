@@ -33,6 +33,9 @@ public class Renderer : IDisposable
     // Sprite vertex array
     private VertexArrayObject _spriteVertices;
 
+    // Glyph vertex array
+    private VertexArrayObject _glyphVertices;
+
     public Renderer(Game game)
     {
         _game = game;
@@ -83,6 +86,9 @@ public class Renderer : IDisposable
 
             // Create quad for drawing sprites
             CreateSpriteVertices();
+
+            // Create quad for text glyphs
+            CreateGlyphVertices();
         };
 
         return Window;
@@ -157,6 +163,7 @@ public class Renderer : IDisposable
     
     public unsafe void DrawTexture(Texture texture, Vector2D<float> offset, float scale = 1.0f)
     {
+        _spriteVertices.SetActive();
         _spriteShader.SetActive();
 
         // Scale the quad by the width/height of texture
@@ -182,14 +189,17 @@ public class Renderer : IDisposable
 
     public unsafe void DrawText(Font font, string text, Vector2D<float> offset, float scale, Vector3D<float> color)
     {
+        _glyphVertices.SetActive();
         _textShader.SetActive();
         _textShader.SetUniform("textColor", color);
 
+        // we need to middle the texture since in the book the position is in the middle of the texture, here we work with multiple texture
         var chars = text.ToCharArray().Select(font.GetCharacter).ToArray();
+        var textHigh = chars.Select(c => (c.Bearing.Y) * scale).Max();
         var textWidth = chars.Select(c => (c.Advance >> 6)  * scale).Sum();
 
-        var x = offset.X -= textWidth / 2.0f;
-        var y = offset.Y;
+        var x = offset.X - textWidth / 2.0f;
+        var y = offset.Y - textHigh / 2.0f;
 
         foreach (var character in chars)
         {
@@ -379,6 +389,24 @@ public class Renderer : IDisposable
         };
 
         _spriteVertices = new VertexArrayObject(GL, vertices, indices);
+    }
+    
+    private void CreateGlyphVertices()
+    {
+        var vertices = new[] {
+            // vertex(3)/normal(3)/(uv coord)
+            0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, // top left
+            1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, // top right
+            1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, // bottom right
+            0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f  // bottom left
+        };
+
+        var indices = new uint[] {
+            0, 1, 2,
+            2, 3, 0
+        };
+
+        _glyphVertices = new VertexArrayObject(GL, vertices, indices);
     }
 
     private void SetLightUniforms(Shader shader)

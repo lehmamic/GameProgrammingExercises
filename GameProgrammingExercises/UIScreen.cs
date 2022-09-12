@@ -1,7 +1,6 @@
 using GameProgrammingExercises.Maths;
 using Silk.NET.Input;
 using Silk.NET.Maths;
-using Silk.NET.OpenGL;
 
 namespace GameProgrammingExercises;
 
@@ -15,13 +14,10 @@ public class UIScreen : IDisposable
     // State
     private UIScreenState _state;
 
-    private Texture? _background;
-
     // Configure positions
-    private Vector2D<float> _nextButtonPos = new(0.0f, 200.0f);
-    private Vector2D<float> _bgPos = new(0.0f, 250.0f);
 
-    private List<Button> _buttons = new();
+    private readonly List<Button> _buttons = new();
+    private Vector2D<float> _nextButtonPos = new(0.0f, 200.0f);
 
     public UIScreen(Game game)
     {
@@ -29,7 +25,7 @@ public class UIScreen : IDisposable
         
         // Add to UI Stack
         Game.PushUI(this);
-        _font = Game.GetFont("Assets/Antonio-Regular.ttf");
+        _font = Game.GetFont("Assets/Carlito-Regular.ttf");
         _buttonOn = Game.Renderer.GetTexture("Assets/ButtonYellow.png");
         _buttonOff = Game.Renderer.GetTexture("Assets/ButtonBlue.png");
     }
@@ -39,26 +35,39 @@ public class UIScreen : IDisposable
 
     public UIScreenState State => _state;
 
-    public string? Title { get; set; }
+    protected string? Title { get; set; }
 
-    public Vector2D<float> TitlePos { get; set; } = new(0.0f, 300.0f);
+    protected Vector2D<float> TitlePos { get; set; } = new(0.0f, 300.0f);
+
+    protected float TitleScale { get; set; } = 1.0f;
+
+    protected Vector3D<float> TitleColor { get; set; } = Color.White;
+
+    protected Texture? Background { get; set; }
+
+    protected Vector2D<float> BgPos { get; set; } = new(0.0f, 250.0f);
+
+    protected Vector2D<float> NextButtonPos
+    {
+        get => _nextButtonPos;
+        set => _nextButtonPos = value;
+    }
 
     public virtual void Update(float deltaTime)
     {
-
     }
 
     public virtual void Draw(Shader shader)
     {
         // Draw background (if exists)
-        if (_background is not null)
+        if (Background is not null)
         {
-            Game.Renderer.DrawTexture(_background, _bgPos);
+            Game.Renderer.DrawTexture(Background, BgPos);
         }
         // Draw title (if exists)
         if (Title is not null)
         {
-            Game.Renderer.DrawText(_font, Title, TitlePos, 1.0f, Color.White);
+            Game.Renderer.DrawText(_font, Title, TitlePos, TitleScale, TitleColor);
         }
         // Draw buttons
         foreach (var b in _buttons)
@@ -128,7 +137,7 @@ public class UIScreen : IDisposable
     public void AddButton(string name, Action onClick)
     {
         Vector2D<float> dims = new(_buttonOn.Width, _buttonOn.Height);
-        Button b = new Button(name, onClick, _nextButtonPos, dims);
+        Button b = new Button(name, onClick, NextButtonPos, dims);
         _buttons.Add(b);
 
         // Update position of next button
