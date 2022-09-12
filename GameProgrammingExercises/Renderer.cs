@@ -163,6 +163,9 @@ public class Renderer : IDisposable
     
     public unsafe void DrawTexture(Texture texture, Vector2D<float> offset, float scale = 1.0f)
     {
+        // Modern text rendering in OpenGL: https://learnopengl.com/In-Practice/Text-Rendering
+        // How to render the glyph als signed distance field: https://stackoverflow.com/questions/71185718/how-to-use-ft-render-mode-sdf-in-freetype
+        // SDF shader: https://www.youtube.com/watch?v=1b5hIMqz_wM
         _spriteVertices.SetActive();
         _spriteShader.SetActive();
 
