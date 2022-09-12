@@ -213,21 +213,29 @@ public class Game
         {
             _ = new PauseMenu(this);
         }
-
-        if (state.Keyboard.GetKeyState(Key.Minus) == ButtonState.Pressed)
+        else if (state.Keyboard.GetKeyState(Key.Minus) == ButtonState.Pressed)
         {
             // Reduce master volume
             float volume = _audioSystem.GetBusVolume("bus:/");
             volume = Scalar.Max(0.0f, volume - 0.1f);
             _audioSystem.SetBusVolume("bus:/", volume);
         }
-
-        if (state.Keyboard.GetKeyState(Key.Equal) == ButtonState.Pressed)
+        else if (state.Keyboard.GetKeyState(Key.Equal) == ButtonState.Pressed)
         {
             // Increase master volume
             float volume = _audioSystem.GetBusVolume("bus:/");
             volume = Scalar.Min(1.0f, volume + 0.1f);
             _audioSystem.SetBusVolume("bus:/", volume);
+        }
+        else if(state.Keyboard.GetKeyState(Key.Number1) == ButtonState.Pressed)
+        {
+            // Load English text
+            LoadText("Assets/English.gptext");
+        }
+        else if(state.Keyboard.GetKeyState(Key.Number2) == ButtonState.Pressed)
+        {
+            // Load Russian text
+            LoadText("Assets/Russian.gptext");
         }
 
         if (state.Mouse.GetButtonState(MouseButton.Left) == ButtonState.Pressed)
