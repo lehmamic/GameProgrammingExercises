@@ -101,7 +101,7 @@ namespace GameProgrammingExercises
             _gl.EnableVertexAttribArray(3);
             _gl.VertexAttribPointer(3, 4, VertexAttribPointerType.UnsignedByte, true, VertexPosNormSkinTex.SizeInBytes, (void*) (6 * sizeof(float) + 4 * sizeof(byte)));
 
-            // Texture coordinates is 2 floats with offset 6
+            // Texture coordinates is 2 floats
             _gl.EnableVertexAttribArray(4);
             _gl.VertexAttribPointer(4, 2, VertexAttribPointerType.Float, false, VertexPosNormSkinTex.SizeInBytes, (void*) (6 * sizeof(float) + 8 * sizeof(byte)));
         }

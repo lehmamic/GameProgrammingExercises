@@ -29,7 +29,7 @@ public class Game
 
 
     // Game specific
-    private FpsActor _fpsActor;
+    private FollowActor _followActor;
     private SpriteComponent _crosshair;
     private Actor _startSphere;
     private Actor _endSphere;
@@ -46,7 +46,7 @@ public class Game
 
     public PhysWorld PhysWorld => _physWorld;
 
-    public FpsActor Player => _fpsActor;
+    public FollowActor Player => _followActor;
 
     public HUD HUD => _hud;
 
@@ -237,11 +237,6 @@ public class Game
             // Load Russian text
             LoadText("Assets/Russian.gptext");
         }
-
-        if (state.Mouse.GetButtonState(MouseButton.Left) == ButtonState.Pressed)
-        {
-            _fpsActor.Shoot();
-        }
     }
 
     private void UpdateGame(float deltaTime)
@@ -375,7 +370,7 @@ public class Game
         // SDL_GetRelativeMouseState(nullptr, nullptr);
 
         // Different camera actors
-        _fpsActor = new FpsActor(this);
+        _followActor = new FollowActor(this);
 
         // Create target actors
         a = new TargetActor(this);

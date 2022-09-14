@@ -22,8 +22,8 @@ public struct VertexPosNormSkinTex
     {
         Position = position;
         Normal = normal;
-        TexCoords = texCoords;
         SkinningIndices = skinningIndices;
         SkinningWeights = skinningWeights;
+        TexCoords = texCoords;
     }
 }
