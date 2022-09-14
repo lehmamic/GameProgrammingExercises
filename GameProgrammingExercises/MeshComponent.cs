@@ -4,10 +4,11 @@ namespace GameProgrammingExercises;
 
 public class MeshComponent : Component
 {
-    public MeshComponent(Actor owner)
+    public MeshComponent(Actor owner, bool isSkeletal = false)
         : base(owner)
     {
         Owner.Game.Renderer.AddMeshComp(this);
+        IsSkeletal = isSkeletal;
     }
 
     public bool Visible { get; set; } = true;
@@ -15,6 +16,8 @@ public class MeshComponent : Component
     public Mesh Mesh { get; set; }
 
     public int TextureIndex { get; set; }
+
+    public bool IsSkeletal { get; }
 
     /// <summary>
     /// Draw the mesh component with the provided shader.

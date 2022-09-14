@@ -14,6 +14,7 @@ public class Renderer : IDisposable
 
     // All mesh components drawn
     private readonly List<MeshComponent> _meshComps = new();
+    private readonly List<SkeletalMeshComponent> _skeletalMeshes = new();
 
     // Map of textures loaded
     private readonly Dictionary<string, Texture> _textures = new();
@@ -24,14 +25,19 @@ public class Renderer : IDisposable
     // Mesh Shader
     private Shader _meshShader;
 
+    // Skinned Shader
+    private Shader _skinnedShader;
+
     // Sprite Shader
     private Shader _spriteShader;
 
     // Text Shader
     private Shader _textShader;
 
+
     // Sprite vertex array
     private VertexArrayObject _spriteVertices;
+
 
     // Glyph vertex array
     private VertexArrayObject _glyphVertices;
@@ -125,6 +131,24 @@ public class Renderer : IDisposable
             if (mesh.Visible)
             {
                 mesh.Draw(_meshShader);
+            }
+        }
+        
+        // Draw any skinned meshes now
+        _skinnedShader.SetActive();
+
+        // Update view-projection matrix
+        _skinnedShader.SetUniform("uViewProj", ViewMatrix * ProjectionMatrix);
+
+        // Update lighting uniforms
+        SetLightUniforms(_skinnedShader);
+
+        // Draw all meshes
+        foreach (var mesh in _meshComps)
+        {
+            if (mesh.Visible)
+            {
+                mesh.Draw(_skinnedShader);
             }
         }
 
@@ -260,12 +284,26 @@ public class Renderer : IDisposable
     
     public void AddMeshComp(MeshComponent mesh)
     {
-        _meshComps.Add(mesh);
+        if (mesh.IsSkeletal)
+        {
+            _skeletalMeshes.Add((SkeletalMeshComponent)mesh);
+        }
+        else
+        {
+            _meshComps.Add(mesh);
+        }
     }
 
     public void RemoveMeshComp(MeshComponent mesh)
     {
-        _meshComps.Remove(mesh);
+        if (mesh.IsSkeletal)
+        {
+            _skeletalMeshes.Remove((SkeletalMeshComponent) mesh);
+        }
+        else
+        {
+            _meshComps.Remove(mesh);
+        }
     }
 
     public Texture GetTexture(string fileName)
@@ -290,6 +328,16 @@ public class Renderer : IDisposable
         return _meshes[fileName];
     }
 
+    /// <summary>
+    /// Given a screen space point, unprojects it into world space,
+    /// based on the current 3D view/projection matrices
+    /// Expected ranges:
+    /// x = [-screenWidth/2, +screenWidth/2]
+    /// y = [-screenHeight/2, +screenHeight/2]
+    /// z = [0, 1) -- 0 is closer to camera, 1 is further
+    /// </summary>
+    /// <param name="screenPoint"></param>
+    /// <returns></returns>
     public Vector3D<float> Unproject(Vector3D<float> screenPoint)
     {
         // Convert screenPoint to device coordinates (between -1 and +1)
@@ -336,6 +384,8 @@ public class Renderer : IDisposable
         
         _spriteShader.Dispose();
         _spriteVertices.Dispose();
+        _textShader.Dispose();
+        _skinnedShader.Dispose();
         GL.Dispose();
     }
 
@@ -360,6 +410,25 @@ public class Renderer : IDisposable
         _meshShader = new Shader(GL, "Shaders/Pong.vert", "Shaders/Pong.frag");
         _meshShader.SetActive();
 
+        // Set the view-projection matrix
+        ViewMatrix = GameMath.CreateLookAt(
+            Vector3D<float>.Zero,      // Camera position
+            Vector3D<float>.UnitX,     // target position
+            Vector3D<float>.UnitZ);    // Up
+
+        ProjectionMatrix = GameMath.CreatePerspectiveFieldOfView(
+            Scalar.DegreesToRadians(70.0f), // Horizontal FOV
+            ScreenWidth,
+            ScreenHeight,
+            25.0f,                  // Near plane
+            10000.0f);              // Far plane
+
+        _meshShader.SetUniform("uViewProj", ViewMatrix * ProjectionMatrix);
+        
+        // Create skinned shader
+        _skinnedShader = new Shader(GL, "Shaders/Skinned.vert", "Shaders/Pong.frag");
+        _skinnedShader.SetActive();
+        
         // Set the view-projection matrix
         ViewMatrix = GameMath.CreateLookAt(
             Vector3D<float>.Zero,      // Camera position
