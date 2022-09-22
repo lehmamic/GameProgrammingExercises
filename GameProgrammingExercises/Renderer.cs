@@ -310,7 +310,7 @@ public class Renderer : IDisposable
     {
         if (!_textures.ContainsKey(fileName))
         {
-            var texture = new Texture(GL, fileName);
+            var texture = Texture.Load(GL, fileName);
             _textures.Add(fileName, texture);
         }
 

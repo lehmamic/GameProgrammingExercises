@@ -77,7 +77,7 @@ public class Font : IDisposable
             throw new FreeTypeException(result);
         }
 
-        var texture = new Texture(_gl, _face);
+        var texture = Texture.CreateFromGlyph(_gl, _face.GlyphBitmap);
         return new Character(
             c,
             texture,
