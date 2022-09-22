@@ -10,6 +10,8 @@ public class FollowActor : Actor
     private readonly MoveComponent _moveComp;
     private readonly FollowCamera _cameraComp;
 
+    private bool _moving = false;
+
     public FollowActor(Game game)
         : base(game)
     {
@@ -55,17 +57,20 @@ public class FollowActor : Actor
             angularSpeed += Scalar<float>.Pi;
         }
 
+        // Did we just start moving?
+        if (!_moving && !forwardSpeed.NearZero())
+        {
+            _moving = true;
+            _meshComp.PlayAnimation(Game.GetAnimation("Assets/CatRunSprint.gpanim"), 1.25f);
+        }
+        // Or did we just stop moving?
+        else if (_moving && forwardSpeed.NearZero())
+        {
+            _moving = false;
+            _meshComp.PlayAnimation(Game.GetAnimation("Assets/CatActionIdle.gpanim"));
+        }
+
         _moveComp.ForwardSpeed = forwardSpeed;
         _moveComp.AngularSpeed = angularSpeed;
-
-        // Adjust horizontal distance of camera based on speed
-        if (!forwardSpeed.NearZero())
-        {
-            _cameraComp.HorzDist = 500.0f;
-        }
-        else
-        {
-            _cameraComp.HorzDist = 350.0f;
-        }
     }
 }
