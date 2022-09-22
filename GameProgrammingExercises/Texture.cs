@@ -1,5 +1,5 @@
 using System.Buffers;
-using FreeTypeSharp;
+using FreeTypeSharp.Native;
 using Silk.NET.OpenGL;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
@@ -11,20 +11,28 @@ public class Texture : IDisposable
     private readonly GL _gl;
     private readonly uint _handle;
 
-    public unsafe Texture(GL gl, string path)
+    private Texture(GL gl, uint handle, int width, int height)
     {
         _gl = gl;
+        _handle = handle;
+        Width = width;
+        Height = height;
+    }
 
+    ~Texture()
+    {
+        Dispose(false);
+    }
+
+    public static unsafe Texture Load(GL gl, string path)
+    {
         var imageConfig = Configuration.Default.Clone();
         imageConfig.PreferContiguousImageBuffers = true;
 
         using var image = Image.Load<Rgba32>(imageConfig, path);
 
-        Width = image.Width;
-        Height = image.Height;
-
-        _handle = _gl.GenTexture();
-        _gl.BindTexture(TextureTarget.Texture2D, _handle);
+        var handle = gl.GenTexture();
+        gl.BindTexture(TextureTarget.Texture2D, handle);
 
         if (!image.DangerousTryGetSinglePixelMemory(out Memory<Rgba32> memory))
         {
@@ -32,53 +40,42 @@ public class Texture : IDisposable
         }
 
         using MemoryHandle pinHandle = memory.Pin();
-        _gl.TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgba, (uint)image.Width, (uint)image.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, pinHandle.Pointer);
-
-        // Enable bilinear filtering
-        _gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int) GLEnum.Linear);
-        _gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) GLEnum.Linear);
-    }
-
-    public unsafe Texture(GL gl, FreeTypeFaceFacade fontFace)
-    {
-        _gl = gl;
-
-        Width = (int)fontFace.GlyphBitmap.width;
-        Height = (int)fontFace.GlyphBitmap.rows;
-
-        // Generate texture
-        _handle = _gl.GenTexture();
-        _gl.BindTexture(TextureTarget.Texture2D, _handle);
-
-        _gl.TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Red, fontFace.GlyphBitmap.width, fontFace.GlyphBitmap.rows, 0, PixelFormat.Red, PixelType.UnsignedByte, fontFace.GlyphBitmap.buffer.ToPointer());
+        gl.TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgba, (uint)image.Width, (uint)image.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, pinHandle.Pointer);
 
         // Generate mipmaps for texture
-        _gl.GenerateMipmap(TextureTarget.Texture2D);
+        gl.GenerateMipmap(TextureTarget.Texture2D);
 
         // Set texture options
-        _gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int) GLEnum.ClampToEdge);
-        _gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int) GLEnum.ClampToEdge);
-        _gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int) GLEnum.LinearMipmapLinear);
-        _gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) GLEnum.Linear);
+        gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int) GLEnum.LinearMipmapLinear);
+        gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) GLEnum.Linear);
 
         // Enable anisotropic filtering, if supported
-        if (_gl.IsExtensionPresent("EXT_texture_filter_anisotropic"))
+        if (gl.IsExtensionPresent("EXT_texture_filter_anisotropic"))
         {
             // Get the maximum anisotropy value
-            _gl.GetFloat(GLEnum.MaxTextureMaxAnisotropy, out float largest);
+            gl.GetFloat(GLEnum.MaxTextureMaxAnisotropy, out float largest);
             // Enable it
-            _gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMaxAnisotropy, largest);
+            gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMaxAnisotropy, largest);
         }
 
-        // // Enable anisotropic filtering, if supported
-        // if (GLEW_EXT_texture_filter_anisotropic)
-        // {
-        //     // Get the maximum anisotropy value
-        //     GLfloat largest;
-        //     glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &largest);
-        //     // Enable it
-        //     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, largest);
-        // }
+        return new Texture(gl, handle, image.Width, image.Height);
+    }
+
+    public static unsafe Texture CreateFromGlyph(GL gl, FT_Bitmap glyph)
+    {
+        // Generate texture
+        var handle = gl.GenTexture();
+        gl.BindTexture(TextureTarget.Texture2D, handle);
+
+        gl.TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Red, glyph.width, glyph.rows, 0, PixelFormat.Red, PixelType.UnsignedByte, glyph.buffer.ToPointer());
+
+        // Set texture options
+        gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int) GLEnum.ClampToEdge);
+        gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int) GLEnum.ClampToEdge);
+        gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int) GLEnum.Linear);
+        gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) GLEnum.Linear);
+
+        return new Texture(gl, handle, (int) glyph.width, (int) glyph.rows);
     }
 
     public int Width { get; }
@@ -89,8 +86,22 @@ public class Texture : IDisposable
     {
         _gl.BindTexture(TextureTarget.Texture2D, _handle);
     }
-    
+
     public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        ReleaseUnmanagedResources();
+        if (disposing)
+        {
+        }
+    }
+
+    private void ReleaseUnmanagedResources()
     {
         _gl.DeleteTextures(1, _handle);
     }
