@@ -60,6 +60,25 @@ public class Texture : IDisposable
         _gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int) GLEnum.ClampToEdge);
         _gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int) GLEnum.LinearMipmapLinear);
         _gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) GLEnum.Linear);
+
+        // Enable anisotropic filtering, if supported
+        if (_gl.IsExtensionPresent("EXT_texture_filter_anisotropic"))
+        {
+            // Get the maximum anisotropy value
+            _gl.GetFloat(GLEnum.MaxTextureMaxAnisotropy, out float largest);
+            // Enable it
+            _gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMaxAnisotropy, largest);
+        }
+
+        // // Enable anisotropic filtering, if supported
+        // if (GLEW_EXT_texture_filter_anisotropic)
+        // {
+        //     // Get the maximum anisotropy value
+        //     GLfloat largest;
+        //     glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &largest);
+        //     // Enable it
+        //     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, largest);
+        // }
     }
 
     public int Width { get; }
