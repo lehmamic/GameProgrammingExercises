@@ -52,11 +52,14 @@ public class Texture : IDisposable
 
         _gl.TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Red, fontFace.GlyphBitmap.width, fontFace.GlyphBitmap.rows, 0, PixelFormat.Red, PixelType.UnsignedByte, fontFace.GlyphBitmap.buffer.ToPointer());
 
+        // Generate mipmaps for texture
+        _gl.GenerateMipmap(TextureTarget.Texture2D);
+
         // Set texture options
         _gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int) GLEnum.ClampToEdge);
         _gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int) GLEnum.ClampToEdge);
+        _gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int) GLEnum.LinearMipmapLinear);
         _gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) GLEnum.Linear);
-        _gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int) GLEnum.Linear);
     }
 
     public int Width { get; }
