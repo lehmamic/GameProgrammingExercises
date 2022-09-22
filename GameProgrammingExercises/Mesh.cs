@@ -170,7 +170,7 @@ public class Mesh : IDisposable
             throw new NotImplementedException($"The VAO layout {layout} has not been implemented yet.");
         }
 
-        return new Mesh(radius, raw.SpecularPower, raw.Shader, textures, box, vao);
+        return new Mesh(radius, specPower, shaderName, textures, box, vao);
     }
     
     public Texture? GetTexture(int index)

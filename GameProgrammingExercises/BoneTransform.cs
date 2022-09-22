@@ -16,7 +16,7 @@ public struct BoneTransform
         return rot * trans;
     }
 
-    public static BoneTransform Interpolation(BoneTransform a, BoneTransform b, float f)
+    public static BoneTransform Interpolate(BoneTransform a, BoneTransform b, float f)
     {
         BoneTransform retVal;
         retVal.Rotation = Quaternion<float>.Slerp(a.Rotation, b.Rotation, f);

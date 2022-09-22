@@ -12,6 +12,8 @@ public class Game
     private readonly List<Actor> _actors = new();
     private readonly List<UIScreen> _uiStack = new();
     private readonly Dictionary<string, Font> _fonts = new();
+    private readonly Dictionary<string, Skeleton> _skeletons = new();
+    private readonly Dictionary<string, Animation> _animations = new();
 
     // Map for text localization
     private readonly Dictionary<string, string> _text = new();
@@ -175,6 +177,28 @@ public class Game
         }
 
         return errorMsg;
+    }
+    
+    public Skeleton GetSkeleton(string fileName)
+    {
+        if (!_skeletons.ContainsKey(fileName))
+        {
+            var skeleton = Skeleton.Load(fileName);
+            _skeletons.Add(fileName, skeleton);
+        }
+
+        return _skeletons[fileName];
+    }
+
+    public Animation GetAnimation(string fileName)
+    {
+        if (!_animations.ContainsKey(fileName))
+        {
+            var animation = Animation.Load(fileName);
+            _animations.Add(fileName, animation);
+        }
+
+        return _animations[fileName];
     }
 
     private void ProcessInput()

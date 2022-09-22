@@ -84,6 +84,22 @@ public sealed class Shader : IDisposable
         // Send the matrix data to the uniform
         _gl.UniformMatrix4(location, 1, true, (float*) &value);
     }
+    
+    public unsafe void SetUniform(string name, Matrix4X4<float>[] values, uint count)
+    {
+        // Find the uniform by this name
+        int location = _gl.GetUniformLocation(_handle, name);
+        if (location == -1) //If GetUniformLocation returns -1 the uniform is not found.
+        {
+            throw new ShaderException($"{name} uniform not found on shader.");
+        }
+
+        fixed(void* d = values)
+        {
+            // Send the matrix data to the uniform
+            _gl.UniformMatrix4(location, count, true, (float *) d);
+        }
+    }
 
     private uint CompileShader(ShaderType type, string path)
     {

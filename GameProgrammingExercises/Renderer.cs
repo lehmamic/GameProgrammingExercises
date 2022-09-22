@@ -133,7 +133,7 @@ public class Renderer : IDisposable
                 mesh.Draw(_meshShader);
             }
         }
-        
+
         // Draw any skinned meshes now
         _skinnedShader.SetActive();
 
@@ -144,7 +144,7 @@ public class Renderer : IDisposable
         SetLightUniforms(_skinnedShader);
 
         // Draw all meshes
-        foreach (var mesh in _meshComps)
+        foreach (var mesh in _skeletalMeshes)
         {
             if (mesh.Visible)
             {
@@ -442,7 +442,7 @@ public class Renderer : IDisposable
             25.0f,                  // Near plane
             10000.0f);              // Far plane
 
-        _meshShader.SetUniform("uViewProj", ViewMatrix * ProjectionMatrix);
+        _skinnedShader.SetUniform("uViewProj", ViewMatrix * ProjectionMatrix);
     }
 
     private void CreateSpriteVertices()

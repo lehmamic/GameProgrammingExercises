@@ -7,8 +7,8 @@ public class MeshComponent : Component
     public MeshComponent(Actor owner, bool isSkeletal = false)
         : base(owner)
     {
-        Owner.Game.Renderer.AddMeshComp(this);
         IsSkeletal = isSkeletal;
+        Owner.Game.Renderer.AddMeshComp(this);
     }
 
     public bool Visible { get; set; } = true;

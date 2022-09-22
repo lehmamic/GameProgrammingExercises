@@ -41,17 +41,17 @@ namespace GameProgrammingExercises
 
             // Specify the vertex attributes
 
-                // Position is 3 floats with offset 0
-                _gl.EnableVertexAttribArray(0);
-                _gl.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, VertexPosNormTex.SizeInBytes, (void*) 0);
+            // Position is 3 floats with offset 0
+            _gl.EnableVertexAttribArray(0);
+            _gl.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, VertexPosNormTex.SizeInBytes, (void*) 0);
 
-                // Normal is 3 floats with offset 3
-                _gl.EnableVertexAttribArray(1);
-                _gl.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, VertexPosNormTex.SizeInBytes, (void*) (3 * sizeof(float)));
+            // Normal is 3 floats with offset 3
+            _gl.EnableVertexAttribArray(1);
+            _gl.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, VertexPosNormTex.SizeInBytes, (void*) (3 * sizeof(float)));
 
-                // Texture coordinates is 2 floats with offset 6
-                _gl.EnableVertexAttribArray(2);
-                _gl.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, VertexPosNormTex.SizeInBytes, (void*) (6 * sizeof(float)));
+            // Texture coordinates is 2 floats with offset 6
+            _gl.EnableVertexAttribArray(2);
+            _gl.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, VertexPosNormTex.SizeInBytes, (void*) (6 * sizeof(float)));
         }
 
         public unsafe VertexArrayObject(GL gl, ReadOnlySpan<VertexPosNormSkinTex> vertices, uint[] indices)
@@ -105,6 +105,7 @@ namespace GameProgrammingExercises
             _gl.EnableVertexAttribArray(4);
             _gl.VertexAttribPointer(4, 2, VertexAttribPointerType.Float, false, VertexPosNormSkinTex.SizeInBytes, (void*) (6 * sizeof(float) + 8 * sizeof(byte)));
         }
+
         public int NumberOfVertices { get; }
 
         public int NumberOfIndices { get; }

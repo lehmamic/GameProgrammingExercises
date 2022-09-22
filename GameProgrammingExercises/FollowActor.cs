@@ -15,8 +15,10 @@ public class FollowActor : Actor
     {
         _meshComp = new SkeletalMeshComponent(this)
         {
-            Mesh = Game.Renderer.GetMesh("Assets/CatWarrior.gpmesh")
+            Mesh = Game.Renderer.GetMesh("Assets/CatWarrior.gpmesh"),
+            Skeleton = Game.GetSkeleton("Assets/CatWarrior.gpskel"),
         };
+        _meshComp.PlayAnimation(Game.GetAnimation("Assets/CatActionIdle.gpanim"));
         Position = new Vector3D<float>(0.0f, 0.0f, -100.0f);
 
         _moveComp = new MoveComponent(this);
