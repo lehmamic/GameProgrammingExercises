@@ -18,7 +18,7 @@ public class FrameBufferObject : IDisposable
         Dispose(false);
     }
 
-    public uint FrameBufferId => _handle;
+    public uint BufferId => _handle;
 
     public void Dispose()
     {

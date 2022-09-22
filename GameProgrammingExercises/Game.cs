@@ -340,10 +340,39 @@ public class Game
         {
             for (int j = 0; j < 10; j++)
             {
+                var pos = new Vector3D<float>(start + i * size, start + j * size, -100.0f);
                 a = new PlaneActor(this)
                 {
-                    Position = new Vector3D<float>(start + i * size, start + j * size, -100.0f),
+                    Position = pos,
                 };
+
+                // Create some point lights
+                a = new Actor(this);
+                pos.Z += 100.0f;
+                a.Position = pos;
+                var p = new PointLightComponent(a);
+                Vector3D<float> color = Color.Black;
+                switch ((i + j) % 5)
+                {
+                    case 0:
+                        color = Color.Green;
+                        break;
+                    case 1:
+                        color = Color.Blue;
+                        break;
+                    case 2:
+                        color = Color.Red;
+                        break;
+                    case 3:
+                        color = Color.Yellow;
+                        break;
+                    case 4:
+                        color = Color.LightPink;
+                        break;
+                }
+                p.DiffuseColor = color;
+                p.InnerRadius = 100.0f;
+                p.OuterRadius = 200.0f;
             }
         }
 

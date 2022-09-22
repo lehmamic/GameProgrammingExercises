@@ -62,6 +62,16 @@ public sealed class Shader : IDisposable
         _gl.Uniform1(location, value);
     }
 
+    public void SetUniform(string name, Vector2D<float> value)
+    {
+        int location = _gl.GetUniformLocation(_handle, name);
+        if (location == -1)
+        {
+            throw new ShaderException($"{name} uniform not found on shader.");
+        }
+        _gl.Uniform2(location, value.X, value.Y);
+    }
+
     public void SetUniform(string name, Vector3D<float> value)
     {
         int location = _gl.GetUniformLocation(_handle, name);

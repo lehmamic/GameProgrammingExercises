@@ -49,6 +49,9 @@ public class Renderer : IDisposable
     // GBuffer
     private GBuffer _gBuffer;
     private Shader _gBufferGlobalShader;
+    private Shader _pointLightShader;
+    private readonly List<PointLightComponent> _pointLights = new();
+    private Mesh _pointLightMesh;
 
     public Renderer(Game game)
     {
@@ -112,9 +115,12 @@ public class Renderer : IDisposable
 
             // Create render target for mirror
             CreateMirrorTarget();
-            
+
             // Create G-buffer
             _gBuffer = GBuffer.Create(GL, (int) ScreenWidth, (int) ScreenHeight);
+
+            // Load point light mesh
+            _pointLightMesh = GetMesh("Assets/PointLight.gpmesh");
         };
 
         return Window;
@@ -127,9 +133,9 @@ public class Renderer : IDisposable
          */
 
         // Draw to the mirror texture first
-        Draw3DScene(_mirrorBuffer!.FrameBufferId, MirrorViewMatrix, ProjectionMatrix, 0.25f, false);
+        Draw3DScene(_mirrorBuffer!.BufferId, MirrorViewMatrix, ProjectionMatrix, 0.25f, false);
         // Draw the 3D scene to the G-buffer
-        Draw3DScene(_gBuffer.FrameBufferId, ViewMatrix, ProjectionMatrix, 1.0f, false);
+        Draw3DScene(_gBuffer.BufferId, ViewMatrix, ProjectionMatrix, 1.0f, false);
 
         // Set the frame buffer back to zero (screen's frame buffer)
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
@@ -159,7 +165,7 @@ public class Renderer : IDisposable
                 sprite.Draw(_spriteShader);
             }
         }
-        
+
         // Draw any UI screens
         foreach (var ui in _game.UIStack)
         {
@@ -246,36 +252,33 @@ public class Renderer : IDisposable
         // Draw the triangles
         GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, null);
 
-        // // Copy depth buffer from G-buffer to default frame buffer
-        // glBindFramebuffer(GL_READ_FRAMEBUFFER, mGBuffer->GetBufferID());
-        // int width = static_cast<int>(mScreenWidth);
-        // int height = static_cast<int>(mScreenHeight);
-        // glBlitFramebuffer(0, 0, width, height,
-        //     0, 0, width, height,
-        //     GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-        //
-        // // Enable depth test, but disable writes to depth buffer
-        // glEnable(GL_DEPTH_TEST);
-        // glDepthMask(GL_FALSE);
-        //
-        // // Set the point light shader and mesh as active
-        // mGPointLightShader->SetActive();
-        // mPointLightMesh->GetVertexArray()->SetActive();
-        // // Set the view-projection matrix
-        // mGPointLightShader->SetMatrixUniform("uViewProj",
-        //     mView * mProjection);
-        // // Set the G-buffer textures for sampling
-        // mGBuffer->SetTexturesActive();
-        //
-        // // The point light color should add to existing color
-        // glEnable(GL_BLEND);
-        // glBlendFunc(GL_ONE, GL_ONE);
-        //
-        // // Draw the point lights
-        // for (PointLightComponent* p : mPointLights)
-        // {
-        //     p->Draw(mGPointLightShader, mPointLightMesh);
-        // }
+        // Copy depth buffer from G-buffer to default frame buffer
+        GL.BindFramebuffer(FramebufferTarget.ReadFramebuffer, _gBuffer.BufferId);
+        int width = (int) ScreenWidth;
+        int height = (int) ScreenHeight;
+        GL.BlitFramebuffer(0, 0, width, height, 0, 0, width, height, ClearBufferMask.DepthBufferBit, BlitFramebufferFilter.Nearest);
+
+        // Enable depth test, but disable writes to depth buffer
+        GL.Enable(EnableCap.DepthTest);
+        GL.DepthMask(false);
+
+        // Set the point light shader and mesh as active
+        _pointLightShader.SetActive();
+        _pointLightMesh.VertexArray.SetActive();
+        // Set the view-projection matrix
+        _pointLightShader.SetUniform("uViewProj", ViewMatrix * ProjectionMatrix);
+        // Set the G-buffer textures for sampling
+        _gBuffer.SetTexturesActive();
+
+        // The point light color should add to existing color
+        GL.Enable(EnableCap.Blend);
+        GL.BlendFunc(BlendingFactor.One, BlendingFactor.One);
+
+        // Draw the point lights
+        foreach (var p in _pointLights)
+        {
+            p.Draw(_pointLightShader, _pointLightMesh);
+        }
     }
 
     public unsafe void DrawTexture(Texture texture, Vector2D<float> offset, float scale = 1.0f, bool flipY = false)
@@ -406,6 +409,16 @@ public class Renderer : IDisposable
         }
     }
 
+    public void AddPointLight(PointLightComponent light)
+    {
+        _pointLights.Add(light);
+    }
+
+    public void RemovePointLight(PointLightComponent light)
+    {
+        _pointLights.Remove(light);
+    }
+
     public Texture GetTexture(string fileName)
     {
         if (!_textures.ContainsKey(fileName))
@@ -497,9 +510,12 @@ public class Renderer : IDisposable
         
         _spriteShader.Dispose();
         _spriteVertices.Dispose();
+        _glyphVertices.Dispose();
+        _pointLightMesh.VertexArray.Dispose();
         _textShader.Dispose();
         _skinnedShader.Dispose();
         _gBufferGlobalShader.Dispose();
+        _pointLightShader.Dispose();
         GL.Dispose();
     }
 
@@ -593,7 +609,7 @@ public class Renderer : IDisposable
             10000.0f);              // Far plane
 
         _skinnedShader.SetUniform("uViewProj", ViewMatrix * ProjectionMatrix);
-        
+
         // Create shader for drawing from GBuffer (global lighting)
         _gBufferGlobalShader =new Shader(GL, "Shaders/GBufferGlobal.vert", "Shaders/GBufferGlobal.frag");
 
@@ -609,6 +625,16 @@ public class Renderer : IDisposable
         // The world transform scales to the screen and flips y
         Matrix4X4<float> gbufferWorld = Matrix4X4.CreateScale(ScreenWidth, -ScreenHeight, 1.0f);
         _gBufferGlobalShader.SetUniform("uWorldTransform", gbufferWorld);
+
+        // Create a shader for point lights from GBuffer
+        _pointLightShader = new Shader(GL, "Shaders/BasicMesh.vert", "Shaders/GBufferPointLight.frag");
+
+        // Set sampler indices
+        _pointLightShader.SetActive();
+        _pointLightShader.SetUniform("uGDiffuse", 0);
+        _pointLightShader.SetUniform("uGNormal", 1);
+        _pointLightShader.SetUniform("uGWorldPos", 2);
+        _pointLightShader.SetUniform("uScreenDimensions", new Vector2D<float>(ScreenWidth, ScreenHeight));
     }
 
     private void CreateSpriteVertices()
