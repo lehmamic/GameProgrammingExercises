@@ -26,6 +26,10 @@ public class FollowActor : Actor
         _moveComp = new MoveComponent(this);
         _cameraComp = new FollowCamera(this);
         _cameraComp.SnapToIdeal();
+
+        // Add a component for the mirror camera
+        var mirror = new MirrorCamera(this);
+        mirror.SnapToIdeal();
     }
     
     public bool Visible

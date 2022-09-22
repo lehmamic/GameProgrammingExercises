@@ -69,6 +69,10 @@ public class HUD : UIScreen
         // Radar arrow
         Game.Renderer.DrawTexture(_radarArrow, radarPos);
 
+        // Draw the mirror (bottom left)
+        var mirror = Game.Renderer.MirrorTexture;
+        Game.Renderer.DrawTexture(mirror, new Vector2D<float>(-350.0f, -250.0f), 1.0f, true);
+
         Game.Renderer.DrawText(Font, $"{_fps:F1} FPS", new Vector2D<float>(470.0f, 370.0f), 0.4f, Color.Green);
     }
 

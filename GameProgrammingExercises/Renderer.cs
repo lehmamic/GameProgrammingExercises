@@ -34,13 +34,17 @@ public class Renderer : IDisposable
     // Text Shader
     private Shader _textShader;
 
-
     // Sprite vertex array
     private VertexArrayObject _spriteVertices;
 
-
     // Glyph vertex array
     private VertexArrayObject _glyphVertices;
+
+    // Framebuffer object for the mirror 
+    private FrameBufferObject? _mirrorBuffer;
+
+    // Texture for the mirror
+    private Texture? _mirrorTexture;
 
     public Renderer(Game game)
     {
@@ -60,12 +64,18 @@ public class Renderer : IDisposable
     // View/projection for 3D shaders
     public Matrix4X4<float> ViewMatrix { get; set; }
 
+    public Matrix4X4<float> MirrorViewMatrix { get; set; }
+
     public Matrix4X4<float> ProjectionMatrix { get; set; }
-    
+
+
     // Lighting data
     public Vector3D<float> AmbientLight { get; set; }
 
     public DirectionalLight DirectionalLight { get; set; }
+
+    // Mirror
+    public Texture? MirrorTexture => _mirrorTexture;
 
     public IWindow Initialize(float screenWidth, float screenHeight, string windowTitle)
     {
@@ -95,6 +105,9 @@ public class Renderer : IDisposable
 
             // Create quad for text glyphs
             CreateGlyphVertices();
+
+            // Create render target for mirror
+            CreateMirrorTarget();
         };
 
         return Window;
@@ -102,55 +115,14 @@ public class Renderer : IDisposable
 
     public void Draw()
     {
-        // Set the clear color to grey
-        GL.ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-
-        // Clear the color buffer
-        GL.Clear((uint) (ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit));
-
         /*
-         * Draw all mesh components
+         * Draw 3d scene to the frame buffers
          */
 
-        // Enable depth buffer/disable alpha blend
-        GL.Enable(EnableCap.DepthTest);
-        GL.Disable(EnableCap.Blend);
-
-        // Set the basic mesh shader active
-        _meshShader.SetActive();
-
-        // Update view-projection matrix
-        _meshShader.SetUniform("uViewProj", ViewMatrix * ProjectionMatrix);
-
-        // Update lighting uniforms
-        SetLightUniforms(_meshShader);
-
-        // Draw all meshes
-        foreach (var mesh in _meshComps)
-        {
-            if (mesh.Visible)
-            {
-                mesh.Draw(_meshShader);
-            }
-        }
-
-        // Draw any skinned meshes now
-        _skinnedShader.SetActive();
-
-        // Update view-projection matrix
-        _skinnedShader.SetUniform("uViewProj", ViewMatrix * ProjectionMatrix);
-
-        // Update lighting uniforms
-        SetLightUniforms(_skinnedShader);
-
-        // Draw all meshes
-        foreach (var mesh in _skeletalMeshes)
-        {
-            if (mesh.Visible)
-            {
-                mesh.Draw(_skinnedShader);
-            }
-        }
+        // Draw to the mirror texture first
+        Draw3DScene(_mirrorBuffer!.FrameBufferId, MirrorViewMatrix, ProjectionMatrix, 0.25f);
+        // Draw the normal 3D scene to the default framebuffer
+        Draw3DScene(0, ViewMatrix, ProjectionMatrix);
 
         /*
          * Draw all sprite components
@@ -185,18 +157,83 @@ public class Renderer : IDisposable
         // SDL_GL_SwapWindow(mWindow);
     }
     
-    public unsafe void DrawTexture(Texture texture, Vector2D<float> offset, float scale = 1.0f)
+    private void Draw3DScene(uint framebuffer, Matrix4X4<float> view, Matrix4X4<float> proj, float viewPortScale = 1.0f, bool lit = true)
     {
-        // Modern text rendering in OpenGL: https://learnopengl.com/In-Practice/Text-Rendering
-        // How to render the glyph als signed distance field: https://stackoverflow.com/questions/71185718/how-to-use-ft-render-mode-sdf-in-freetype
-        // SDF shader: https://www.youtube.com/watch?v=1b5hIMqz_wM
+        // Set the current frame buffer
+        GL.BindFramebuffer(FramebufferTarget.Framebuffer, framebuffer);
+
+        // Set viewport size based on scale
+        GL.Viewport(0, 0, (uint) (ScreenWidth * viewPortScale), (uint) (ScreenHeight * viewPortScale));
+
+        // Clear color buffer/depth buffer
+        GL.ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        GL.DepthMask(true);
+        GL.Clear((uint) (ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit));
+
+        // Draw mesh components
+        // Enable depth buffer/disable alpha blend
+        GL.Enable(EnableCap.DepthTest);
+        GL.Disable(EnableCap.Blend);
+
+        // Set the basic mesh shader active
+        _meshShader.SetActive();
+
+        // Update view-projection matrix
+        _meshShader.SetUniform("uViewProj", view * proj);
+
+        // Update lighting uniforms
+        if (lit)
+        {
+            SetLightUniforms(_meshShader, view);
+        }
+
+        // Draw all meshes
+        foreach (var mesh in _meshComps)
+        {
+            if (mesh.Visible)
+            {
+                mesh.Draw(_meshShader);
+            }
+        }
+
+        // Draw any skinned meshes now
+        _skinnedShader.SetActive();
+
+        // Update view-projection matrix
+        _skinnedShader.SetUniform("uViewProj", view * proj);
+
+        // Update lighting uniforms
+        if (lit)
+        {
+            SetLightUniforms(_skinnedShader, view);
+        }
+
+        // Draw all meshes
+        foreach (var mesh in _skeletalMeshes)
+        {
+            if (mesh.Visible)
+            {
+                mesh.Draw(_skinnedShader);
+            }
+        }
+    }
+
+    public unsafe void DrawTexture(Texture texture, Vector2D<float> offset, float scale = 1.0f, bool flipY = false)
+    {
         _spriteVertices.SetActive();
         _spriteShader.SetActive();
-
+        
         // Scale the quad by the width/height of texture
+        // and flip the y if we need to
+        float yScale = texture.Height * scale;
+        if (flipY)
+        {
+            yScale *= -1.0f;
+        }
+
         Matrix4X4<float> scaleMat = Matrix4X4.CreateScale(
             texture.Width * scale,
-            texture.Height * scale,
+            yScale,
             1.0f);
         
         // Translate to position on screen
@@ -216,6 +253,9 @@ public class Renderer : IDisposable
 
     public unsafe void DrawText(Font font, string text, Vector2D<float> offset, float scale, Vector3D<float> color)
     {
+        // Modern text rendering in OpenGL: https://learnopengl.com/In-Practice/Text-Rendering
+        // How to render the glyph als signed distance field: https://stackoverflow.com/questions/71185718/how-to-use-ft-render-mode-sdf-in-freetype
+        // SDF shader: https://www.youtube.com/watch?v=1b5hIMqz_wM
         _glyphVertices.SetActive();
         _textShader.SetActive();
         _textShader.SetUniform("textColor", color);
@@ -368,6 +408,13 @@ public class Renderer : IDisposable
 
     public void Dispose()
     {
+        // Get rid of any render target textures, if they exist
+        if (_mirrorTexture is not null)
+        {
+            _mirrorBuffer?.Dispose();
+            _mirrorTexture?.Dispose();
+        }
+
         // Destroy textures
         foreach (var texture in _textures.ToArray())
         {
@@ -387,6 +434,41 @@ public class Renderer : IDisposable
         _textShader.Dispose();
         _skinnedShader.Dispose();
         GL.Dispose();
+    }
+
+    private void CreateMirrorTarget()
+    {
+        int width = (int) (ScreenWidth / 4);
+        int height = (int) (ScreenHeight / 4);
+
+        // Generate a frame buffer for the mirror texture
+        GL.GenFramebuffers(1, out uint mirrorBuffer);
+        GL.BindFramebuffer(FramebufferTarget.Framebuffer, mirrorBuffer);
+        _mirrorBuffer = new FrameBufferObject(GL, mirrorBuffer);
+
+        // Create the texture we'll use for rendering
+        _mirrorTexture = Texture.CreateForRendering(GL, width, height, InternalFormat.Rgb);
+
+        // Add a depth buffer to this target
+        GL.GenRenderbuffers(1, out uint depthBuffer);
+        GL.BindRenderbuffer(RenderbufferTarget.Renderbuffer, depthBuffer);
+        GL.RenderbufferStorage(RenderbufferTarget.Renderbuffer, InternalFormat.DepthComponent, (uint)width, (uint)height);
+        GL.FramebufferRenderbuffer(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, RenderbufferTarget.Renderbuffer, depthBuffer);
+
+        // Attach mirror texture as the output target for the frame buffer
+        GL.FramebufferTexture(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, _mirrorTexture.TextureId, 0);
+
+        // Set the list of buffers to draw to for this frame buffer
+        var drawBuffers = new [] { GLEnum.ColorAttachment0 };
+        GL.DrawBuffers(1, drawBuffers);
+
+        // Make sure everything worked
+        if (GL.CheckFramebufferStatus(FramebufferTarget.Framebuffer) != GLEnum.FramebufferComplete)
+        {
+            // If it didn't work, delete the framebuffer,
+            // unload/delete the texture and return false
+            throw new InvalidOperationException("Initializing the framebuffer failed");
+        }
     }
 
     private void LoadShaders()
@@ -481,10 +563,10 @@ public class Renderer : IDisposable
         _glyphVertices = new VertexArrayObject(GL, vertices, indices);
     }
 
-    private void SetLightUniforms(Shader shader)
+    private void SetLightUniforms(Shader shader, Matrix4X4<float> viewMatrix)
     {
         // Camera position is from inverted view
-        Matrix4X4.Invert(ViewMatrix, out var invView);
+        Matrix4X4.Invert(viewMatrix, out var invView);
         shader.SetUniform("uCameraPos", invView.GetTranslation());
 
         // Ambient light

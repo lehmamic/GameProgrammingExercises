@@ -77,10 +77,28 @@ public class Texture : IDisposable
 
         return new Texture(gl, handle, (int) glyph.width, (int) glyph.rows);
     }
+    
+    public static unsafe Texture CreateForRendering(GL gl, int width, int height, InternalFormat format)
+    {
+        // Create the texture id
+        var handle = gl.GenTexture();
+        gl.BindTexture(TextureTarget.Texture2D, handle);
+
+        // Set the image width/height with null initial data
+        gl.TexImage2D(TextureTarget.Texture2D, 0, format, (uint)width, (uint)height, 0, PixelFormat.Rgba, PixelType.Float, null);
+
+        // For a texture we'll render to, just use nearest neighbor
+        gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int) GLEnum.Nearest);
+        gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) GLEnum.Nearest);
+
+        return new Texture(gl, handle, width, height);
+    }
 
     public int Width { get; }
 
     public int Height { get; }
+
+    public uint TextureId => _handle;
 
     public void SetActive()
     {
