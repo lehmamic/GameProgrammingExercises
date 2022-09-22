@@ -100,8 +100,9 @@ public class Texture : IDisposable
 
     public uint TextureId => _handle;
 
-    public void SetActive()
+    public void SetActive(int index = 0)
     {
+        _gl.ActiveTexture(TextureUnit.Texture0 + index);
         _gl.BindTexture(TextureTarget.Texture2D, _handle);
     }
 

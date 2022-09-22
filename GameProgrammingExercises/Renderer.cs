@@ -45,6 +45,10 @@ public class Renderer : IDisposable
 
     // Texture for the mirror
     private Texture? _mirrorTexture;
+    
+    // GBuffer
+    private GBuffer _gBuffer;
+    private Shader _gBufferGlobalShader;
 
     public Renderer(Game game)
     {
@@ -108,6 +112,9 @@ public class Renderer : IDisposable
 
             // Create render target for mirror
             CreateMirrorTarget();
+            
+            // Create G-buffer
+            _gBuffer = GBuffer.Create(GL, (int) ScreenWidth, (int) ScreenHeight);
         };
 
         return Window;
@@ -120,9 +127,15 @@ public class Renderer : IDisposable
          */
 
         // Draw to the mirror texture first
-        Draw3DScene(_mirrorBuffer!.FrameBufferId, MirrorViewMatrix, ProjectionMatrix, 0.25f);
-        // Draw the normal 3D scene to the default framebuffer
-        Draw3DScene(0, ViewMatrix, ProjectionMatrix);
+        Draw3DScene(_mirrorBuffer!.FrameBufferId, MirrorViewMatrix, ProjectionMatrix, 0.25f, false);
+        // Draw the 3D scene to the G-buffer
+        Draw3DScene(_gBuffer.FrameBufferId, ViewMatrix, ProjectionMatrix, 1.0f, false);
+
+        // Set the frame buffer back to zero (screen's frame buffer)
+        GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+
+        // Draw from the GBuffer
+        DrawFromGBuffer();
 
         /*
          * Draw all sprite components
@@ -156,7 +169,7 @@ public class Renderer : IDisposable
         // Swap the buffers (No need Silk.Net does it for us)
         // SDL_GL_SwapWindow(mWindow);
     }
-    
+
     private void Draw3DScene(uint framebuffer, Matrix4X4<float> view, Matrix4X4<float> proj, float viewPortScale = 1.0f, bool lit = true)
     {
         // Set the current frame buffer
@@ -216,6 +229,53 @@ public class Renderer : IDisposable
                 mesh.Draw(_skinnedShader);
             }
         }
+    }
+    
+    private unsafe void DrawFromGBuffer()
+    {
+        // Disable depth testing for the global lighting pass
+        GL.Disable(GLEnum.DepthTest);
+        // Activate global G-buffer shader
+        _gBufferGlobalShader.SetActive();
+        // Activate sprite verts quad
+        _spriteVertices.SetActive();
+        // Set the G-buffer textures to sample
+        _gBuffer.SetTexturesActive();
+        // Set the lighting uniforms
+        SetLightUniforms(_gBufferGlobalShader, ViewMatrix);
+        // Draw the triangles
+        GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, null);
+
+        // // Copy depth buffer from G-buffer to default frame buffer
+        // glBindFramebuffer(GL_READ_FRAMEBUFFER, mGBuffer->GetBufferID());
+        // int width = static_cast<int>(mScreenWidth);
+        // int height = static_cast<int>(mScreenHeight);
+        // glBlitFramebuffer(0, 0, width, height,
+        //     0, 0, width, height,
+        //     GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+        //
+        // // Enable depth test, but disable writes to depth buffer
+        // glEnable(GL_DEPTH_TEST);
+        // glDepthMask(GL_FALSE);
+        //
+        // // Set the point light shader and mesh as active
+        // mGPointLightShader->SetActive();
+        // mPointLightMesh->GetVertexArray()->SetActive();
+        // // Set the view-projection matrix
+        // mGPointLightShader->SetMatrixUniform("uViewProj",
+        //     mView * mProjection);
+        // // Set the G-buffer textures for sampling
+        // mGBuffer->SetTexturesActive();
+        //
+        // // The point light color should add to existing color
+        // glEnable(GL_BLEND);
+        // glBlendFunc(GL_ONE, GL_ONE);
+        //
+        // // Draw the point lights
+        // for (PointLightComponent* p : mPointLights)
+        // {
+        //     p->Draw(mGPointLightShader, mPointLightMesh);
+        // }
     }
 
     public unsafe void DrawTexture(Texture texture, Vector2D<float> offset, float scale = 1.0f, bool flipY = false)
@@ -414,6 +474,12 @@ public class Renderer : IDisposable
             _mirrorBuffer?.Dispose();
             _mirrorTexture?.Dispose();
         }
+        
+        // Get rid of G-buffer
+        if (_gBuffer is not null)
+        {
+            _gBuffer.Dispose();
+        }
 
         // Destroy textures
         foreach (var texture in _textures.ToArray())
@@ -433,6 +499,7 @@ public class Renderer : IDisposable
         _spriteVertices.Dispose();
         _textShader.Dispose();
         _skinnedShader.Dispose();
+        _gBufferGlobalShader.Dispose();
         GL.Dispose();
     }
 
@@ -465,6 +532,7 @@ public class Renderer : IDisposable
         // Make sure everything worked
         if (GL.CheckFramebufferStatus(FramebufferTarget.Framebuffer) != GLEnum.FramebufferComplete)
         {
+            _mirrorBuffer.Dispose();
             // If it didn't work, delete the framebuffer,
             // unload/delete the texture and return false
             throw new InvalidOperationException("Initializing the framebuffer failed");
@@ -478,18 +546,18 @@ public class Renderer : IDisposable
         _spriteShader.SetActive();
 
         // Set the view-projection matrix
-        Matrix4X4<float> viewProj = GameMath.CreateSimpleViewProj(ScreenWidth, ScreenHeight);
-        _spriteShader.SetUniform("uViewProj", viewProj);
+        Matrix4X4<float> spriteViewProj = GameMath.CreateSimpleViewProj(ScreenWidth, ScreenHeight);
+        _spriteShader.SetUniform("uViewProj", spriteViewProj);
         
         // Create sprite shader
         _textShader = new Shader(GL, "Shaders/Text.vert", "Shaders/Text.frag");
         _textShader.SetActive();
 
         // Set the view-projection matrix
-        _textShader.SetUniform("uViewProj", viewProj);
+        _textShader.SetUniform("uViewProj", spriteViewProj);
 
         // Create basic mesh shader
-        _meshShader = new Shader(GL, "Shaders/Pong.vert", "Shaders/Pong.frag");
+        _meshShader = new Shader(GL, "Shaders/Pong.vert", "Shaders/GBufferWrite.frag");
         _meshShader.SetActive();
 
         // Set the view-projection matrix
@@ -508,7 +576,7 @@ public class Renderer : IDisposable
         _meshShader.SetUniform("uViewProj", ViewMatrix * ProjectionMatrix);
         
         // Create skinned shader
-        _skinnedShader = new Shader(GL, "Shaders/Skinned.vert", "Shaders/Pong.frag");
+        _skinnedShader = new Shader(GL, "Shaders/Skinned.vert", "Shaders/GBufferWrite.frag");
         _skinnedShader.SetActive();
         
         // Set the view-projection matrix
@@ -525,6 +593,22 @@ public class Renderer : IDisposable
             10000.0f);              // Far plane
 
         _skinnedShader.SetUniform("uViewProj", ViewMatrix * ProjectionMatrix);
+        
+        // Create shader for drawing from GBuffer (global lighting)
+        _gBufferGlobalShader =new Shader(GL, "Shaders/GBufferGlobal.vert", "Shaders/GBufferGlobal.frag");
+
+        // For the GBuffer, we need to associate each sampler with an index
+        _gBufferGlobalShader.SetActive();
+        _gBufferGlobalShader.SetUniform("uGDiffuse", 0);
+        _gBufferGlobalShader.SetUniform("uGNormal", 1);
+        _gBufferGlobalShader.SetUniform("uGWorldPos", 2);
+
+        // The view projection is just the sprite one
+        _gBufferGlobalShader.SetUniform("uViewProj", spriteViewProj);
+
+        // The world transform scales to the screen and flips y
+        Matrix4X4<float> gbufferWorld = Matrix4X4.CreateScale(ScreenWidth, -ScreenHeight, 1.0f);
+        _gBufferGlobalShader.SetUniform("uWorldTransform", gbufferWorld);
     }
 
     private void CreateSpriteVertices()

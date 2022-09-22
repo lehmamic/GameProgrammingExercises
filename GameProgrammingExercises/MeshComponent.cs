@@ -29,7 +29,14 @@ public class MeshComponent : Component
         shader.SetUniform("uWorldTransform", Owner.WorldTransform);
 
         // Set specular power
-        shader.SetUniform("uSpecPower", Mesh.SpecularPower);
+        try
+        {
+            shader.SetUniform("uSpecPower", Mesh.SpecularPower);
+        }
+        catch (ShaderException)
+        {
+            // we catch it because the gbuffer shader has no lighting information
+        }
 
         // Set the active texture
         var texture = Mesh.GetTexture(TextureIndex);
