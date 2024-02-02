@@ -20,13 +20,13 @@ uniform sampler2D uTexture;
 // Create a structure for directional light
 struct DirectionalLight
 {
-// Direction of light
+    // Direction of light
     vec3 mDirection;
 
-// Diffuse color
+    // Diffuse color
     vec3 mDiffuseColor;
 
-// Specular color
+    // Specular color
     vec3 mSpecColor;
 };
 
