@@ -191,7 +191,7 @@ public class Mesh : IDisposable
     private class RawMesh
     {
         public int Version { get; set; }
-        
+
         [JsonPropertyName("vertexformat")]
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public VertexArrayObjectLayout VertexFormat { get; set; }

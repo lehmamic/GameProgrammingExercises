@@ -402,16 +402,11 @@ public class Game
             a.Rotation = q;
         }
 
-        // Setup lights
-        _renderer.AmbientLight = new Vector3D<float>(0.4f, 0.4f, 0.4f);
-        _renderer.DirectionalLight = new DirectionalLight(
-            direction: new Vector3D<float>(0.0f, -0.707f, -0.707f),
-            diffuseColor: new Vector3D<float>(0.78f, 0.88f, 1.0f),
-            specularColor: new Vector3D<float>(0.8f, 0.8f, 0.8f)
-        );
-
         // UI elements
         _hud = new HUD(this);
+
+        // Load the level from file
+        LevelLoader.LoadLevel(this, "Assets/Level1.gplevel");
 
         // Start music
         _musicEvent = _audioSystem.PlayEvent("event:/Music");

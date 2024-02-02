@@ -77,4 +77,10 @@ public class FollowActor : Actor
         _moveComp.ForwardSpeed = forwardSpeed;
         _moveComp.AngularSpeed = angularSpeed;
     }
+
+    protected override void LoadProperties(LevelLoader.ActorProperties properties)
+    {
+        base.LoadProperties(properties);
+        _moving = properties.Moving;
+    }
 }

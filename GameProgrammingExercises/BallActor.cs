@@ -43,4 +43,10 @@ public class BallActor : Actor
             State = ActorState.Dead;
         }
     }
+
+    protected override void LoadProperties(LevelLoader.ActorProperties properties)
+    {
+        base.LoadProperties(properties);
+        _lifeSpan = properties.LifeSpan;
+    }
 }

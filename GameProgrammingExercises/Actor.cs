@@ -74,6 +74,14 @@ public class Actor : IDisposable
 
     public Matrix4X4<float> WorldTransform { get; private set; }
 
+    public static Actor Create<T>(Game game, LevelLoader.RawActor rawActor) where T : Actor
+    {
+        var actor = (T)Activator.CreateInstance(typeof(T), game)!;
+        actor.LoadProperties(rawActor.Properties);
+
+        return actor;
+    }
+
     /// <summary>
     /// Update function called from Game (not overridable).
     /// </summary>
@@ -151,7 +159,7 @@ public class Actor : IDisposable
             }
         }
     }
-    
+
     public void AddComponent(Component component)
     {
         // Find the insertion point in the sorted vector
@@ -172,6 +180,12 @@ public class Actor : IDisposable
     public void RemoveComponent(Component component)
     {
         _components.Remove(component);
+    }
+    
+    // Search through component vector for one of type
+    public Component? GetComponentOfType(string type)
+    {
+        return _components.Find(c => string.Equals(c.GetType().Name, type, StringComparison.OrdinalIgnoreCase));
     }
 
     /// <summary>
@@ -195,7 +209,6 @@ public class Actor : IDisposable
         }
     }
 
-
     /// <summary>
     /// Any actor-specific update code (overridable).
     /// </summary>
@@ -210,6 +223,17 @@ public class Actor : IDisposable
     /// <param name="state"></param>
     protected virtual void ActorInput(InputState state)
     {
+    }
+
+    protected virtual void LoadProperties(LevelLoader.ActorProperties properties)
+    {
+        State = properties.State;
+
+        // Load position, rotation, and scale, and compute transform
+        JsonHelper.TryGetVector3D(properties.Position, out _position);
+        JsonHelper.TryGetQuaternion(properties.Rotation, out _rotation);
+        _scale = properties.Scale.GetValueOrDefault(1.0f);
+        ComputeWorldTransform();
     }
 
     protected virtual void Dispose(bool disposing)

@@ -25,6 +25,14 @@ public class Component : IDisposable
     /// </summary>
     public int UpdateOrder { get; }
 
+    public static Component Create<T>(Actor owner, LevelLoader.RawComponent rawComponent) where T : Component
+    {
+        var actor = (T)Activator.CreateInstance(typeof(T), owner)!;
+        actor.LoadProperties(rawComponent.Properties);
+
+        return actor;
+    }
+
     /// <summary>
     /// Update this component by delta time.
     /// </summary>
@@ -46,6 +54,17 @@ public class Component : IDisposable
     /// </summary>
     public virtual void OnUpdateWorldTransform()
     {
+    }
+
+    public virtual void LoadProperties(LevelLoader.ComponentProperties properties)
+    {
+        // State = properties.State;
+        //
+        // // Load position, rotation, and scale, and compute transform
+        // JsonHelper.TryGetVector3D(properties.Position, out _position);
+        // JsonHelper.TryGetQuaternion(properties.Rotation, out _rotation);
+        // _scale = properties.Scale.GetValueOrDefault(1.0f);
+        // ComputeWorldTransform();
     }
 
     /// <summary>
